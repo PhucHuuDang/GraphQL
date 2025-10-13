@@ -12,6 +12,9 @@ export class Author {
   @Field({ nullable: true })
   lastName?: string;
 
+  @Field(() => Boolean, { nullable: true })
+  verified: boolean;
+
   @Field((type) => [Post])
   posts: Post[];
 }

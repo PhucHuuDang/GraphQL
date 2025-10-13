@@ -2,6 +2,20 @@
 # THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
 # ------------------------------------------------------
 
+type Author {
+  firstName: String
+  id: Int!
+  lastName: String
+  posts: [Post!]!
+  verified: Boolean
+}
+
+type Post {
+  id: Int!
+  title: String!
+  votes: Int
+}
+
 type Query {
-  hello: String!
+  author(id: Int!): Author!
 }
