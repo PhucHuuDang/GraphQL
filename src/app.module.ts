@@ -1,24 +1,25 @@
 import { Module } from '@nestjs/common';
-import { AppController } from './app.controller';
-import { AppService } from './app.service';
 import { GraphQLModule } from '@nestjs/graphql';
 import { ApolloDriver, ApolloDriverConfig } from '@nestjs/apollo';
 import { join } from 'path';
 import { ApolloServerPluginLandingPageLocalDefault } from '@apollo/server/plugin/landingPage/default';
-import { AppResolver } from './app.resolver';
+import { AuthorsModule } from './authors/authors.module';
 
 @Module({
   imports: [
     GraphQLModule.forRoot<ApolloDriverConfig>({
       driver: ApolloDriver,
       // playground: false,
+      // autoSchemaFile: join(process.cwd(), 'src/schema.gql'),
       graphiql: true,
-      autoSchemaFile: join(process.cwd(), 'src/schema.gql'),
+      autoSchemaFile: true,
+
       sortSchema: true,
-      plugins: [ApolloServerPluginLandingPageLocalDefault()],
     }),
+
+    AuthorsModule,
   ],
-  controllers: [AppController],
-  providers: [AppService, AppResolver],
+  controllers: [],
+  providers: [],
 })
 export class AppModule {}
