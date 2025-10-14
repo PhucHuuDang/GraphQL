@@ -15,6 +15,7 @@ import { AuthorsModule } from './authors/authors.module';
       autoSchemaFile: true,
 
       sortSchema: true,
+      playground: true, // bật playground
     }),
 
     AuthorsModule,

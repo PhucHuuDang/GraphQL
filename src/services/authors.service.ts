@@ -10,9 +10,27 @@ export class AuthorsService {
       lastName: 'Nguyen',
       verified: true,
       posts: [],
+      bio: 'Alice is a software engineer at Google',
+      avatarUrl: 'https://alice.com/avatar.png',
     },
-    { id: 2, firstName: 'Bob', lastName: 'Tran', verified: false, posts: [] },
-    { id: 3, firstName: 'Charlie', lastName: 'Le', verified: true, posts: [] },
+    {
+      id: 2,
+      firstName: 'Bob',
+      lastName: 'Tran',
+      verified: false,
+      posts: [],
+      bio: 'Bob is a software engineer at Apple',
+      avatarUrl: 'https://bob.com/avatar.png',
+    },
+    {
+      id: 3,
+      firstName: 'Charlie',
+      lastName: 'Le',
+      verified: true,
+      posts: [],
+      bio: 'Charlie is a software engineer at Microsoft',
+      avatarUrl: 'https://charlie.com/avatar.png',
+    },
   ];
 
   findAll(): Author[] {
