@@ -12,6 +12,12 @@ export class Author {
   @Field({ nullable: true })
   lastName?: string;
 
+  @Field({ nullable: true })
+  bio: string;
+
+  @Field({ nullable: true })
+  avatarUrl: string;
+
   @Field(() => Boolean, { nullable: true })
   verified: boolean;
 
