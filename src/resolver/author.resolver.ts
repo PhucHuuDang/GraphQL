@@ -8,8 +8,8 @@ import {
 } from '@nestjs/graphql';
 import { Author } from 'src/models/author.model';
 import { Post } from 'src/models/post.model';
+import { PostsService } from 'src/posts/post.service';
 import { AuthorsService } from 'src/services/authors.service';
-import { PostsService } from 'src/services/posts.service';
 
 @Resolver(() => Author)
 export class AuthorsResolver {
@@ -26,6 +26,6 @@ export class AuthorsResolver {
   @ResolveField('posts', () => [Post])
   posts(@Parent() author: Author) {
     const { id } = author;
-    return this.postsService.findAll({ authorId: id });
+    return this.postsService.findAuthorPosts(id);
   }
 }

@@ -10,5 +10,5 @@ export class Category {
   name: string;
 
   @Field(() => [Post], { nullable: true })
-  post: Post[];
+  posts: Post[];
 }
