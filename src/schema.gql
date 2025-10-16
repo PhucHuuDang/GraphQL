@@ -3,6 +3,8 @@
 # ------------------------------------------------------
 
 type Author {
+  avatarUrl: String
+  bio: String
   firstName: String
   id: Int!
   lastName: String
@@ -10,12 +12,68 @@ type Author {
   verified: Boolean
 }
 
-type Post {
+type Category {
   id: Int!
+  name: String!
+  posts: [Post!]
+}
+
+type Comment {
+  content: String!
+  createdAt: DateTime!
+  id: Int!
+  post: Post
+  user: User!
+}
+
+input CreateUser {
+  avatarUrl: String
+  email: String
+  name: String!
+  password: String
+}
+
+"""
+A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date-time format.
+"""
+scalar DateTime
+
+type Like {
+  id: Int!
+  user: User!
+}
+
+type Mutation {
+  createUser(createUserInput: CreateUser!): User!
+  removeUser(id: Int!): User!
+  updateUser(updateUserInput: UpdateUser!): User!
+}
+
+type Post {
+  author: Author!
+  category: Category
+  comments: [Comment!]
+  id: Int!
+  likes: [Like!]
   title: String!
   votes: Int
 }
 
 type Query {
   author(id: Int!): Author!
+  post(id: Int!): Post!
+  user(id: Int!): User!
+}
+
+input UpdateUser {
+  id: Int!
+}
+
+type User {
+  avatarUrl: String
+  comments: [Comment!]
+  email: String
+  id: Int!
+  likes: [Like!]
+  name: String!
 }

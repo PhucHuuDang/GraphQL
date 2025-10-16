@@ -4,21 +4,31 @@ import { ApolloDriver, ApolloDriverConfig } from '@nestjs/apollo';
 import { join } from 'path';
 import { ApolloServerPluginLandingPageLocalDefault } from '@apollo/server/plugin/landingPage/default';
 import { AuthorsModule } from './authors/authors.module';
-
+import { ConfigModule } from '@nestjs/config';
+import { UserModule } from './user/user.module';
+import { CategoryModule } from './category/category.module';
 @Module({
   imports: [
     GraphQLModule.forRoot<ApolloDriverConfig>({
       driver: ApolloDriver,
       // playground: false,
-      // autoSchemaFile: join(process.cwd(), 'src/schema.gql'),
+      autoSchemaFile: join(process.cwd(), 'src/schema.gql'),
       graphiql: true,
-      autoSchemaFile: true,
+      // autoSchemaFile: true,
 
       sortSchema: true,
-      playground: true, // bật playground
+      playground: true,
     }),
 
     AuthorsModule,
+
+    ConfigModule.forRoot({
+      isGlobal: true,
+    }),
+
+    UserModule,
+
+    CategoryModule,
   ],
   controllers: [],
   providers: [],
