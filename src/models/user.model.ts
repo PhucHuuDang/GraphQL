@@ -11,11 +11,14 @@ export class User {
   name: string;
 
   @Field({ nullable: true })
-  email: string;
+  email?: string;
+
+  @Field({ nullable: true })
+  avatarUrl?: string;
 
   @Field(() => [Comment], { nullable: true })
-  comments: Comment[];
+  comments?: Comment[];
 
   @Field(() => [Like], { nullable: true })
-  likes: Like[];
+  likes?: Like[];
 }
