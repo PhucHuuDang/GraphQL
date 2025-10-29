@@ -15,9 +15,13 @@ import { CategoryModule } from './category/category.module';
       autoSchemaFile: join(process.cwd(), 'src/schema.gql'),
       graphiql: true,
       // autoSchemaFile: true,
-
       sortSchema: true,
       playground: true,
+    }),
+
+    ConfigModule.forRoot({
+      isGlobal: true,
+      envFilePath: ['.env.local', '.env'],
     }),
 
     AuthorsModule,
