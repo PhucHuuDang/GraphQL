@@ -9,6 +9,7 @@ async function bootstrap() {
       compact: true,
       showHidden: true,
       timestamp: true,
+      colors: true,
     }),
   });
 
