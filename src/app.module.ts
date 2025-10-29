@@ -22,6 +22,7 @@ import { CategoryModule } from './category/category.module';
     ConfigModule.forRoot({
       isGlobal: true,
       envFilePath: ['.env.local', '.env'],
+      skipProcessEnv: true,
     }),
 
     AuthorsModule,
