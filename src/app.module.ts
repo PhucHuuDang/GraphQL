@@ -7,6 +7,7 @@ import { AuthorsModule } from './authors/authors.module';
 import { ConfigModule } from '@nestjs/config';
 import { UserModule } from './user/user.module';
 import { CategoryModule } from './category/category.module';
+import { PrismaModule } from './prisma/prisma.module';
 @Module({
   imports: [
     GraphQLModule.forRoot<ApolloDriverConfig>({
@@ -34,6 +35,8 @@ import { CategoryModule } from './category/category.module';
     UserModule,
 
     CategoryModule,
+
+    PrismaModule,
   ],
   controllers: [],
   providers: [],
