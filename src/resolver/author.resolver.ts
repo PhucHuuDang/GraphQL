@@ -26,6 +26,12 @@ export class AuthorsResolver {
   @ResolveField('posts', () => [Post])
   posts(@Parent() author: Author) {
     const { id } = author;
-    return this.postsService.findAuthorPosts(id);
+    return this.postsService.findAll();
   }
+
+  // @ResolveField('posts', () => [Post])
+  // posts(@Parent() author: Author) {
+  //   const { id } = author;
+  //   return this.postsService.findAuthorPosts(
+  // }
 }
