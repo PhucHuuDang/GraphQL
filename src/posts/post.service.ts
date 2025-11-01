@@ -17,6 +17,7 @@ export class PostsService {
   }
 
   async createPost(data: Prisma.PostCreateInput): Promise<Post> {
+    console.log({ data });
     return await this.postRepository.create(data);
   }
 

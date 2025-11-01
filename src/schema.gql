@@ -12,12 +12,6 @@ type Author {
   verified: Boolean
 }
 
-type Category {
-  id: Int!
-  name: String!
-  posts: [Post!]
-}
-
 type Comment {
   content: String!
   createdAt: DateTime!
@@ -38,26 +32,38 @@ A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date
 """
 scalar DateTime
 
+"""
+The `JSON` scalar type represents JSON values as specified by [ECMA-404](http://www.ecma-international.org/publications/files/ECMA-ST/ECMA-404.pdf).
+"""
+scalar JSON
+
 type Like {
   id: Int!
   user: User!
 }
 
 type Mutation {
-  createPost(authorId: Int!, categoryId: Int!, title: String!, votes: Int!): Post!
+  createPost(authorId: Int!, categoryId: Int!, content: JSON!, description: String!, mainImage: String!, tags: [String!]!, title: String!, votes: Int!): Post!
   createUser(createUserInput: CreateUser!): User!
   removeUser(id: Int!): User!
   updateUser(updateUserInput: UpdateUser!): User!
 }
 
 type Post {
-  author: Author!
-  category: Category
-  comments: [Comment!]
+  authorId: Int!
+  categoryId: Int
+  content: JSON!
+  createdAt: DateTime!
+  description: String
   id: Int!
-  likes: [Like!]
+  isPinned: Boolean!
+  isPriority: Boolean!
+  isPublished: Boolean!
+  mainImage: String
+  tags: [String!]!
   title: String!
-  votes: Int
+  updatedAt: DateTime!
+  votes: Int!
 }
 
 type Query {

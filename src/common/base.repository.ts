@@ -11,8 +11,16 @@ export abstract class BaseRepository<T> {
     return await this.model.findUnique({ where: { id } });
   }
 
-  async create(data: any): Promise<T> {
-    return await this.model.create({ data });
+  async create(data: any, include?: any): Promise<T> {
+    return await this.model.create({ data, include });
+  }
+
+  async createManyAndReturn(data: any[]): Promise<T[]> {
+    return await this.model.createManyAndReturn({ data });
+  }
+
+  async createMany(data: any[]): Promise<number> {
+    return await this.model.createMany({ data });
   }
 
   async update(id: number, data: any): Promise<T> {

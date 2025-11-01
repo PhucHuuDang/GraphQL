@@ -1,29 +1,47 @@
-import { Field, Int, ObjectType } from '@nestjs/graphql';
-import { Author } from './author.model';
-import { Comment } from './comment.model';
-import { Category } from './category.model';
-import { Like } from './like.model';
+import { ObjectType, Field, Int } from '@nestjs/graphql';
+import GraphQLJSON from 'graphql-type-json';
 
 @ObjectType()
 export class Post {
-  @Field((type) => Int)
+  @Field(() => Int)
   id: number;
 
   @Field()
   title: string;
 
-  @Field((type) => Int, { nullable: true })
+  @Field({ nullable: true })
+  mainImage?: string;
+
+  @Field({ nullable: true })
+  description?: string;
+
+  @Field(() => GraphQLJSON) // hoặc (() => GraphQLJSON) nếu content là JSON
+  content: any;
+
+  @Field(() => Int)
   votes: number;
 
-  @Field(() => Author)
-  author: Author;
+  @Field()
+  createdAt: Date;
 
-  @Field(() => Category, { nullable: true })
-  category: Category;
+  @Field()
+  updatedAt: Date;
 
-  @Field(() => [Comment], { nullable: true })
-  comments: Comment[];
+  @Field(() => [String])
+  tags: string[];
 
-  @Field(() => [Like], { nullable: true })
-  likes: Like[];
+  @Field({ defaultValue: false })
+  isPublished: boolean;
+
+  @Field({ defaultValue: false })
+  isPriority: boolean;
+
+  @Field({ defaultValue: false })
+  isPinned: boolean;
+
+  @Field(() => Int)
+  authorId: number;
+
+  @Field(() => Int, { nullable: true })
+  categoryId?: number;
 }
