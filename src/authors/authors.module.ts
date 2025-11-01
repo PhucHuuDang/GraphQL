@@ -5,8 +5,7 @@ import { AuthorsResolver } from 'src/resolver/author.resolver';
 import { AuthorsService } from 'src/services/authors.service';
 
 @Module({
-  providers: [AuthorsResolver, AuthorsService, PostsService],
-
+  providers: [AuthorsResolver, AuthorsService],
   imports: [PostModule],
   exports: [AuthorsResolver],
 })

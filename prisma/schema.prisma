@@ -5,8 +5,8 @@
 // Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
 
 generator client {
-  provider = "prisma-client"
-  // provider = "prisma-client-js"
+  // provider = "prisma-client"
+  provider = "prisma-client-js"
   output   = "../generated/prisma"
 }
 
@@ -35,6 +35,17 @@ model Author {
   bio       String?
   avatarUrl String?
   verified  Boolean  @default(false)
+  email     String?   @unique
+  password  String?
+  role      String   @default("user")
+  isActive  Boolean  @default(true)
+  isVerified  Boolean  @default(false)
+  isDeleted  Boolean  @default(false)
+  isSuspended  Boolean  @default(false)
+  isLocked  Boolean  @default(false)
+  isExpired  Boolean  @default(false)
+  isBlocked  Boolean  @default(false)
+  socialLinks Json?
   posts     Post[]
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -55,6 +66,9 @@ model Category {
 model Post {
   id         Int       @id @default(autoincrement())
   title      String
+  mainImage  String?
+  description String?
+  content    Json
   votes      Int       @default(0)
   authorId   Int
   author     Author    @relation(fields: [authorId], references: [id], onDelete: Cascade)
@@ -65,6 +79,11 @@ model Post {
   createdAt  DateTime  @default(now())
   updatedAt  DateTime  @updatedAt
   tags       String[]  @default([])
+
+  views      Int       @default(0)
+  isPublished Boolean   @default(false)
+  isPriority  Boolean   @default(false)
+  isPinned    Boolean   @default(false)
 
   @@map("posts")
 }
