@@ -1,9 +1,7 @@
 import { PrismaService } from 'src/prisma/prisma.service';
 
 export abstract class BaseRepository<T> {
-  protected abstract model: any;
-
-  constructor(protected readonly prisma: PrismaService) {}
+  constructor(protected readonly model: any) {}
 
   async findAll(): Promise<T[]> {
     return await this.model.findMany();

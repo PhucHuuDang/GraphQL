@@ -44,6 +44,7 @@ type Like {
 }
 
 type Mutation {
+  createPost(authorId: Int!, categoryId: Int!, title: String!, votes: Int!): Post!
   createUser(createUserInput: CreateUser!): User!
   removeUser(id: Int!): User!
   updateUser(updateUserInput: UpdateUser!): User!
@@ -62,6 +63,7 @@ type Post {
 type Query {
   author(id: Int!): Author!
   post(id: Int!): Post!
+  posts: [Post!]!
   user(id: Int!): User!
 }
 
