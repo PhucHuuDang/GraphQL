@@ -7,7 +7,7 @@ import {
   Int,
 } from '@nestjs/graphql';
 import { Author } from 'src/models/author.model';
-import { Post } from 'src/models/post.model';
+import { Post } from 'src/models/post/post.model';
 import { PostsService } from 'src/posts/post.service';
 import { AuthorsService } from 'src/services/authors.service';
 

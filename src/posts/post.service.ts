@@ -21,7 +21,7 @@ export class PostsService {
     return await this.postRepository.create(data);
   }
 
-  async updatePost(id: number, data: Post): Promise<Post> {
+  async updatePost(id: number, data: Prisma.PostUpdateInput): Promise<Post> {
     return await this.postRepository.update(id, data);
   }
 
