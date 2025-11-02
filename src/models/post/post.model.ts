@@ -1,4 +1,4 @@
-import { ObjectType, Field, Int } from '@nestjs/graphql';
+import { ObjectType, Field, Int, InputType } from '@nestjs/graphql';
 import GraphQLJSON from 'graphql-type-json';
 
 @ObjectType()
@@ -16,7 +16,7 @@ export class Post {
   description?: string;
 
   @Field(() => GraphQLJSON) // hoặc (() => GraphQLJSON) nếu content là JSON
-  content: any;
+  content: JSON;
 
   @Field(() => Int)
   votes: number;

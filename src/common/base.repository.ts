@@ -1,3 +1,4 @@
+import { Prisma } from 'generated/prisma';
 import { PrismaService } from 'src/prisma/prisma.service';
 
 export abstract class BaseRepository<T> {
@@ -9,6 +10,12 @@ export abstract class BaseRepository<T> {
 
   async findById(id: number): Promise<T | null> {
     return await this.model.findUnique({ where: { id } });
+  }
+
+  async findFirstWithConditions(
+    condition: Prisma.PostWhereInput,
+  ): Promise<T | null> {
+    return await this.model.findFirst({ where: condition });
   }
 
   async create(data: any, include?: any): Promise<T> {

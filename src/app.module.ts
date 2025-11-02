@@ -8,6 +8,7 @@ import { ConfigModule } from '@nestjs/config';
 import { UserModule } from './user/user.module';
 import { CategoryModule } from './category/category.module';
 import { PrismaModule } from './prisma/prisma.module';
+import GraphQLJSON from 'graphql-type-json';
 @Module({
   imports: [
     GraphQLModule.forRoot<ApolloDriverConfig>({
@@ -18,6 +19,9 @@ import { PrismaModule } from './prisma/prisma.module';
       // autoSchemaFile: true,
       sortSchema: true,
       playground: true,
+      resolvers: {
+        JSON: GraphQLJSON,
+      },
     }),
 
     ConfigModule.forRoot({

@@ -9,7 +9,8 @@ import {
 } from '@nestjs/graphql';
 import GraphQLJSON from 'graphql-type-json';
 import { Like } from 'src/models/like.model';
-import { Post } from 'src/models/post.model';
+import { Post } from 'src/models/post/post.model';
+import { UpdatePost } from 'src/models/post/update-post.model';
 import { PostsService } from 'src/posts/post.service';
 
 @Resolver(() => Post)
@@ -48,6 +49,14 @@ export class PostResolver {
       tags: [],
       content: content,
     });
+  }
+
+  @Mutation(() => Post)
+  async updatePost(
+    @Args('id', { type: () => Int }) id: number,
+    @Args('data') data: UpdatePost,
+  ) {
+    return this.postsService.updatePost(id, data);
   }
 
   async deletePost(@Args('id', { type: () => Int }) id: number) {
