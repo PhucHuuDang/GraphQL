@@ -43,8 +43,9 @@ type Like {
 }
 
 type Mutation {
-  createPost(authorId: Int!, categoryId: Int!, content: JSON!, description: String!, mainImage: String!, tags: [String!]!, title: String!, votes: Int!): Post!
+  createPost(authorId: Int!, categoryId: Int!, content: JSON!, description: String!, mainImage: String!, slug: String!, tags: [String!]!, title: String!, votes: Int!): Post!
   createUser(createUserInput: CreateUser!): User!
+  deletePost(id: Int!): Post!
   removeUser(id: Int!): User!
   updatePost(data: UpdatePost!, id: Int!): Post!
   updateUser(updateUserInput: UpdateUser!): User!
@@ -61,16 +62,25 @@ type Post {
   isPriority: Boolean!
   isPublished: Boolean!
   mainImage: String
+  slug: String!
   tags: [String!]!
   title: String!
   updatedAt: DateTime!
   votes: Int!
 }
 
+input PostPaginationInput {
+  limit: Int!
+  page: Int!
+}
+
 type Query {
   author(id: Int!): Author!
-  post(id: Int!): Post!
+  findPostById(id: Int!): Post!
+  findPostBySlug(slug: String!): Post!
+  postPaginated(params: PostPaginationInput!): [Post!]!
   posts: [Post!]!
+  priorityPosts(limit: Int! = 10): [Post!]!
   user(id: Int!): User!
 }
 

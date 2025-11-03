@@ -48,3 +48,15 @@ export class Post {
   @Field(() => Int, { nullable: true })
   categoryId?: number;
 }
+
+@InputType()
+export class PostPaginationInput {
+  @Field(() => Int, { nullable: true })
+  page?: number;
+
+  @Field(() => Int, { nullable: true })
+  limit?: number;
+
+  @Field(() => GraphQLJSON, { nullable: true })
+  extra?: Record<string, any>;
+}
