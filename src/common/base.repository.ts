@@ -23,6 +23,8 @@ export interface PaginationResult<T> {
 export interface PaginationParams {
   page?: number;
   limit?: number;
+
+  [key: string]: any;
 }
 
 export interface SortParams<T = any> {
@@ -34,7 +36,12 @@ export abstract class BaseRepository<
   ModelDelegate extends { [key: string]: any },
 > {
   protected readonly logger = new Logger(BaseRepository.name);
-  constructor(protected readonly model: any) {}
+  constructor(
+    protected readonly model: any,
+    loggerContext?: string,
+  ) {
+    this.logger = new Logger(loggerContext || this.constructor.name);
+  }
 
   // READ OPERATIONS
   async findAll(params?: Prisma.SelectSubset<any, any>): Promise<T[]> {

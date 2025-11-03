@@ -46,6 +46,7 @@ type Mutation {
   createPost(authorId: Int!, categoryId: Int!, content: JSON!, description: String!, mainImage: String!, tags: [String!]!, title: String!, votes: Int!): Post!
   createUser(createUserInput: CreateUser!): User!
   removeUser(id: Int!): User!
+  updatePost(data: UpdatePost!, id: Int!): Post!
   updateUser(updateUserInput: UpdateUser!): User!
 }
 
@@ -71,6 +72,20 @@ type Query {
   post(id: Int!): Post!
   posts: [Post!]!
   user(id: Int!): User!
+}
+
+input UpdatePost {
+  authorId: Float
+  categoryId: Float
+  content: JSON
+  description: String
+  isPinned: Boolean
+  isPriority: Boolean
+  isPublished: Boolean
+  mainImage: String
+  tags: [String!]
+  title: String
+  votes: Float
 }
 
 input UpdateUser {

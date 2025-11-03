@@ -1,11 +1,14 @@
 import { Field, InputType } from '@nestjs/graphql';
 import {
+  IsArray,
   IsBoolean,
   IsInt,
   IsJSON,
   IsOptional,
   IsString,
 } from 'class-validator';
+import { InputJsonValue } from 'generated/prisma/runtime/library';
+import GraphQLJSON from 'graphql-type-json';
 
 @InputType()
 export class UpdatePost {
@@ -19,19 +22,19 @@ export class UpdatePost {
   @IsString()
   description?: string;
 
-  @Field({ nullable: true })
+  @Field(() => GraphQLJSON, { nullable: true })
   @IsOptional()
-  @IsJSON()
-  content?: string;
+  content?: any;
 
   @Field({ nullable: true })
   @IsOptional()
   @IsString()
   mainImage?: string;
 
-  @Field({ nullable: true })
+  @Field(() => [String], { nullable: true })
   @IsOptional()
-  @IsString()
+  @IsArray()
+  @IsString({ each: true })
   tags?: string[];
 
   @Field({ nullable: true })

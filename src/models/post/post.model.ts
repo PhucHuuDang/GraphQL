@@ -30,6 +30,9 @@ export class Post {
   @Field(() => [String])
   tags: string[];
 
+  @Field(() => String)
+  slug: string;
+
   @Field({ defaultValue: false })
   isPublished: boolean;
 
