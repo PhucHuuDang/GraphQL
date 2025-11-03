@@ -53,10 +53,10 @@ export class PostRepository extends BaseRepository<Post, Prisma.PostDelegate> {
     });
   }
 
-  async postPaginated(params: any) {
-    return this.findManyPaginated({
-      ...params,
-    });
+  async postPaginated(
+    params: PaginationParams & Prisma.SelectSubset<any, any>,
+  ) {
+    return this.findManyPaginated(params);
   }
 
   async findPriorityPosts(limit: number = 10) {

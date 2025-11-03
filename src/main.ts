@@ -23,9 +23,9 @@ async function bootstrap() {
 
   console.log('test', process.env.DATABASE_URL);
 
-  const port = process.env.PORT || 3000;
+  const port = process.env.PORT || 3001;
 
   await app.listen(port);
-  console.log(`🚀 GraphQL server ready at http://localhost:3000/graphql`);
+  console.log(`🚀 GraphQL server ready at http://localhost:${port}/graphql`);
 }
 bootstrap();

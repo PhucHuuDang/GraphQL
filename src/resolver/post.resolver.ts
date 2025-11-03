@@ -10,7 +10,7 @@ import {
 import { InputJsonValue } from 'generated/prisma/runtime/library';
 import GraphQLJSON from 'graphql-type-json';
 import type { PaginationParams } from 'src/common/base.repository';
-import { Post } from 'src/models/post/post.model';
+import { Post, PostPaginationInput } from 'src/models/post/post.model';
 import { UpdatePost } from 'src/models/post/update-post.model';
 import { PostsService } from 'src/posts/post.service';
 import { generateSlug } from 'src/utils/slug-stringify';
@@ -32,8 +32,15 @@ export class PostResolver {
   }
 
   @Query(() => [Post], { name: 'postPaginated' })
-  async postPaginated(@Args('params') params: PaginationParams) {
-    return this.postsService.postPaginated(params);
+  async postPaginated(
+    @Args('params', { type: () => PostPaginationInput })
+    params: PostPaginationInput,
+  ) {
+    return this.postsService.postPaginated({
+      page: params.page,
+      limit: params.limit,
+      extra: params.extra,
+    });
   }
 
   @Query(() => Post, { name: 'findPostBySlug' })
