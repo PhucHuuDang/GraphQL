@@ -80,10 +80,13 @@ model Post {
   updatedAt  DateTime  @updatedAt
   tags       String[]  @default([])
 
+  slug       String    @unique
+
   views      Int       @default(0)
   isPublished Boolean   @default(false)
   isPriority  Boolean   @default(false)
   isPinned    Boolean   @default(false)
+  isDeleted   Boolean   @default(false)
 
   @@map("posts")
 }
