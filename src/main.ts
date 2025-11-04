@@ -11,6 +11,8 @@ async function bootstrap() {
       timestamp: true,
       colors: true,
     }),
+
+    bodyParser: false,
   });
 
   app.enableCors({
@@ -21,7 +23,7 @@ async function bootstrap() {
     credentials: true,
   });
 
-  console.log('test', process.env.DATABASE_URL);
+  // console.log('test', process.env.DATABASE_URL);
 
   const port = process.env.PORT || 3001;
 

@@ -19,7 +19,7 @@ import { generateSlug } from 'src/utils/slug-stringify';
 export class PostResolver {
   constructor(private readonly postsService: PostsService) {}
 
-  @Query(() => [Post], { name: 'posts' })
+  @Query(() => [Post], { name: 'allPosts' })
   async findAllPosts() {
     return this.postsService.findAll();
   }
