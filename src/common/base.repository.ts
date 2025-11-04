@@ -53,7 +53,7 @@ export abstract class BaseRepository<
   }
 
   async findById(
-    id: number,
+    id: string,
     params?: Prisma.SelectSubset<any, any>,
   ): Promise<T | null> {
     try {
@@ -68,7 +68,7 @@ export abstract class BaseRepository<
   }
 
   async findByIdOrFail(
-    id: number,
+    id: string,
     params?: Prisma.SelectSubset<any, any>,
   ): Promise<T> {
     const results = await this.findById(id, params);
@@ -233,7 +233,7 @@ export abstract class BaseRepository<
     }
   }
 
-  async update(id: number, data: any, include?: any): Promise<T> {
+  async update(id: string, data: any, include?: any): Promise<T> {
     try {
       if (!id) {
         throw new BadRequestException('Id is required for update');
@@ -266,7 +266,7 @@ export abstract class BaseRepository<
 
   //* Delete operation
 
-  async delete(id: number): Promise<T> {
+  async delete(id: string): Promise<T> {
     try {
       if (!id) {
         throw new BadRequestException('Id is required for delete');
@@ -292,7 +292,7 @@ export abstract class BaseRepository<
     }
   }
 
-  async softDeleted(id: number): Promise<T> {
+  async softDeleted(id: string): Promise<T> {
     try {
       if (!id) {
         throw new BadRequestException('Id is required for softDeleted');
@@ -307,7 +307,7 @@ export abstract class BaseRepository<
     }
   }
 
-  async restore(id: number): Promise<T> {
+  async restore(id: string): Promise<T> {
     try {
       if (!id) {
         throw new BadRequestException('Id is required for restore');
@@ -393,7 +393,7 @@ export abstract class BaseRepository<
     }
   }
 
-  async findWithRelations(id: number, include: any): Promise<T | null> {
+  async findWithRelations(id: string, include: any): Promise<T | null> {
     try {
       if (!id) {
         throw new BadRequestException('Id is required ');

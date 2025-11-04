@@ -52,10 +52,10 @@ export class Post {
 @InputType()
 export class PostPaginationInput {
   @Field(() => Int, { nullable: true })
-  page?: number;
+  page?: number = 1;
 
   @Field(() => Int, { nullable: true })
-  limit?: number;
+  limit?: number = 10;
 
   @Field(() => GraphQLJSON, { nullable: true })
   extra?: Record<string, any>;

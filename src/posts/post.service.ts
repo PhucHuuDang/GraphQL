@@ -33,7 +33,7 @@ export class PostsService {
     return await this.postRepository.findPublishedPosts(params);
   }
 
-  async findById(id: number): Promise<Post | null> {
+  async findById(id: string): Promise<Post | null> {
     return await this.postRepository.findById(id);
   }
 
@@ -47,15 +47,15 @@ export class PostsService {
     return await this.postRepository.create(data);
   }
 
-  async updatePost(id: number, data: Prisma.PostUpdateInput): Promise<Post> {
+  async updatePost(id: string, data: Prisma.PostUpdateInput): Promise<Post> {
     return await this.postRepository.update(id, data);
   }
 
-  async incrementViews(id: number): Promise<Post> {
+  async incrementViews(id: string): Promise<Post> {
     return await this.postRepository.incrementViews(id);
   }
 
-  async deletePost(id: number): Promise<Post> {
+  async deletePost(id: string): Promise<Post> {
     return await this.postRepository.delete(id);
   }
 }

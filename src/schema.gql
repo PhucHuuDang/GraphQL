@@ -70,16 +70,17 @@ type Post {
 }
 
 input PostPaginationInput {
-  limit: Int!
-  page: Int!
+  extra: JSON
+  limit: Int = 10
+  page: Int = 1
 }
 
 type Query {
+  allPosts: [Post!]!
   author(id: Int!): Author!
   findPostById(id: Int!): Post!
   findPostBySlug(slug: String!): Post!
   postPaginated(params: PostPaginationInput!): [Post!]!
-  posts: [Post!]!
   priorityPosts(limit: Int! = 10): [Post!]!
   user(id: Int!): User!
 }

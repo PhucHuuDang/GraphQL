@@ -14,7 +14,7 @@ export class PostRepository extends BaseRepository<Post, Prisma.PostDelegate> {
     return this.findOne({ where: { slug } });
   }
 
-  async findById(id: number): Promise<Post | null> {
+  async findById(id: string): Promise<Post | null> {
     return await this.model.findUnique({ where: { id } });
   }
 
@@ -84,7 +84,7 @@ export class PostRepository extends BaseRepository<Post, Prisma.PostDelegate> {
     });
   }
 
-  async incrementViews(id: number) {
+  async incrementViews(id: string) {
     return this.update(id, { views: { increment: 1 } });
   }
 
