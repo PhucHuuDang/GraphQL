@@ -37,8 +37,8 @@ model User {
 model Author {
   // id          Int       @id @default(autoincrement())
   id          String    @id @default(cuid())
-  firstName   String?
-  lastName    String?
+  name        String
+  designation String?
   bio         String?
   avatarUrl   String?
   verified    Boolean   @default(false)
@@ -66,7 +66,7 @@ model Category {
   name      String   @unique
   posts     Post[]
   createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  updatedAt DateTime? @updatedAt
 
   @@map("categories")
 }

@@ -7,17 +7,19 @@ import {
   ServiceUnavailableException,
   UnprocessableEntityException,
 } from '@nestjs/common';
-import { Prisma } from '@prisma/client';
 import {
   PrismaClientInitializationError,
   PrismaClientKnownRequestError,
   PrismaClientValidationError,
   PrismaClientRustPanicError,
 } from 'generated/prisma/runtime/library';
+import { C } from 'node_modules/better-auth/dist/shared/better-auth.Cj7kf8Ev.cjs';
 
 export class PrismaErrorHelper {
   static handle(error: any, context?: string): never {
     const contextMsg = context ? ` (${context})` : '';
+
+    console.error({ contextMsg });
 
     // ✅ Xử lý lỗi Prisma Known Request Error
     if (error instanceof PrismaClientKnownRequestError) {
@@ -59,6 +61,9 @@ export class PrismaErrorHelper {
           throw new ServiceUnavailableException(
             `Server has closed the connection${contextMsg}`,
           );
+
+        case 'P2025':
+          throw new NotFoundException(`Record not found${contextMsg}`);
 
         // --- Constraint violations ---
         case 'P2002': {
@@ -148,8 +153,7 @@ export class PrismaErrorHelper {
           throw new ServiceUnavailableException(
             `Connection pool timeout${contextMsg}`,
           );
-        case 'P2025':
-          throw new NotFoundException(`Record not found${contextMsg}`);
+
         case 'P2026':
           throw new BadRequestException(
             `Unsupported database feature${contextMsg}`,

@@ -5,11 +5,17 @@
 type Author {
   avatarUrl: String
   bio: String
-  firstName: String
-  id: Int!
-  lastName: String
+  designation: String
+  id: String!
+  name: String!
   posts: [Post!]!
   verified: Boolean
+}
+
+type Category {
+  id: String!
+  name: String!
+  posts: [Post!]
 }
 
 type Comment {
@@ -18,6 +24,28 @@ type Comment {
   id: Int!
   post: Post
   user: User!
+}
+
+input CreateAuthor {
+  avatarUrl: String
+  bio: String
+  designation: String
+  email: String
+  isActive: Boolean
+  isBlocked: Boolean
+  isDeleted: Boolean
+  isExpired: Boolean
+  isLocked: Boolean
+  isSuspended: Boolean
+  isVerified: Boolean
+  name: String!
+  password: String
+  role: String
+  socialLinks: JSONObject
+}
+
+input CreateCategory {
+  name: String!
 }
 
 input CreateUser {
@@ -37,27 +65,34 @@ The `JSON` scalar type represents JSON values as specified by [ECMA-404](http://
 """
 scalar JSON
 
+"""
+The `JSONObject` scalar type represents JSON objects as specified by [ECMA-404](http://www.ecma-international.org/publications/files/ECMA-ST/ECMA-404.pdf).
+"""
+scalar JSONObject
+
 type Like {
   id: Int!
   user: User!
 }
 
 type Mutation {
-  createPost(authorId: Int!, categoryId: Int!, content: JSON!, description: String!, mainImage: String!, slug: String!, tags: [String!]!, title: String!, votes: Int!): Post!
+  createAuthor(author: CreateAuthor!): Author!
+  createCategory(category: CreateCategory!): Category!
+  createPost(authorId: String!, categoryId: String!, content: JSON!, description: String!, mainImage: String!, slug: String!, tags: [String!]!, title: String!, votes: Int!): Post!
   createUser(createUserInput: CreateUser!): User!
-  deletePost(id: Int!): Post!
+  deletePost(id: String!): Post!
   removeUser(id: Int!): User!
-  updatePost(data: UpdatePost!, id: Int!): Post!
+  updatePost(data: UpdatePost!, id: String!): Post!
   updateUser(updateUserInput: UpdateUser!): User!
 }
 
 type Post {
-  authorId: Int!
-  categoryId: Int
+  authorId: String!
+  categoryId: String
   content: JSON!
   createdAt: DateTime!
   description: String
-  id: Int!
+  id: String!
   isPinned: Boolean!
   isPriority: Boolean!
   isPublished: Boolean!
@@ -77,11 +112,12 @@ input PostPaginationInput {
 
 type Query {
   allPosts: [Post!]!
-  author(id: Int!): Author!
-  findPostById(id: Int!): Post!
+  author(id: String!): Author!
+  findPostById(id: String!): Post!
   findPostBySlug(slug: String!): Post!
   postPaginated(params: PostPaginationInput!): [Post!]!
   priorityPosts(limit: Int! = 10): [Post!]!
+  profile: User!
   user(id: Int!): User!
 }
 

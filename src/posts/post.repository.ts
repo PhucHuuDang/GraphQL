@@ -87,6 +87,4 @@ export class PostRepository extends BaseRepository<Post, Prisma.PostDelegate> {
   async incrementViews(id: string) {
     return this.update(id, { views: { increment: 1 } });
   }
-
-  //* C
 }
