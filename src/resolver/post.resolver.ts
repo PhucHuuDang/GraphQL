@@ -7,6 +7,7 @@ import {
   ResolveField,
   Resolver,
 } from '@nestjs/graphql';
+import { AllowAnonymous } from '@thallesp/nestjs-better-auth';
 import { InputJsonValue } from 'generated/prisma/runtime/library';
 import GraphQLJSON from 'graphql-type-json';
 import type { PaginationParams } from 'src/common/base.repository';
@@ -15,6 +16,7 @@ import { UpdatePost } from 'src/models/post/update-post.model';
 import { PostsService } from 'src/posts/post.service';
 import { generateSlug } from 'src/utils/slug-stringify';
 
+@AllowAnonymous()
 @Resolver(() => Post)
 export class PostResolver {
   constructor(private readonly postsService: PostsService) {}
@@ -60,7 +62,7 @@ export class PostResolver {
   }
 
   @Query(() => Post, { name: 'findPostById' })
-  async findPostById(@Args('id', { type: () => Int }) id: number) {
+  async findPostById(@Args('id', { type: () => String }) id: string) {
     return await this.postsService.findById(id);
   }
 
@@ -73,8 +75,8 @@ export class PostResolver {
     @Args('tags', { type: () => [String] }) tags: string[],
     @Args('content', { type: () => GraphQLJSON }) content: any,
     @Args('mainImage', { type: () => String }) mainImage: string,
-    @Args('authorId', { type: () => Int }) authorId: number,
-    @Args('categoryId', { type: () => Int }) categoryId: number,
+    @Args('authorId', { type: () => String }) authorId: string,
+    @Args('categoryId', { type: () => String }) categoryId: string,
     @Args('slug', { type: () => String }) slug: string,
   ) {
     return this.postsService.createPost({
@@ -92,7 +94,7 @@ export class PostResolver {
 
   @Mutation(() => Post)
   async updatePost(
-    @Args('id', { type: () => Int }) id: number,
+    @Args('id', { type: () => String }) id: string,
     @Args('data')
     data: UpdatePost,
   ) {
@@ -100,7 +102,7 @@ export class PostResolver {
   }
 
   @Mutation(() => Post)
-  async deletePost(@Args('id', { type: () => Int }) id: number) {
+  async deletePost(@Args('id', { type: () => String }) id: string) {
     return this.postsService.deletePost(id);
   }
 }

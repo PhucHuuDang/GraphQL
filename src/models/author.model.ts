@@ -3,17 +3,17 @@ import { Post } from './post/post.model';
 
 @ObjectType()
 export class Author {
-  @Field((type) => Int)
-  id: number;
+  @Field((type) => String)
+  id: string;
+
+  @Field()
+  name: string;
 
   @Field({ nullable: true })
-  firstName?: string;
+  bio?: string;
 
   @Field({ nullable: true })
-  lastName?: string;
-
-  @Field({ nullable: true })
-  bio: string;
+  designation?: string;
 
   @Field({ nullable: true })
   avatarUrl: string;

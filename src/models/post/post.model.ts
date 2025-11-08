@@ -3,8 +3,8 @@ import GraphQLJSON from 'graphql-type-json';
 
 @ObjectType()
 export class Post {
-  @Field(() => Int)
-  id: number;
+  @Field(() => String)
+  id: string;
 
   @Field()
   title: string;
@@ -42,11 +42,11 @@ export class Post {
   @Field({ defaultValue: false })
   isPinned: boolean;
 
-  @Field(() => Int)
-  authorId: number;
+  @Field(() => String)
+  authorId: string;
 
-  @Field(() => Int, { nullable: true })
-  categoryId?: number;
+  @Field(() => String, { nullable: true })
+  categoryId?: string;
 }
 
 @InputType()

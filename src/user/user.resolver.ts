@@ -4,9 +4,22 @@ import { User } from 'src/models/user.model';
 import { CreateUser } from './dto/create-user';
 import { UpdateUser } from './dto/update-user';
 
+import {
+  type UserSession,
+  type BaseUserSession,
+  Session,
+} from '@thallesp/nestjs-better-auth';
+
+import { Session as SessionModel } from 'src/models/session.model';
+
 @Resolver(() => User)
 export class UserResolver {
   constructor(private readonly userService: UserService) {}
+
+  @Query(() => User, { name: 'profile' })
+  getProfile(@Session() session: UserSession) {
+    return { user: session.user };
+  }
 
   @Mutation(() => User)
   createUser(@Args('createUserInput') createUserInput: CreateUser) {

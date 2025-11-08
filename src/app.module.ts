@@ -8,8 +8,9 @@ import { ConfigModule } from '@nestjs/config';
 import { UserModule } from './user/user.module';
 import { CategoryModule } from './category/category.module';
 import { PrismaModule } from './prisma/prisma.module';
-import { AuthModule } from './auth/auth.module';
 import GraphQLJSON from 'graphql-type-json';
+import { AuthModule } from '@thallesp/nestjs-better-auth';
+import { auth } from './lib/auth';
 @Module({
   imports: [
     GraphQLModule.forRoot<ApolloDriverConfig>({
@@ -43,7 +44,9 @@ import GraphQLJSON from 'graphql-type-json';
 
     PrismaModule,
 
-    AuthModule,
+    AuthModule.forRoot({
+      auth,
+    }),
   ],
   controllers: [],
   providers: [],

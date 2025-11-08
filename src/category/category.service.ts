@@ -1,6 +1,14 @@
 import { Injectable } from '@nestjs/common';
+import { CategoryRepository } from './category.repository';
+import { Category, Prisma } from 'generated/prisma';
 
 @Injectable()
 export class CategoryService {
-  findAll() {}
+  constructor(private readonly categoryRepository: CategoryRepository) {}
+
+  async createCategory(
+    category: Prisma.CategoryCreateInput,
+  ): Promise<Category> {
+    return await this.categoryRepository.create(category);
+  }
 }
