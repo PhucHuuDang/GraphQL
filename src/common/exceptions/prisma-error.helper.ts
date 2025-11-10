@@ -12,8 +12,8 @@ import {
   PrismaClientKnownRequestError,
   PrismaClientValidationError,
   PrismaClientRustPanicError,
-} from 'generated/prisma/runtime/library';
-import { C } from 'node_modules/better-auth/dist/shared/better-auth.Cj7kf8Ev.cjs';
+} from '@prisma/client/runtime/library';
+// } from 'generated/prisma/runtime/library';
 
 export class PrismaErrorHelper {
   static handle(error: any, context?: string): never {
@@ -68,11 +68,12 @@ export class PrismaErrorHelper {
         // --- Constraint violations ---
         case 'P2002': {
           const target = error.meta?.target;
-          const fields = Array.isArray(target) ? target.join(', ') : target;
+          const fields = Array.isArray(target)
+            ? target.join(', ')
+            : target || 'unknown';
+
           throw new ConflictException(
-            `Unique constraint failed on field(s): ${
-              (fields as string[])?.join(', ') || 'unknown'
-            }${contextMsg}`,
+            `Unique constraint failed on field(s): ${fields as string}${contextMsg}`,
           );
         }
         case 'P2003': {

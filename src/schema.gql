@@ -7,8 +7,16 @@ type Author {
   bio: String
   designation: String
   id: String!
+  isActive: Boolean
+  isBlocked: Boolean
+  isDeleted: Boolean
+  isExpired: Boolean
+  isLocked: Boolean
+  isSuspended: Boolean
+  isVerified: Boolean
   name: String!
   posts: [Post!]!
+  socialLinks: JSONObject
   verified: Boolean
 }
 
@@ -78,21 +86,24 @@ type Like {
 type Mutation {
   createAuthor(author: CreateAuthor!): Author!
   createCategory(category: CreateCategory!): Category!
-  createPost(authorId: String!, categoryId: String!, content: JSON!, description: String!, mainImage: String!, slug: String!, tags: [String!]!, title: String!, votes: Int!): Post!
+  createPost(authorId: String!, categoryId: String!, content: JSON!, description: String!, isPublished: Boolean!, mainImage: String!, slug: String!, tags: [String!]!, title: String!): Post!
   createUser(createUserInput: CreateUser!): User!
   deletePost(id: String!): Post!
   removeUser(id: Int!): User!
-  updatePost(data: UpdatePost!, id: String!): Post!
+  updatePost(data: UpdatePostInput!, id: String!): Post!
   updateUser(updateUserInput: UpdateUser!): User!
 }
 
 type Post {
+  author: Author!
   authorId: String!
+  category: Category
   categoryId: String
   content: JSON!
   createdAt: DateTime!
   description: String
   id: String!
+  isDeleted: Boolean!
   isPinned: Boolean!
   isPriority: Boolean!
   isPublished: Boolean!
@@ -101,6 +112,7 @@ type Post {
   tags: [String!]!
   title: String!
   updatedAt: DateTime!
+  views: Int!
   votes: Int!
 }
 
@@ -121,7 +133,7 @@ type Query {
   user(id: Int!): User!
 }
 
-input UpdatePost {
+input UpdatePostInput {
   authorId: Float
   categoryId: Float
   content: JSON
@@ -130,9 +142,9 @@ input UpdatePost {
   isPriority: Boolean
   isPublished: Boolean
   mainImage: String
+  slug: String
   tags: [String!]
   title: String
-  votes: Float
 }
 
 input UpdateUser {

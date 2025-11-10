@@ -1,3 +1,4 @@
+import { BadRequestException } from '@nestjs/common';
 import {
   Args,
   Int,
@@ -12,7 +13,7 @@ import { InputJsonValue } from 'generated/prisma/runtime/library';
 import GraphQLJSON from 'graphql-type-json';
 import type { PaginationParams } from 'src/common/base.repository';
 import { Post, PostPaginationInput } from 'src/models/post/post.model';
-import { UpdatePost } from 'src/models/post/update-post.model';
+import { UpdatePostInput } from 'src/models/post/update-post.model';
 import { PostsService } from 'src/posts/post.service';
 import { generateSlug } from 'src/utils/slug-stringify';
 
@@ -23,7 +24,19 @@ export class PostResolver {
 
   @Query(() => [Post], { name: 'allPosts' })
   async findAllPosts() {
-    return this.postsService.findAll();
+    const test = await this.postsService.findAll({
+      include: {
+        author: true,
+        category: true,
+      },
+    });
+    console.log({ test });
+    return await this.postsService.findAll({
+      include: {
+        author: true,
+        category: true,
+      },
+    });
   }
 
   @Query(() => [Post], { name: 'priorityPosts' })
@@ -69,8 +82,7 @@ export class PostResolver {
   @Mutation(() => Post)
   async createPost(
     @Args('title') title: string,
-    @Args('votes', { type: () => Int })
-    votes: number,
+
     @Args('description', { type: () => String }) description: string,
     @Args('tags', { type: () => [String] }) tags: string[],
     @Args('content', { type: () => GraphQLJSON }) content: any,
@@ -78,10 +90,12 @@ export class PostResolver {
     @Args('authorId', { type: () => String }) authorId: string,
     @Args('categoryId', { type: () => String }) categoryId: string,
     @Args('slug', { type: () => String }) slug: string,
+    @Args('isPublished', { type: () => Boolean }) isPublished: boolean,
   ) {
+    console.log({ slug });
+
     return this.postsService.createPost({
       title,
-      votes,
       description,
       mainImage,
       author: { connect: { id: authorId } },
@@ -89,16 +103,28 @@ export class PostResolver {
       tags,
       content: content,
       slug,
+      isPublished,
     });
   }
 
   @Mutation(() => Post)
   async updatePost(
     @Args('id', { type: () => String }) id: string,
-    @Args('data')
-    data: UpdatePost,
+    @Args('data', { type: () => UpdatePostInput })
+    data: UpdatePostInput,
   ) {
-    return this.postsService.updatePost(id, data);
+    if (!id) {
+      throw new BadRequestException('Id is required for update');
+    }
+    if (!data) {
+      throw new BadRequestException('Data is required for update');
+    }
+
+    return await this.postsService.updatePost(id, {
+      ...data,
+      ...(data.slug ? { slug: generateSlug(data.slug) } : {}),
+      updatedAt: new Date(),
+    });
   }
 
   @Mutation(() => Post)

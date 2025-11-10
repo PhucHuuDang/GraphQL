@@ -1,21 +1,25 @@
+// src/modules/posts/dto/update-post.input.ts
 import { Field, InputType } from '@nestjs/graphql';
 import {
-  IsArray,
-  IsBoolean,
-  IsInt,
-  IsJSON,
   IsOptional,
   IsString,
+  IsBoolean,
+  IsInt,
+  IsArray,
 } from 'class-validator';
-import { InputJsonValue } from 'generated/prisma/runtime/library';
 import GraphQLJSON from 'graphql-type-json';
 
 @InputType()
-export class UpdatePost {
+export class UpdatePostInput {
   @Field({ nullable: true })
   @IsOptional()
   @IsString()
   title?: string;
+
+  @Field({ nullable: true })
+  @IsOptional()
+  @IsString()
+  slug?: string;
 
   @Field({ nullable: true })
   @IsOptional()
@@ -34,7 +38,6 @@ export class UpdatePost {
   @Field(() => [String], { nullable: true })
   @IsOptional()
   @IsArray()
-  @IsString({ each: true })
   tags?: string[];
 
   @Field({ nullable: true })
@@ -61,9 +64,4 @@ export class UpdatePost {
   @IsOptional()
   @IsInt()
   authorId?: number;
-
-  @Field({ nullable: true })
-  @IsOptional()
-  @IsInt()
-  votes?: number;
 }
