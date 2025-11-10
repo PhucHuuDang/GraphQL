@@ -11,6 +11,7 @@ import { PrismaModule } from './prisma/prisma.module';
 import GraphQLJSON from 'graphql-type-json';
 import { AuthModule } from '@thallesp/nestjs-better-auth';
 import { auth } from './lib/auth';
+// import { typeDefs } from 'typeDefs';
 @Module({
   imports: [
     GraphQLModule.forRoot<ApolloDriverConfig>({
@@ -24,6 +25,7 @@ import { auth } from './lib/auth';
       resolvers: {
         JSON: GraphQLJSON,
       },
+      // typeDefs: [typeDefs],
     }),
 
     ConfigModule.forRoot({

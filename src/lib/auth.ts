@@ -9,6 +9,11 @@ export const auth = betterAuth({
     debugLogs: true,
   }),
 
+  advanced: {
+    cookiePrefix: 'blog',
+    cookieSecure: process.env.NODE_ENV === 'production',
+  },
+
   emailAndPassword: {
     enabled: true,
     requireEmailVerification: false,

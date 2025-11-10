@@ -9,9 +9,9 @@ export class AuthorsService {
   async createAuthor(author: Prisma.AuthorCreateInput): Promise<Author> {
     return await this.authorRepository.create({
       ...author,
-      posts: {
-        create: [],
-      },
+      // posts: {
+      //   create: [],
+      // },
     });
   }
 }

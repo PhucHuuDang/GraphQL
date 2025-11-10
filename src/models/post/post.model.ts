@@ -1,5 +1,7 @@
 import { ObjectType, Field, Int, InputType } from '@nestjs/graphql';
 import GraphQLJSON from 'graphql-type-json';
+import { Author } from '../author.model';
+import { Category } from '../category.model';
 
 @ObjectType()
 export class Post {
@@ -17,6 +19,9 @@ export class Post {
 
   @Field(() => GraphQLJSON) // hoặc (() => GraphQLJSON) nếu content là JSON
   content: JSON;
+
+  @Field(() => Int)
+  views: number;
 
   @Field(() => Int)
   votes: number;
@@ -42,11 +47,20 @@ export class Post {
   @Field({ defaultValue: false })
   isPinned: boolean;
 
+  @Field({ defaultValue: false })
+  isDeleted: boolean;
+
   @Field(() => String)
   authorId: string;
 
   @Field(() => String, { nullable: true })
   categoryId?: string;
+
+  @Field(() => Author)
+  author: Author;
+
+  @Field(() => Category, { nullable: true })
+  category?: Category;
 }
 
 @InputType()
