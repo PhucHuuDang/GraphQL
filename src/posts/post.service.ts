@@ -14,7 +14,15 @@ export class PostsService {
   }
 
   async findBySlug(slug: string): Promise<Post | null> {
-    return await this.postRepository.findBySlug(slug);
+    return await this.postRepository.findUnique(
+      { slug },
+      {
+        include: {
+          author: true,
+          category: true,
+        },
+      },
+    );
   }
 
   async findPriorityPosts(limit: number = 10): Promise<Post[]> {

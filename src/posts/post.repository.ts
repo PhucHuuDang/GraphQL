@@ -10,9 +10,9 @@ export class PostRepository extends BaseRepository<Post, Prisma.PostDelegate> {
   }
 
   //* R
-  async findBySlug(slug: string): Promise<Post | null> {
-    return this.findOne({ where: { slug } });
-  }
+  // async findBySlug(slug: string): Promise<Post | null> {
+  //   return await this.findUnique({ where: { slug } });
+  // }
 
   async findById(id: string): Promise<Post | null> {
     return await this.model.findUnique({ where: { id } });

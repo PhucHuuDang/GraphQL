@@ -58,7 +58,7 @@ export class PostResolver {
     });
   }
 
-  @Query(() => Post, { name: 'findPostBySlug' })
+  @Query(() => Post)
   async findPostBySlug(
     @Args(
       'slug',
@@ -71,6 +71,10 @@ export class PostResolver {
     )
     slug: string,
   ) {
+    const test = await this.postsService.findBySlug(slug);
+
+    console.log({ test });
+
     return await this.postsService.findBySlug(slug);
   }
 
