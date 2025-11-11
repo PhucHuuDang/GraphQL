@@ -95,6 +95,28 @@ export abstract class BaseRepository<
     }
   }
 
+  async findUnique(
+    where: Prisma.SelectSubset<any, any>,
+    params?: Prisma.SelectSubset<any, any>,
+  ): Promise<T | null> {
+    try {
+      return await this.model.findUnique({ where, ...((params as any) ?? {}) });
+    } catch (error) {
+      PrismaErrorHelper.handle(error, 'findUnique');
+    }
+  }
+
+  async findFirst(
+    where: Prisma.SelectSubset<any, any>,
+    params?: Prisma.SelectSubset<any, any>,
+  ): Promise<T | null> {
+    try {
+      return await this.model.findFirst({ where, ...(params as any) });
+    } catch (error) {
+      PrismaErrorHelper.handle(error, 'findFirst');
+    }
+  }
+
   async findOneOrFail(
     where: Prisma.SelectSubset<any, any>,
     params?: Prisma.SelectSubset<any, any>,
