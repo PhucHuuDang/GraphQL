@@ -84,7 +84,23 @@ export class PostRepository extends BaseRepository<Post, Prisma.PostDelegate> {
     });
   }
 
+  // async findOne(
+  //   where: Prisma.SelectSubset<any, any>,
+  //   params?: Prisma.SelectSubset<any, any>,
+  // ) {
+  //   return await this.findOne({ where, ...(params as any) });
+  // }
+
   async incrementViews(id: string) {
-    return this.update(id, { views: { increment: 1 } });
+    return this.update(id, {
+      data: {
+        views: { increment: 1 },
+      },
+
+      include: {
+        author: true,
+        category: true,
+      },
+    });
   }
 }

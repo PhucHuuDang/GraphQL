@@ -1,13 +1,19 @@
-import { Injectable } from '@nestjs/common';
-// import { Post } from 'src/models/post.model';
+import { Inject, Injectable } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { PostRepository } from './post.repository';
 import { Post, Prisma } from 'generated/prisma/client';
 import { PaginationParams, PaginationResult } from 'src/common/base.repository';
+import { Cache, CACHE_MANAGER } from '@nestjs/cache-manager';
+import { Redis } from '@upstash/redis';
+import { UPSTASH_REDIS } from 'src/lib/key';
 
 @Injectable()
 export class PostsService {
-  constructor(private readonly postRepository: PostRepository) {}
+  constructor(
+    private readonly postRepository: PostRepository,
+    // @Inject(CACHE_MANAGER) private readonly cacheManager: Cache,
+    @Inject(UPSTASH_REDIS) private readonly upstashRedis: Redis,
+  ) {}
 
   async findAll(params?: Prisma.SelectSubset<any, any>): Promise<Post[]> {
     return await this.postRepository.findAll(params);
@@ -60,8 +66,30 @@ export class PostsService {
     return await this.postRepository.update(id, data);
   }
 
-  async incrementViews(id: string): Promise<Post> {
-    return await this.postRepository.incrementViews(id);
+  async incrementViews(id: string, identifier: string) {
+    const cacheKey = `blog:${id}:view:${identifier}`;
+
+    const hasViewed = await this.upstashRedis.get(cacheKey);
+
+    console.log('Cache check:', { cacheKey, hasViewed });
+
+    if (hasViewed) {
+      const blog = await this.postRepository.findById(id);
+
+      console.log('Already viewed, returning current views:', blog?.views);
+
+      return blog;
+    }
+
+    await this.upstashRedis.set(cacheKey, identifier, { ex: 3600 });
+
+    const updatedPost = await this.postRepository.incrementViews(id);
+
+    console.log('View incremented:', updatedPost?.views);
+
+    return updatedPost;
+
+    // return await this.postRepository.incrementViews(id);
   }
 
   async deletePost(id: string): Promise<Post> {

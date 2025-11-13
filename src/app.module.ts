@@ -11,7 +11,10 @@ import { PrismaModule } from './prisma/prisma.module';
 import GraphQLJSON from 'graphql-type-json';
 import { AuthModule } from '@thallesp/nestjs-better-auth';
 import { auth } from './lib/auth';
+// import { CacheModule } from '@nestjs/cache-manager';
 // import { typeDefs } from 'typeDefs';
+import { CacheModule } from './cache/cache.module';
+import { upstashRedis } from './lib/upstash-client';
 @Module({
   imports: [
     GraphQLModule.forRoot<ApolloDriverConfig>({
@@ -41,16 +44,20 @@ import { auth } from './lib/auth';
     }),
 
     UserModule,
-
     CategoryModule,
-
     PrismaModule,
-
     AuthModule.forRoot({
       auth,
     }),
+
+    CacheModule,
   ],
   controllers: [],
-  providers: [],
+  providers: [
+    {
+      provide: 'UPSTASH_REDIS',
+      useValue: upstashRedis,
+    },
+  ],
 })
 export class AppModule {}

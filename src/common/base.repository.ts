@@ -265,13 +265,16 @@ export abstract class BaseRepository<
       if (!data) {
         throw new BadRequestException('Data is required for update');
       }
-      return await this.model.update({ where: { id }, data, include });
+      return await this.model.update({ where: { id }, ...data, include });
     } catch (error) {
       PrismaErrorHelper.handle(error, 'update');
     }
   }
 
-  async updateMany(where: any, data: any): Promise<number> {
+  async updateMany(
+    where: Prisma.SelectSubset<any, any>,
+    data: any,
+  ): Promise<number> {
     try {
       if (!where) {
         throw new BadRequestException(
@@ -281,7 +284,7 @@ export abstract class BaseRepository<
       if (!data || Object.keys(data).length === 0) {
         throw new BadRequestException('Data is required for updateMany');
       }
-      const result = await this.model.updateMany({ where, data });
+      const result = await this.model.updateMany({ where, ...data });
       return result.count;
     } catch (error) {
       PrismaErrorHelper.handle(error, 'updateMany');
