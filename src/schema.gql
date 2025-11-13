@@ -89,6 +89,7 @@ type Mutation {
   createPost(authorId: String!, categoryId: String!, content: JSON!, description: String!, isPublished: Boolean!, mainImage: String!, slug: String!, tags: [String!]!, title: String!): Post!
   createUser(createUserInput: CreateUser!): User!
   deletePost(id: String!): Post!
+  incrementViews(id: String!, identifier: String!): Post!
   removeUser(id: Int!): User!
   updatePost(data: UpdatePostInput!, id: String!): Post!
   updateUser(updateUserInput: UpdateUser!): User!
