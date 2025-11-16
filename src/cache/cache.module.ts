@@ -18,8 +18,8 @@ import { UPSTASH_REDIS } from 'src/lib/key';
         });
         console.log('✅ Redis store initialized');
         return {
-          store, // Không await ở đây
-          ttl: 60, // TTL mặc định 1 ngày
+          store,
+          ttl: 60,
         };
       },
     }),
