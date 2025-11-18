@@ -1,9 +1,10 @@
 import { Field, Int, ObjectType } from '@nestjs/graphql';
-import { Post } from './post/post.model';
-import { IsArray, IsDate, IsString } from 'class-validator';
+import { PostModel } from './post/post.model';
+import { IsArray, IsDate, IsOptional, IsString } from 'class-validator';
+import { isNullableType } from 'graphql';
 
 @ObjectType()
-export class Category {
+export class CategoryModel {
   @Field(() => String)
   @IsString()
   id: string;
@@ -12,15 +13,16 @@ export class Category {
   @IsString()
   name: string;
 
-  @Field(() => [Post], { nullable: true })
+  @Field(() => [PostModel], { nullable: true })
   @IsArray()
-  posts?: Post[];
+  posts?: PostModel[];
 
-  // @Field({ nullable: true })
-  // @IsDate()
-  // createdAt?: Date;
+  @Field()
+  @IsDate()
+  createdAt: Date;
 
-  // @Field({ nullable: true })
-  // @IsDate()
-  // updatedAt?: Date | null;
+  @Field(() => Date)
+  @IsDate()
+  @IsOptional()
+  updatedAt: Date | null;
 }

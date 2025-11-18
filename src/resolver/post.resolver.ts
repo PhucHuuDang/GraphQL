@@ -1,25 +1,15 @@
 import { BadRequestException } from '@nestjs/common';
-import {
-  Args,
-  Context,
-  Int,
-  Mutation,
-  Parent,
-  Query,
-  ResolveField,
-  Resolver,
-} from '@nestjs/graphql';
+import { Args, Context, Int, Mutation, Query, Resolver } from '@nestjs/graphql';
 import { AllowAnonymous } from '@thallesp/nestjs-better-auth';
 import { Request } from 'express';
-import { InputJsonValue } from 'generated/prisma/runtime/library';
 import GraphQLJSON from 'graphql-type-json';
-import { Post, PostPaginationInput } from 'src/models/post/post.model';
+import { PostModel, PostPaginationInput } from 'src/models/post/post.model';
 import { UpdatePostInput } from 'src/models/post/update-post.model';
 import { PostsService } from 'src/posts/post.service';
 import { generateSlug } from 'src/utils/slug-stringify';
 
 @AllowAnonymous()
-@Resolver(() => Post)
+@Resolver(() => PostModel)
 export class PostResolver {
   private getClientIp(req: Request) {
     const ip =
@@ -45,7 +35,7 @@ export class PostResolver {
   }
   constructor(private readonly postsService: PostsService) {}
 
-  @Query(() => [Post], { name: 'allPosts' })
+  @Query(() => [PostModel], { name: 'allPosts' })
   async findAllPosts() {
     return await this.postsService.findAll({
       include: {
@@ -55,14 +45,14 @@ export class PostResolver {
     });
   }
 
-  @Query(() => [Post], { name: 'priorityPosts' })
+  @Query(() => [PostModel], { name: 'priorityPosts' })
   async findPriorityPosts(
     @Args('limit', { type: () => Int, defaultValue: 10 }) limit: number,
   ) {
     return this.postsService.findPriorityPosts(limit);
   }
 
-  @Query(() => [Post], { name: 'postPaginated' })
+  @Query(() => [PostModel], { name: 'postPaginated' })
   async postPaginated(
     @Args('params', { type: () => PostPaginationInput })
     params: PostPaginationInput,
@@ -74,7 +64,7 @@ export class PostResolver {
     });
   }
 
-  @Query(() => Post)
+  @Query(() => PostModel)
   async findPostBySlug(
     @Args(
       'slug',
@@ -90,12 +80,12 @@ export class PostResolver {
     return await this.postsService.findBySlug(slug);
   }
 
-  @Query(() => Post, { name: 'findPostById' })
+  @Query(() => PostModel, { name: 'findPostById' })
   async findPostById(@Args('id', { type: () => String }) id: string) {
     return await this.postsService.findById(id);
   }
 
-  @Mutation(() => Post)
+  @Mutation(() => PostModel)
   async createPost(
     @Args('title') title: string,
     @Args('description', { type: () => String }) description: string,
@@ -107,7 +97,7 @@ export class PostResolver {
     @Args('slug', { type: () => String }) slug: string,
     @Args('isPublished', { type: () => Boolean }) isPublished: boolean,
   ) {
-    console.log({ slug });
+    // console.log({ slug });
 
     return this.postsService.createPost({
       title,
@@ -122,7 +112,7 @@ export class PostResolver {
     });
   }
 
-  @Mutation(() => Post)
+  @Mutation(() => PostModel)
   async updatePost(
     @Args('id', { type: () => String }) id: string,
     @Args('data', { type: () => UpdatePostInput })
@@ -142,21 +132,21 @@ export class PostResolver {
     });
   }
 
-  @Mutation(() => Post)
+  @Mutation(() => PostModel)
   async deletePost(@Args('id', { type: () => String }) id: string) {
     return this.postsService.deletePost(id);
   }
 
-  @Mutation(() => Post)
+  @Mutation(() => PostModel)
   async incrementViews(
     @Args('id', { type: () => String }) id: string,
     @Args('identifier', { type: () => String }) identifier: string,
     @Context() context: { req: Request },
   ) {
-    // console.log({ context });
+    console.log({ context });
 
     const identifierResult = this.getIdentifier(context.req, identifier);
-    console.log({ identifierResult });
+    // console.log({ identifierResult });
     return await this.postsService.incrementViews(id, identifierResult);
   }
 }

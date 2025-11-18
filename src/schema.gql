@@ -2,6 +2,23 @@
 # THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
 # ------------------------------------------------------
 
+type AccountModel {
+  accessToken: String
+  accessTokenExpiresAt: DateTime
+  accountId: String!
+  createdAt: DateTime!
+  id: String!
+  idToken: String
+  password: String
+  providerId: String!
+  refreshToken: String
+  refreshTokenExpiresAt: DateTime
+  scope: String
+  updatedAt: DateTime!
+  user: UserModel!
+  userId: String!
+}
+
 type Author {
   avatarUrl: String
   bio: String
@@ -15,23 +32,25 @@ type Author {
   isSuspended: Boolean
   isVerified: Boolean
   name: String!
-  posts: [Post!]!
+  posts: [PostModel!]!
   socialLinks: JSONObject
   verified: Boolean
 }
 
-type Category {
+type CategoryModel {
+  createdAt: DateTime!
   id: String!
   name: String!
-  posts: [Post!]
+  posts: [PostModel!]
+  updatedAt: DateTime!
 }
 
 type Comment {
   content: String!
   createdAt: DateTime!
   id: Int!
-  post: Post
-  user: User!
+  post: PostModel
+  user: UserModel!
 }
 
 input CreateAuthor {
@@ -78,27 +97,30 @@ The `JSONObject` scalar type represents JSON objects as specified by [ECMA-404](
 """
 scalar JSONObject
 
-type Like {
+type LikeModel {
+  createdAt: DateTime!
   id: Int!
-  user: User!
+  post: PostModel!
+  postId: String!
+  user: UserModel!
+  userId: String!
 }
 
 type Mutation {
   createAuthor(author: CreateAuthor!): Author!
-  createCategory(category: CreateCategory!): Category!
-  createPost(authorId: String!, categoryId: String!, content: JSON!, description: String!, isPublished: Boolean!, mainImage: String!, slug: String!, tags: [String!]!, title: String!): Post!
-  createUser(createUserInput: CreateUser!): User!
-  deletePost(id: String!): Post!
-  incrementViews(id: String!, identifier: String!): Post!
-  removeUser(id: Int!): User!
-  updatePost(data: UpdatePostInput!, id: String!): Post!
-  updateUser(updateUserInput: UpdateUser!): User!
+  createCategory(category: CreateCategory!): CategoryModel!
+  createPost(authorId: String!, categoryId: String!, content: JSON!, description: String!, isPublished: Boolean!, mainImage: String!, slug: String!, tags: [String!]!, title: String!): PostModel!
+  createUser(createUserInput: CreateUser!): UserModel!
+  deletePost(id: String!): PostModel!
+  incrementViews(id: String!, identifier: String!): PostModel!
+  signUpEmail(callbackURL: String, email: String!, image: String, name: String, password: String!, rememberMe: Boolean): UserModel!
+  updatePost(data: UpdatePostInput!, id: String!): PostModel!
 }
 
-type Post {
+type PostModel {
   author: Author!
   authorId: String!
-  category: Category
+  category: CategoryModel
   categoryId: String
   content: JSON!
   createdAt: DateTime!
@@ -124,14 +146,27 @@ input PostPaginationInput {
 }
 
 type Query {
-  allPosts: [Post!]!
+  allPosts: [PostModel!]!
   author(id: String!): Author!
-  findPostById(id: String!): Post!
-  findPostBySlug(slug: String!): Post!
-  postPaginated(params: PostPaginationInput!): [Post!]!
-  priorityPosts(limit: Int! = 10): [Post!]!
-  profile: User!
-  user(id: Int!): User!
+  findPostById(id: String!): PostModel!
+  findPostBySlug(slug: String!): PostModel!
+  getAccounts: [AccountModel!]!
+  getSession: UserModel!
+  postPaginated(params: PostPaginationInput!): [PostModel!]!
+  priorityPosts(limit: Int! = 10): [PostModel!]!
+  profile: UserModel!
+}
+
+type SessionModel {
+  createdAt: DateTime!
+  expiresAt: DateTime!
+  id: String!
+  ipAddress: String!
+  token: String!
+  updatedAt: DateTime!
+  user: UserModel!
+  userAgent: String!
+  userId: String!
 }
 
 input UpdatePostInput {
@@ -148,15 +183,17 @@ input UpdatePostInput {
   title: String
 }
 
-input UpdateUser {
-  id: Int!
-}
-
-type User {
+type UserModel {
+  accounts: [AccountModel!]!
   avatarUrl: String
-  comments: [Comment!]
+  comments: [Comment!]!
+  createdAt: DateTime!
   email: String
-  id: Int!
-  likes: [Like!]
-  name: String!
+  emailVerified: Boolean!
+  id: String!
+  image: String
+  likes: [LikeModel!]!
+  name: String
+  sessions: [SessionModel!]!
+  updatedAt: DateTime
 }
