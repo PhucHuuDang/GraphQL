@@ -38,16 +38,13 @@ import { upstashRedis } from './lib/upstash-client';
     }),
 
     AuthorsModule,
-
-    ConfigModule.forRoot({
-      isGlobal: true,
-    }),
-
     UserModule,
     CategoryModule,
     PrismaModule,
     AuthModule.forRoot({
       auth,
+      isGlobal: true,
+      disableGlobalAuthGuard: true,
     }),
 
     CacheModule,

@@ -18,9 +18,8 @@ datasource db {
 model User {
   // id        Int       @id @default(autoincrement())
   id        String    @id @default(cuid())
-  name      String
+  name      String?
   email     String?   @unique
-  avatarUrl String?
   comments  Comment[]
   likes     Like[]
   createdAt DateTime  @default(now())
@@ -66,7 +65,7 @@ model Category {
   name      String   @unique
   posts     Post[]
   createdAt DateTime @default(now())
-  updatedAt DateTime? @updatedAt
+  updatedAt DateTime @updatedAt
 
   @@map("categories")
 }

@@ -9,11 +9,6 @@ export class PostRepository extends BaseRepository<Post, Prisma.PostDelegate> {
     super(prisma.post, 'PostRepository');
   }
 
-  //* R
-  // async findBySlug(slug: string): Promise<Post | null> {
-  //   return await this.findUnique({ where: { slug } });
-  // }
-
   async findById(id: string): Promise<Post | null> {
     return await this.model.findUnique({ where: { id } });
   }
@@ -84,15 +79,8 @@ export class PostRepository extends BaseRepository<Post, Prisma.PostDelegate> {
     });
   }
 
-  // async findOne(
-  //   where: Prisma.SelectSubset<any, any>,
-  //   params?: Prisma.SelectSubset<any, any>,
-  // ) {
-  //   return await this.findOne({ where, ...(params as any) });
-  // }
-
-  async incrementViews(id: string) {
-    return this.update(id, {
+  async incrementViews(id: string): Promise<Post | null> {
+    return await this.update(id, {
       data: {
         views: { increment: 1 },
       },

@@ -3,7 +3,6 @@ import { PrismaService } from 'src/prisma/prisma.service';
 import { PostRepository } from './post.repository';
 import { Post, Prisma } from 'generated/prisma/client';
 import { PaginationParams, PaginationResult } from 'src/common/base.repository';
-import { Cache, CACHE_MANAGER } from '@nestjs/cache-manager';
 import { Redis } from '@upstash/redis';
 import { UPSTASH_REDIS } from 'src/lib/key';
 
@@ -58,7 +57,7 @@ export class PostsService {
   }
 
   async createPost(data: Prisma.PostCreateInput): Promise<Post> {
-    console.log({ data });
+    // console.log({ data });
     return await this.postRepository.create(data);
   }
 
@@ -71,12 +70,12 @@ export class PostsService {
 
     const hasViewed = await this.upstashRedis.get(cacheKey);
 
-    console.log('Cache check:', { cacheKey, hasViewed });
+    // console.log('Cache check:', { cacheKey, hasViewed });
 
     if (hasViewed) {
       const blog = await this.postRepository.findById(id);
 
-      console.log('Already viewed, returning current views:', blog?.views);
+      // console.log('Already viewed, returning current views:', blog?.views);
 
       return blog;
     }

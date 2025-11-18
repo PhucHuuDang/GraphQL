@@ -1,14 +1,16 @@
 import { ObjectType, Field, Int } from '@nestjs/graphql';
 import { Comment } from './comment.model';
-import { Like } from './like.model';
+import { LikeModel } from './like.model';
+import { SessionModel } from './session.model';
+import { AccountModel } from './account.model';
 
 @ObjectType()
-export class User {
-  @Field(() => Int)
-  id: number;
+export class UserModel {
+  @Field(() => String)
+  id: string;
 
-  @Field()
-  name: string;
+  @Field((type) => String, { nullable: true })
+  name?: string;
 
   @Field({ nullable: true })
   email?: string;
@@ -16,9 +18,27 @@ export class User {
   @Field({ nullable: true })
   avatarUrl?: string;
 
-  @Field(() => [Comment], { nullable: true })
-  comments?: Comment[];
+  @Field(() => [Comment], { defaultValue: [] })
+  comments: Comment[];
 
-  @Field(() => [Like], { nullable: true })
-  likes?: Like[];
+  @Field(() => [LikeModel], { defaultValue: [] })
+  likes: LikeModel[];
+
+  @Field(() => Date)
+  createdAt: Date;
+
+  @Field(() => Date, { nullable: true })
+  updatedAt?: Date;
+
+  @Field(() => Boolean, { defaultValue: false })
+  emailVerified: boolean;
+
+  @Field(() => String, { nullable: true })
+  image?: string;
+
+  @Field(() => [SessionModel], { defaultValue: [] })
+  sessions: SessionModel[];
+
+  @Field(() => [AccountModel], { defaultValue: [] })
+  accounts: AccountModel[];
 }

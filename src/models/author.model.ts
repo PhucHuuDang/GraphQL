@@ -1,5 +1,5 @@
 import { Field, Int, ObjectType } from '@nestjs/graphql';
-import { Post } from './post/post.model';
+import { PostModel } from './post/post.model';
 import { GraphQLJSONObject } from 'graphql-type-json';
 
 @ObjectType()
@@ -22,8 +22,8 @@ export class Author {
   @Field(() => Boolean, { nullable: true })
   verified: boolean;
 
-  @Field((type) => [Post])
-  posts: Post[];
+  @Field((type) => [PostModel])
+  posts: PostModel[];
 
   @Field({ defaultValue: false, nullable: true })
   isActive?: boolean;

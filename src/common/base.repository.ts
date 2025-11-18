@@ -196,14 +196,14 @@ export abstract class BaseRepository<
 
   //* CREATE OPERATIONS
   async create(data: any, include?: any): Promise<T> {
-    console.log({ data });
+    // console.log({ data });
     try {
       if (!data) {
         throw new BadRequestException('Data is required for create');
       }
       return await this.model.create({ data, include });
     } catch (error) {
-      console.log({ error });
+      // console.log({ error });
       PrismaErrorHelper.handle(error, 'create');
     }
   }

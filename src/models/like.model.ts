@@ -1,11 +1,24 @@
 import { Field, ObjectType, Int } from '@nestjs/graphql';
-import { User } from './user.model';
+import { UserModel } from './user.model';
+import { PostModel } from './post/post.model';
 
 @ObjectType()
-export class Like {
+export class LikeModel {
   @Field(() => Int)
   id: number;
 
-  @Field(() => User)
-  user: User;
+  @Field(() => UserModel)
+  user: UserModel;
+
+  @Field(() => String)
+  userId: string;
+
+  @Field(() => String)
+  postId: string;
+
+  @Field(() => PostModel)
+  post: PostModel;
+
+  @Field(() => Date)
+  createdAt: Date;
 }
