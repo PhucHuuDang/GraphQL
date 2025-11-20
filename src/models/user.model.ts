@@ -1,4 +1,4 @@
-import { ObjectType, Field, Int } from '@nestjs/graphql';
+import { ObjectType, Field, Int, PickType, InputType } from '@nestjs/graphql';
 import { Comment } from './comment.model';
 import { LikeModel } from './like.model';
 import { SessionModel } from './session.model';

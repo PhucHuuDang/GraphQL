@@ -45,6 +45,12 @@ type CategoryModel {
   updatedAt: DateTime!
 }
 
+input ChangePasswordInput {
+  currentPassword: String!
+  newPassword: String!
+  revokeOtherSessions: Boolean
+}
+
 type Comment {
   content: String!
   createdAt: DateTime!
@@ -107,13 +113,15 @@ type LikeModel {
 }
 
 type Mutation {
+  changePassword(changePasswordInput: ChangePasswordInput!): Boolean!
   createAuthor(author: CreateAuthor!): Author!
   createCategory(category: CreateCategory!): CategoryModel!
   createPost(authorId: String!, categoryId: String!, content: JSON!, description: String!, isPublished: Boolean!, mainImage: String!, slug: String!, tags: [String!]!, title: String!): PostModel!
   createUser(createUserInput: CreateUser!): UserModel!
   deletePost(id: String!): PostModel!
   incrementViews(id: String!, identifier: String!): PostModel!
-  signUpEmail(callbackURL: String, email: String!, image: String, name: String, password: String!, rememberMe: Boolean): UserModel!
+  signInEmail(signInInput: SignInInput!): SignInEmailUser!
+  signUpEmail(signUpInput: SignUpInput!): SignUpEmailUser!
   updatePost(data: UpdatePostInput!, id: String!): PostModel!
 }
 
@@ -151,10 +159,8 @@ type Query {
   findPostById(id: String!): PostModel!
   findPostBySlug(slug: String!): PostModel!
   getAccounts: [AccountModel!]!
-  getSession: UserModel!
   postPaginated(params: PostPaginationInput!): [PostModel!]!
   priorityPosts(limit: Int! = 10): [PostModel!]!
-  profile: UserModel!
 }
 
 type SessionModel {
@@ -167,6 +173,50 @@ type SessionModel {
   user: UserModel!
   userAgent: String!
   userId: String!
+}
+
+type SignInEmailUser {
+  redirect: String!
+  token: String!
+  url: String!
+  user: SignInEmailUserResponse!
+}
+
+type SignInEmailUserResponse {
+  createdAt: DateTime!
+  email: String
+  id: String!
+  image: String
+  name: String
+  updatedAt: DateTime
+}
+
+input SignInInput {
+  callbackURL: String
+  email: String!
+  password: String!
+  rememberMe: Boolean
+}
+
+type SignUpEmailResponse {
+  email: String
+  id: String!
+  image: String
+  name: String
+}
+
+type SignUpEmailUser {
+  token: String
+  user: SignUpEmailResponse!
+}
+
+input SignUpInput {
+  callbackURL: String
+  email: String!
+  image: String
+  name: String
+  password: String!
+  rememberMe: Boolean
 }
 
 input UpdatePostInput {

@@ -143,7 +143,7 @@ export class PostResolver {
     @Args('identifier', { type: () => String }) identifier: string,
     @Context() context: { req: Request },
   ) {
-    console.log({ context });
+    // console.log({ context });
 
     const identifierResult = this.getIdentifier(context.req, identifier);
     // console.log({ identifierResult });

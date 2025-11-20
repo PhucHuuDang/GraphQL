@@ -13,50 +13,92 @@ import {
 
 import { SessionModel } from 'src/models/session.model';
 import { AccountModel } from 'src/models/account.model';
-import { Request } from 'express';
+import { Request, Response } from 'express';
+
+import { User } from 'better-auth';
+import { SignInEmailUser, SignUpEmailUser } from 'src/models/auth.model';
+import { SignInInput, SignUpInput } from 'src/dto/user.dto';
+import { ChangePasswordInput } from 'src/authors/author.dto';
 
 @AllowAnonymous()
 @Resolver(() => UserModel)
 export class UserResolver {
   constructor(private readonly userService: UserService) {}
 
-  @Query(() => UserModel, { name: 'profile' })
-  getProfile(@Session() session: UserSession) {
-    return { user: session.user };
-  }
-
-  @Query(() => UserModel)
-  getSession(@Session() session: UserSession) {
-    console.log({ session });
-    return { session: session.user };
-  }
-
-  @Mutation(() => UserModel)
-  async signUpEmail(
-    @Args('email', { type: () => String }) email: string,
-    @Args('password', { type: () => String }) password: string,
-    @Args('name', { type: () => String, nullable: true }) name?: string,
-    @Args('image', { type: () => String, nullable: true }) image?: string,
-    @Args('callbackURL', { type: () => String, nullable: true })
-    callbackURL?: string,
-    @Args('rememberMe', { type: () => Boolean, nullable: true })
-    rememberMe?: boolean,
-  ) {
-    return this.userService.signUpEmail(
-      email,
-      password,
-      name,
-      image,
-      callbackURL,
-      rememberMe,
-    );
-  }
-
   @Query(() => [AccountModel])
   async getAccounts(@Context() context: { req: Request }) {
     const test = await this.userService.getAccounts(context.req);
     console.log({ test });
     return test;
+  }
+
+  // @Query(() => UserModel, { name: 'profile' })
+  // getProfile(@Session() session: UserSession) {
+  //   return { user: session.user };
+  // }
+
+  // @Query(() => UserModel)
+  // getSession(@Session() session: UserSession) {
+  //   console.log({ session });
+  //   return { session: session.user };
+  // }
+
+  @Mutation((type) => SignUpEmailUser)
+  async signUpEmail(
+    @Args('signUpInput') signUpInput: SignUpInput,
+    @Context() ctx: { req: Request; res: Response },
+  ) {
+    const { email, password, name, image, callbackURL, rememberMe } =
+      signUpInput;
+
+    const response = await this.userService.signUpEmail(signUpInput);
+
+    console.log({ response });
+
+    ctx.res.cookie('test-token', response.token, {
+      // secure: true,
+      // httpOnly: true
+      sameSite: 'lax',
+      path: '/',
+      maxAge: 7 * 24 * 3600 * 1000,
+    });
+
+    return response;
+  }
+
+  @Mutation(() => SignInEmailUser)
+  async signInEmail(
+    @Args('signInInput') signInInput: SignInInput,
+    @Context() ctx: { req: Request; res: Response },
+  ) {
+    const response = await this.userService.signInEmail(signInInput, ctx.req);
+
+    if ('errors' in response) {
+      console.log('Auth error:', response.errors);
+      return response;
+    }
+
+    if ('token' in response) {
+      ctx.res.cookie('blog-access-token', response.token, {
+        sameSite: 'lax',
+        path: '/',
+        maxAge: 7 * 24 * 3600 * 1000,
+      });
+    }
+
+    return response;
+  }
+
+  @Mutation(() => Boolean)
+  async changePassword(
+    @Args('changePasswordInput') changePasswordInput: ChangePasswordInput,
+    @Context() ctx: { req: Request },
+  ) {
+    const response = await this.userService.changePassword(
+      changePasswordInput,
+      ctx.req,
+    );
+    return response;
   }
 
   @Mutation(() => UserModel)

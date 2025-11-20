@@ -8,6 +8,8 @@ import { Request } from 'express';
 import { fromNodeHeaders } from 'better-auth/node';
 import { UserRepository } from './user.repository';
 import { User } from 'better-auth';
+import { SignInInput, SignUpInput } from 'src/dto/user.dto';
+import { ChangePasswordInput } from 'src/authors/author.dto';
 
 @Injectable()
 export class UserService {
@@ -24,21 +26,17 @@ export class UserService {
       accounts,
     };
   }
-  async signUpEmail(
-    email: string,
-    password: string,
-    name?: string,
-    image?: string,
-    callbackURL?: string,
-    rememberMe?: boolean,
-  ): Promise<{
+  async signUpEmail(signUpInput: SignUpInput): Promise<{
     token: string | null;
     user: User | null;
   }> {
+    const { email, password, callbackURL, image, name, rememberMe } =
+      signUpInput;
+
     const body = {
-      name: name || '',
       email,
       password,
+      name: name || '',
       image: image || '',
       callbackURL: callbackURL || 'localhost:3000/blogs',
       rememberMe: rememberMe || false,
@@ -49,57 +47,50 @@ export class UserService {
     const response = await this.authService.api.signUpEmail({
       body,
     });
-
     console.log({ response });
-
-    const user = await this.userRepository.create({
-      data: {
-        id: response.user.id,
-        email: response.user.email,
-        name: response.user.name,
-        image: response.user.image,
-      },
-    });
-
-    console.log({ userResponseDb: user });
 
     console.log(response.user);
 
-    return {
-      token: response.token,
-      user: response.user,
-    };
+    return response;
   }
 
-  async signInEmail(
-    email: string,
-    password: string,
-    rememberMe?: boolean,
-    callbackURL?: string,
-  ) {
-    const { token, redirect, url, user } =
-      await this.authService.api.signInEmail({
+  async signInEmail(signInInput: SignInInput, req: Request) {
+    const { email, password, callbackURL, rememberMe } = signInInput;
+
+    try {
+      const response = await this.authService.api.signInEmail({
         body: {
           email,
           password,
-          callbackURL,
+          callbackURL: 'localhost:3000/blogs',
           rememberMe,
         },
       });
 
-    if (!token) {
+      return response;
+    } catch (err: any) {
+      console.error('ERR SIGN IN:', err);
+
       return {
-        error: 'Invalid credentials',
+        error: err?.message ?? 'Invalid credentials',
         statusCode: 401,
       };
     }
+  }
+  async changePassword(changePasswordInput: ChangePasswordInput, req: Request) {
+    const { currentPassword, newPassword, revokeOtherSessions } =
+      changePasswordInput;
 
-    return {
-      token,
-      redirect,
-      url,
-      user,
-    };
+    const response = await this.authService.api.changePassword({
+      body: {
+        currentPassword,
+        newPassword,
+        revokeOtherSessions,
+      },
+
+      headers: fromNodeHeaders(req.headers),
+    });
+    return response;
   }
 
   async signOut(req: Request) {
