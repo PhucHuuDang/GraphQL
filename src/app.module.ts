@@ -28,6 +28,8 @@ import { upstashRedis } from './lib/upstash-client';
       resolvers: {
         JSON: GraphQLJSON,
       },
+
+      context: ({ req, res }) => ({ req, res }),
       // typeDefs: [typeDefs],
     }),
 

@@ -77,3 +77,19 @@ export class CreateAuthor {
   @IsOptional()
   socialLinks?: Record<string, string>;
 }
+
+@InputType()
+export class ChangePasswordInput {
+  @Field()
+  @IsString()
+  currentPassword: string;
+
+  @Field()
+  @IsString()
+  newPassword: string;
+
+  @Field(() => Boolean, { nullable: true })
+  @IsOptional()
+  @IsBoolean()
+  revokeOtherSessions?: boolean;
+}
