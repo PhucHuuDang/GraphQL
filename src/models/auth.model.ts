@@ -20,6 +20,18 @@ export class SignInEmailUserResponse extends PickType(UserModel, [
 ] as const) {}
 
 @ObjectType()
+export class GitHubUserResponse extends SignInEmailUserResponse {
+  @Field(() => String)
+  redirect: string;
+
+  @Field(() => String)
+  token: string;
+
+  @Field(() => String)
+  url: string;
+}
+
+@ObjectType()
 export class SignUpEmailUser {
   @Field(() => String, { nullable: true })
   token?: string;

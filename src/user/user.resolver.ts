@@ -16,7 +16,11 @@ import { AccountModel } from 'src/models/account.model';
 import { Request, Response } from 'express';
 
 import { User } from 'better-auth';
-import { SignInEmailUser, SignUpEmailUser } from 'src/models/auth.model';
+import {
+  GitHubUserResponse,
+  SignInEmailUser,
+  SignUpEmailUser,
+} from 'src/models/auth.model';
 import { SignInInput, SignUpInput } from 'src/dto/user.dto';
 import { ChangePasswordInput } from 'src/authors/author.dto';
 
@@ -98,6 +102,21 @@ export class UserResolver {
       changePasswordInput,
       ctx.req,
     );
+    return response;
+  }
+
+  @Mutation(() => Boolean)
+  async signOut(@Context() ctx: { req: Request }) {
+    const response = await this.userService.signOut(ctx.req);
+    return response;
+  }
+
+  @Mutation(() => GitHubUserResponse)
+  async gitHub(@Context() ctx: { req: Request }) {
+    const response = await this.userService.gitHub(ctx.req);
+
+    console.log({ response });
+
     return response;
   }
 
