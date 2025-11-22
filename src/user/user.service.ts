@@ -100,6 +100,18 @@ export class UserService {
     return response;
   }
 
+  async gitHub(req: Request) {
+    const data = await this.authService.api.signInSocial({
+      body: {
+        provider: 'github',
+        callbackURL: 'localhost:3000/blogs',
+      },
+
+      headers: fromNodeHeaders(req.headers),
+    });
+    return data;
+  }
+
   // async signIn(
   //   email: string,
   //   password: string,
