@@ -93,6 +93,18 @@ A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date
 """
 scalar DateTime
 
+type GitHubUserResponse {
+  createdAt: DateTime!
+  email: String
+  id: String!
+  image: String
+  name: String
+  redirect: String!
+  token: String!
+  updatedAt: DateTime
+  url: String!
+}
+
 """
 The `JSON` scalar type represents JSON values as specified by [ECMA-404](http://www.ecma-international.org/publications/files/ECMA-ST/ECMA-404.pdf).
 """
@@ -119,8 +131,10 @@ type Mutation {
   createPost(authorId: String!, categoryId: String!, content: JSON!, description: String!, isPublished: Boolean!, mainImage: String!, slug: String!, tags: [String!]!, title: String!): PostModel!
   createUser(createUserInput: CreateUser!): UserModel!
   deletePost(id: String!): PostModel!
+  gitHub: GitHubUserResponse!
   incrementViews(id: String!, identifier: String!): PostModel!
   signInEmail(signInInput: SignInInput!): SignInEmailUser!
+  signOut: Boolean!
   signUpEmail(signUpInput: SignUpInput!): SignUpEmailUser!
   updatePost(data: UpdatePostInput!, id: String!): PostModel!
 }

@@ -10,6 +10,10 @@ export const auth = betterAuth({
     debugLogs: true,
   }),
 
+  experimental: {
+    joins: true,
+  },
+
   advanced: {
     cookiePrefix: 'blog',
     cookieSecure: process.env.NODE_ENV === 'production',
