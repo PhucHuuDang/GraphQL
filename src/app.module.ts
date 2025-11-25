@@ -12,9 +12,10 @@ import GraphQLJSON from 'graphql-type-json';
 import { AuthModule } from '@thallesp/nestjs-better-auth';
 import { auth } from './lib/auth';
 // import { CacheModule } from '@nestjs/cache-manager';
-// import { typeDefs } from 'typeDefs';
 import { CacheModule } from './cache/cache.module';
 import { upstashRedis } from './lib/upstash-client';
+
+import { Logger, LoggerModule } from 'nestjs-pino';
 @Module({
   imports: [
     GraphQLModule.forRoot<ApolloDriverConfig>({
@@ -50,6 +51,12 @@ import { upstashRedis } from './lib/upstash-client';
     }),
 
     CacheModule,
+
+    LoggerModule.forRoot({
+      pinoHttp: {
+        level: 'info',
+      },
+    }),
   ],
   controllers: [],
   providers: [
