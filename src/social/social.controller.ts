@@ -5,16 +5,18 @@ import { auth } from 'src/lib/auth';
 
 @Controller('social')
 export class SocialController {
+  private readonly callbackURL: string = process.env.AUTH_CALLBACK_URL!;
   constructor(private readonly authService: AuthService<typeof auth>) {}
 
   @Get('github')
   async github(@Req() req: Request, @Res() res: any) {
-    const data = await auth.api.signInSocial({
+    console.log('test call in here');
+    const data = await this.authService.api.signInSocial({
       body: {
         provider: 'github',
-        callbackURL: 'http://localhost:3001/api/auth/callback/github',
+        callbackURL: this.callbackURL,
       },
-      // headers: fromNodeHeaders(req.headers as any),
+      headers: fromNodeHeaders(req.headers as any),
     });
 
     console.log({ data });

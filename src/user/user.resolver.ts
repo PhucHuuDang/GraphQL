@@ -72,7 +72,7 @@ export class UserResolver {
     }
 
     if ('token' in response) {
-      ctx.res.cookie('blog-access-token', response.token, {
+      ctx.res.cookie('devs:access-token', response.token, {
         sameSite: 'lax',
         path: '/',
         maxAge: 7 * 24 * 3600 * 1000,

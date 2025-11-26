@@ -32,7 +32,7 @@ export const auth = betterAuth({
   },
 
   advanced: {
-    cookiePrefix: 'blog',
+    cookiePrefix: 'devs',
     // ⚠️ CRITICAL: Must be false for localhost OAuth to work
     cookieSecure: process.env.NODE_ENV === 'production',
     // Use lax for OAuth on localhost
@@ -82,13 +82,14 @@ export const auth = betterAuth({
   session: {
     cookie: {
       httpOnly: true,
-      sameSite: 'lax', // ✅ BẮT BUỘC cho OAuth localhost
-      secure: false, // ✅ localhost
+      sameSite: 'lax',
+      secure: false,
       path: '/',
     },
     cookieCache: {
       enabled: true,
-      maxAge: 5 * 60,
+      // maxAge: 5 * 60,
+      maxAge: 1 * 60,
     },
   },
 

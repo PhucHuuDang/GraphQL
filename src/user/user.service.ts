@@ -15,7 +15,7 @@ import { ChangePasswordInput } from 'src/authors/author.dto';
 export class UserService {
   // ⚠️ This is where the USER is redirected AFTER authentication completes
   // NOT the OAuth callback URL (Better Auth handles that automatically)
-  private readonly callbackURLDefault = 'http://localhost:3000/blogs';
+  private readonly callbackURL: string = 'http://localhost:3000/blogs';
   constructor(
     private readonly authService: AuthService<typeof auth>,
     private readonly userRepository: UserRepository,
@@ -41,7 +41,7 @@ export class UserService {
       password,
       name: name || '',
       image: image || '',
-      callbackURL: callbackURL || this.callbackURLDefault,
+      callbackURL: callbackURL || this.callbackURL,
       rememberMe: rememberMe || false,
     };
 
@@ -65,7 +65,7 @@ export class UserService {
         body: {
           email,
           password,
-          callbackURL: this.callbackURLDefault,
+          callbackURL: this.callbackURL,
           rememberMe,
         },
       });
@@ -109,7 +109,7 @@ export class UserService {
         body: {
           provider: 'github',
           // This is where user goes AFTER successful authentication (frontend page)
-          callbackURL: this.callbackURLDefault,
+          callbackURL: this.callbackURL,
         },
         headers: fromNodeHeaders(req.headers),
       });
