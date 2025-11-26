@@ -103,6 +103,7 @@ type GitHubUserResponse {
   token: String!
   updatedAt: DateTime
   url: String!
+  user: UserModel
 }
 
 """
@@ -128,7 +129,17 @@ type Mutation {
   changePassword(changePasswordInput: ChangePasswordInput!): Boolean!
   createAuthor(author: CreateAuthor!): Author!
   createCategory(category: CreateCategory!): CategoryModel!
-  createPost(authorId: String!, categoryId: String!, content: JSON!, description: String!, isPublished: Boolean!, mainImage: String!, slug: String!, tags: [String!]!, title: String!): PostModel!
+  createPost(
+    authorId: String!
+    categoryId: String!
+    content: JSON!
+    description: String!
+    isPublished: Boolean!
+    mainImage: String!
+    slug: String!
+    tags: [String!]!
+    title: String!
+  ): PostModel!
   createUser(createUserInput: CreateUser!): UserModel!
   deletePost(id: String!): PostModel!
   gitHub: GitHubUserResponse!

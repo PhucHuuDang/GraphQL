@@ -16,6 +16,11 @@ import { CacheModule } from './cache/cache.module';
 import { upstashRedis } from './lib/upstash-client';
 
 import { Logger, LoggerModule } from 'nestjs-pino';
+// ⚠️ REMOVED: CallbackModule interferes with Better Auth's automatic OAuth handling
+// import { CallbackModule } from './callback/callback.module';
+import { SocialController } from './social/social.controller';
+import { CallbackModule } from './callback/callback.module';
+
 @Module({
   imports: [
     GraphQLModule.forRoot<ApolloDriverConfig>({
@@ -31,7 +36,6 @@ import { Logger, LoggerModule } from 'nestjs-pino';
       },
 
       context: ({ req, res }) => ({ req, res }),
-      // typeDefs: [typeDefs],
     }),
 
     ConfigModule.forRoot({
@@ -44,6 +48,7 @@ import { Logger, LoggerModule } from 'nestjs-pino';
     UserModule,
     CategoryModule,
     PrismaModule,
+    // ⚠️ AuthModule MUST come before any custom controllers that might interfere
     AuthModule.forRoot({
       auth,
       isGlobal: true,
@@ -52,11 +57,13 @@ import { Logger, LoggerModule } from 'nestjs-pino';
 
     CacheModule,
 
-    LoggerModule.forRoot({
-      pinoHttp: {
-        level: 'info',
-      },
-    }),
+    CallbackModule,
+
+    // LoggerModule.forRoot({
+    //   pinoHttp: {
+    //     level: 'info',
+    //   },
+    // }),
   ],
   controllers: [],
   providers: [
