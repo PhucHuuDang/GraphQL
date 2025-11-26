@@ -29,6 +29,9 @@ export class GitHubUserResponse extends SignInEmailUserResponse {
 
   @Field(() => String)
   url: string;
+
+  @Field(() => UserModel, { nullable: true })
+  user?: UserModel; // ← ADD THIS
 }
 
 @ObjectType()

@@ -4,25 +4,28 @@ import { ConsoleLogger } from '@nestjs/common';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule, {
-    // logger: new ConsoleLogger({
-    //   prefix: 'GraphQL',
-    //   compact: true,
-    //   showHidden: true,
-    //   timestamp: true,
-    //   colors: true,
-    // }),
+    logger: new ConsoleLogger({
+      prefix: 'GraphQL',
+      compact: true,
+      showHidden: true,
+      timestamp: true,
+      colors: true,
+    }),
 
-    bufferLogs: true,
+    // bufferLogs: true,
 
-    bodyParser: false,
+    // ⚠️ CRITICAL: Better Auth REQUIRES body parser enabled for OAuth state management
+    // bodyParser: false,
   });
 
   app.enableCors({
-    // origin: ['https://localhost:3000'],
+    // ⚠️ CRITICAL: Specify exact origin for OAuth state cookies to work
+    // origin: process.env.FRONTEND_URL || 'http://localhost:3000',
     origin: true,
-    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Authorization'],
-    credentials: true,
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],
+    allowedHeaders: ['Content-Type', 'Authorization', 'Cookie'],
+    credentials: true, // Required for cookies
+    // exposedHeaders: ['Set-Cookie'],
   });
 
   // console.log('test', process.env.DATABASE_URL);

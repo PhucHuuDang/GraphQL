@@ -36,17 +36,6 @@ export class UserResolver {
     return test;
   }
 
-  // @Query(() => UserModel, { name: 'profile' })
-  // getProfile(@Session() session: UserSession) {
-  //   return { user: session.user };
-  // }
-
-  // @Query(() => UserModel)
-  // getSession(@Session() session: UserSession) {
-  //   console.log({ session });
-  //   return { session: session.user };
-  // }
-
   @Mutation((type) => SignUpEmailUser)
   async signUpEmail(
     @Args('signUpInput') signUpInput: SignUpInput,
@@ -114,6 +103,8 @@ export class UserResolver {
   @Mutation(() => GitHubUserResponse)
   async gitHub(@Context() ctx: { req: Request }) {
     const response = await this.userService.gitHub(ctx.req);
+
+    console.log('cookies before redirect:', ctx.req.headers.cookie);
 
     console.log({ response });
 

@@ -13,6 +13,9 @@ import { ChangePasswordInput } from 'src/authors/author.dto';
 
 @Injectable()
 export class UserService {
+  // ⚠️ This is where the USER is redirected AFTER authentication completes
+  // NOT the OAuth callback URL (Better Auth handles that automatically)
+  private readonly callbackURLDefault = 'http://localhost:3000/blogs';
   constructor(
     private readonly authService: AuthService<typeof auth>,
     private readonly userRepository: UserRepository,
@@ -38,7 +41,7 @@ export class UserService {
       password,
       name: name || '',
       image: image || '',
-      callbackURL: callbackURL || 'localhost:3000/blogs',
+      callbackURL: callbackURL || this.callbackURLDefault,
       rememberMe: rememberMe || false,
     };
 
@@ -62,7 +65,7 @@ export class UserService {
         body: {
           email,
           password,
-          callbackURL: 'localhost:3000/blogs',
+          callbackURL: this.callbackURLDefault,
           rememberMe,
         },
       });
@@ -101,27 +104,42 @@ export class UserService {
   }
 
   async gitHub(req: Request) {
-    const data = await this.authService.api.signInSocial({
-      body: {
-        provider: 'github',
-        callbackURL: 'localhost:3000/blogs',
-      },
+    try {
+      const data = await this.authService.api.signInSocial({
+        body: {
+          provider: 'github',
+          // This is where user goes AFTER successful authentication (frontend page)
+          callbackURL: this.callbackURLDefault,
+        },
+        headers: fromNodeHeaders(req.headers),
+      });
 
-      headers: fromNodeHeaders(req.headers),
-    });
-    return data;
+      console.log('GitHub sign-in initiation response:', data);
+
+      // The response should contain a redirect URL to GitHub OAuth
+      if (!data.url) {
+        throw new Error('No redirect URL received from Better Auth');
+      }
+
+      return data;
+    } catch (error: any) {
+      console.error('GitHub sign-in error:', error);
+      throw new Error(`GitHub authentication failed: ${error.message}`);
+    }
   }
 
-  // async signIn(
-  //   email: string,
-  //   password: string,
-  // ): Promise<{ session: UserSession }> {
-  //   const session = await this.authService.api.signInEmail({});
+  async githubCallback(req: any) {
+    return await this.authService.api.callbackOAuth({
+      method: 'GET',
+      headers: fromNodeHeaders(req.headers),
+      params: { id: 'github' }, // <-- đây thay thế cho provider
+      request: req,
+    });
 
-  //   return {
-  //     session,
-  //   };
-  // }
+    // console.log('result callback', result);
+
+    // return result;
+  }
   async isExists(email: string, id: number) {}
   async create(createUserInput: CreateUser): Promise<
     | UserModel
