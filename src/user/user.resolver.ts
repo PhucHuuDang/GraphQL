@@ -106,7 +106,7 @@ export class UserResolver {
 
     console.log('cookies before redirect:', ctx.req.headers.cookie);
 
-    console.log({ response });
+    // console.log({ response });
 
     return response;
   }
