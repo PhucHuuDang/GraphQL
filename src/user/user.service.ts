@@ -136,8 +136,6 @@ export class UserService {
       request: req,
     });
 
-    // console.log('result callback', result);
-
     // return result;
   }
   async isExists(email: string, id: number) {}

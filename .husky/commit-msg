@@ -14,7 +14,7 @@ if ! echo "$commit_msg" | grep -qE "^(feat|fix|docs|style|refactor|test|chore|pe
   echo "Commit message should follow this format:"
   echo "  <type>: <description>"
   echo ""
-  echo "Types: feat, fix, docs, style, refactor, test, chore, perf, ci, build, revert, important, update"
+  echo "Types: feat, fix, docs, style, refactor, test, chore, perf, ci, build, revert, important, update, remove"
   echo ""
   echo "Examples:"
   echo "  feat: add GitHub OAuth authentication"
@@ -27,8 +27,9 @@ if ! echo "$commit_msg" | grep -qE "^(feat|fix|docs|style|refactor|test|chore|pe
   echo "  build: update build script for production deployment"
   echo "  revert: revert previous commit"
   echo "  style: update commit message format"
-  echo " important: commit message should be in English"
-  echo " update: improve features or configurations"
+  echo "  important: commit message should be in English"
+  echo "  update: improve features or configurations"
+  echo "  remove: remove comments or code"
   exit 1
 fi
 
