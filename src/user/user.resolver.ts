@@ -17,6 +17,7 @@ import { Request, Response } from 'express';
 
 import { User } from 'better-auth';
 import {
+  GetSessionResponse,
   GitHubUserResponse,
   SignInEmailUser,
   SignUpEmailUser,
@@ -106,13 +107,17 @@ export class UserResolver {
 
     console.log('cookies before redirect:', ctx.req.headers.cookie);
 
-    // console.log({ response });
-
     return response;
   }
 
   @Mutation(() => UserModel)
   createUser(@Args('createUserInput') createUserInput: CreateUser) {
     return this.userService.create(createUserInput);
+  }
+
+  @Query(() => GetSessionResponse)
+  async getSession(@Context() ctx: { req: Request }) {
+    const response = await this.userService.getSession(ctx.req);
+    return response;
   }
 }

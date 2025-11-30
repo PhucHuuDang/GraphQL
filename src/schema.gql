@@ -93,6 +93,11 @@ A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date
 """
 scalar DateTime
 
+type GetSessionResponse {
+  session: SessionModel!
+  user: UserModel!
+}
+
 type GitHubUserResponse {
   createdAt: DateTime!
   email: String
@@ -129,17 +134,7 @@ type Mutation {
   changePassword(changePasswordInput: ChangePasswordInput!): Boolean!
   createAuthor(author: CreateAuthor!): Author!
   createCategory(category: CreateCategory!): CategoryModel!
-  createPost(
-    authorId: String!
-    categoryId: String!
-    content: JSON!
-    description: String!
-    isPublished: Boolean!
-    mainImage: String!
-    slug: String!
-    tags: [String!]!
-    title: String!
-  ): PostModel!
+  createPost(authorId: String!, categoryId: String!, content: JSON!, description: String!, isPublished: Boolean!, mainImage: String!, slug: String!, tags: [String!]!, title: String!): PostModel!
   createUser(createUserInput: CreateUser!): UserModel!
   deletePost(id: String!): PostModel!
   gitHub: GitHubUserResponse!
@@ -184,6 +179,7 @@ type Query {
   findPostById(id: String!): PostModel!
   findPostBySlug(slug: String!): PostModel!
   getAccounts: [AccountModel!]!
+  getSession: GetSessionResponse!
   postPaginated(params: PostPaginationInput!): [PostModel!]!
   priorityPosts(limit: Int! = 10): [PostModel!]!
 }

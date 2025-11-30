@@ -138,6 +138,14 @@ export class UserService {
 
     // return result;
   }
+
+  async getSession(req: Request) {
+    const data = await this.authService.api.getSession({
+      headers: fromNodeHeaders(req.headers),
+    });
+
+    return data;
+  }
   async isExists(email: string, id: number) {}
   async create(createUserInput: CreateUser): Promise<
     | UserModel
