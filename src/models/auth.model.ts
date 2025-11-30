@@ -1,5 +1,6 @@
 import { Field, ObjectType, PickType } from '@nestjs/graphql';
 import { UserModel } from './user.model';
+import { SessionModel } from './session.model';
 
 @ObjectType()
 export class SignUpEmailResponse extends PickType(UserModel, [
@@ -56,3 +57,34 @@ export class SignInEmailUser {
   @Field(() => SignInEmailUserResponse)
   user: SignInEmailUserResponse;
 }
+
+@ObjectType()
+export class GetSessionResponse {
+  @Field(() => SessionModel)
+  session: SessionModel;
+
+  @Field(() => UserModel)
+  user: UserModel;
+}
+
+// const data: {
+//   session: {
+//       id: string;
+//       createdAt: Date;
+//       updatedAt: Date;
+//       userId: string;
+//       expiresAt: Date;
+//       token: string;
+//       ipAddress?: string | null | undefined | undefined;
+//       userAgent?: string | null | undefined | undefined;
+//   };
+//   user: {
+//       id: string;
+//       createdAt: Date;
+//       updatedAt: Date;
+//       email: string;
+//       emailVerified: boolean;
+//       name: string;
+//       image?: string | null | undefined | undefined;
+//   };
+// } | null

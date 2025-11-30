@@ -22,7 +22,5 @@ export class SocialController {
     console.log({ data });
 
     return res.redirect(data.url); // redirect browser tới GitHub
-    // redirect browser tới GitHub
-    // return data; // redirect browser tới GitHub
   }
 }
