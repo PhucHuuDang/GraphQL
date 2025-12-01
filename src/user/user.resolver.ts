@@ -20,6 +20,7 @@ import {
   GetSessionResponse,
   GitHubUserResponse,
   SignInEmailUser,
+  SignOutResponse,
   SignUpEmailUser,
 } from 'src/models/auth.model';
 import { SignInInput, SignUpInput } from 'src/dto/user.dto';
@@ -49,13 +50,13 @@ export class UserResolver {
 
     console.log({ response });
 
-    ctx.res.cookie('test-token', response.token, {
-      // secure: true,
-      // httpOnly: true
-      sameSite: 'lax',
-      path: '/',
-      maxAge: 7 * 24 * 3600 * 1000,
-    });
+    // ctx.res.cookie('devs.session_token', response.token, {
+    //   secure: process.env.NODE_ENV === 'production',
+    //   httpOnly: true,
+    //   sameSite: 'lax',
+    //   path: '/',
+    //   maxAge: 7 * 24 * 3600 * 1000,
+    // });
 
     return response;
   }
@@ -73,10 +74,15 @@ export class UserResolver {
     }
 
     if ('token' in response) {
-      ctx.res.cookie('devs:access-token', response.token, {
+      ctx.res.cookie('devs.session_token', response.token, {
+        httpOnly: true,
         sameSite: 'lax',
         path: '/',
-        maxAge: 7 * 24 * 3600 * 1000,
+        maxAge: signInInput.rememberMe
+          ? 30 * 24 * 3600 * 1000
+          : 7 * 24 * 3600 * 1000, // 30 ngày vs 7 ngày
+
+        secure: false,
       });
     }
 
@@ -95,9 +101,14 @@ export class UserResolver {
     return response;
   }
 
-  @Mutation(() => Boolean)
-  async signOut(@Context() ctx: { req: Request }) {
+  @Mutation(() => SignOutResponse)
+  async signOut(@Context() ctx: { req: Request; res: Response }) {
     const response = await this.userService.signOut(ctx.req);
+
+    if (response.success) {
+      ctx.res.clearCookie('devs.session_token');
+    }
+
     return response;
   }
 
@@ -117,7 +128,10 @@ export class UserResolver {
 
   @Query(() => GetSessionResponse)
   async getSession(@Context() ctx: { req: Request }) {
+    console.log(ctx.req);
     const response = await this.userService.getSession(ctx.req);
+
+    console.log({ response });
     return response;
   }
 }

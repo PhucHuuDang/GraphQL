@@ -67,6 +67,12 @@ export class GetSessionResponse {
   user: UserModel;
 }
 
+@ObjectType()
+export class SignOutResponse {
+  @Field(() => Boolean)
+  success: boolean;
+}
+
 // const data: {
 //   session: {
 //       id: string;

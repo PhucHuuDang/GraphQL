@@ -16,10 +16,8 @@ import { CacheModule } from './cache/cache.module';
 import { upstashRedis } from './lib/upstash-client';
 
 import { Logger, LoggerModule } from 'nestjs-pino';
-// ⚠️ REMOVED: CallbackModule interferes with Better Auth's automatic OAuth handling
-// import { CallbackModule } from './callback/callback.module';
-import { SocialController } from './social/social.controller';
 import { CallbackModule } from './callback/callback.module';
+import { SessionModule } from './session/session.module';
 
 @Module({
   imports: [
@@ -57,7 +55,9 @@ import { CallbackModule } from './callback/callback.module';
 
     CacheModule,
 
-    CallbackModule,
+    // CallbackModule,
+
+    SessionModule,
 
     // LoggerModule.forRoot({
     //   pinoHttp: {

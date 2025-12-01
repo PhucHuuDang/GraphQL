@@ -7,18 +7,36 @@ import { AuthService } from '@thallesp/nestjs-better-auth';
 import { Request } from 'express';
 import { fromNodeHeaders } from 'better-auth/node';
 import { UserRepository } from './user.repository';
-import { User } from 'better-auth';
+import { APIError, User } from 'better-auth';
 import { SignInInput, SignUpInput } from 'src/dto/user.dto';
 import { ChangePasswordInput } from 'src/authors/author.dto';
+import { C, G } from 'node_modules/@upstash/redis/zmscore-Cq_Bzgy4';
+import { GetSessionResponse } from 'src/models/auth.model';
+import { SessionRepository } from 'src/session/session.repository';
 
 @Injectable()
 export class UserService {
   // ⚠️ This is where the USER is redirected AFTER authentication completes
   // NOT the OAuth callback URL (Better Auth handles that automatically)
   private readonly callbackURL: string = 'http://localhost:3000/blogs';
+
+  private getSessionToken(headers: Headers): string | null {
+    const cookie = headers.get('cookie');
+    if (!cookie) return null;
+
+    return (
+      cookie
+        .split(';')
+        .map((c) => c.trim())
+        .find((c) => c.startsWith('devs.session_token='))
+        ?.split('=')[1] ?? null
+    );
+  }
   constructor(
     private readonly authService: AuthService<typeof auth>,
     private readonly userRepository: UserRepository,
+
+    private readonly sessionRepository: SessionRepository,
   ) {}
 
   async getAccounts(req: Request) {
@@ -28,6 +46,18 @@ export class UserService {
     return {
       accounts,
     };
+  }
+
+  async getAccessToken(req: Request) {
+    const accessToken = await this.authService.api.getAccessToken({
+      body: {
+        providerId: 'email',
+        accountId: '123',
+        userId: '123',
+      },
+      headers: fromNodeHeaders(req.headers),
+    });
+    return accessToken;
   }
   async signUpEmail(signUpInput: SignUpInput): Promise<{
     token: string | null;
@@ -60,6 +90,7 @@ export class UserService {
   async signInEmail(signInInput: SignInInput, req: Request) {
     const { email, password, callbackURL, rememberMe } = signInInput;
 
+    console.log('signInEmail', { email, password, callbackURL, rememberMe });
     try {
       const response = await this.authService.api.signInEmail({
         body: {
@@ -68,11 +99,15 @@ export class UserService {
           callbackURL: this.callbackURL,
           rememberMe,
         },
+
+        headers: fromNodeHeaders(req.headers),
       });
 
       return response;
     } catch (err: any) {
-      console.error('ERR SIGN IN:', err);
+      if (err instanceof APIError) {
+        console.log(err.message, err.status);
+      }
 
       return {
         error: err?.message ?? 'Invalid credentials',
@@ -80,6 +115,7 @@ export class UserService {
       };
     }
   }
+
   async changePassword(changePasswordInput: ChangePasswordInput, req: Request) {
     const { currentPassword, newPassword, revokeOtherSessions } =
       changePasswordInput;
@@ -97,10 +133,32 @@ export class UserService {
   }
 
   async signOut(req: Request) {
-    const response = await this.authService.api.signOut({
-      headers: fromNodeHeaders(req.headers),
-    });
-    return response;
+    console.log(req.headers);
+
+    const headers = fromNodeHeaders(req.headers);
+    try {
+      return await this.authService.api.signOut({
+        headers: fromNodeHeaders(req.headers),
+      });
+    } catch (err: any) {
+      if (err?.body?.code === 'FAILED_TO_GET_SESSION') {
+        // ✅ Không có session cũng coi là sign out thành công
+
+        const token = this.getSessionToken(headers);
+
+        if (!token) return { success: false };
+
+        const test = await this.sessionRepository.delete({
+          where: {
+            token,
+          },
+        });
+        console.log({ test });
+
+        return { success: true };
+      }
+      throw err;
+    }
   }
 
   async gitHub(req: Request) {
@@ -135,16 +193,40 @@ export class UserService {
       params: { id: 'github' }, // <-- đây thay thế cho provider
       request: req,
     });
-
-    // return result;
   }
 
   async getSession(req: Request) {
-    const data = await this.authService.api.getSession({
-      headers: fromNodeHeaders(req.headers),
+    console.log(
+      fromNodeHeaders(req.headers)
+        .get('cookie')
+        ?.split(';')
+        .find((item) => item.includes('devs.session_token')),
+    );
+
+    const headers = fromNodeHeaders(req.headers);
+
+    const apiSession = (await this.authService.api.getSession({
+      headers,
+    })) as GetSessionResponse | null;
+
+    if (apiSession) return apiSession;
+    const token = this.getSessionToken(headers);
+
+    if (!token) return null;
+    const session = await this.sessionRepository.findOne({
+      token,
     });
 
-    return data;
+    if (!session) return null;
+
+    const user = await this.userRepository.findById(session?.userId);
+
+    if (!user) return null;
+
+    return {
+      session,
+      user,
+    };
   }
   async isExists(email: string, id: number) {}
   async create(createUserInput: CreateUser): Promise<

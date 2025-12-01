@@ -37,7 +37,17 @@ export const auth = betterAuth({
     cookieSecure: process.env.NODE_ENV === 'production',
     // Use lax for OAuth on localhost
     cookieSameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
+
+    // cookies: {
+    //   session_token: {
+    //     name: 'devs.session_token',
+    //   },
+    // },
   },
+
+  // emailVerification: {
+  //   sendOnSignUp: true,
+  // },
 
   // advanced: {
   //   defaultCookieAttributes: {
