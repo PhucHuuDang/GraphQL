@@ -8,8 +8,8 @@ export class SignUpInput {
   @Field()
   password: string;
 
-  @Field({ nullable: true })
-  name?: string;
+  @Field()
+  name: string;
 
   @Field({ nullable: true })
   image?: string;

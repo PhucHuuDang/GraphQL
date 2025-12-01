@@ -293,12 +293,12 @@ export abstract class BaseRepository<
 
   //* Delete operation
 
-  async delete(id: string): Promise<T> {
+  async delete(where: any): Promise<T> {
     try {
-      if (!id) {
-        throw new BadRequestException('Id is required for delete');
+      if (!where) {
+        throw new BadRequestException('Where is required for delete');
       }
-      return await this.model.delete({ where: { id } });
+      return await this.model.delete({ ...where });
     } catch (error) {
       PrismaErrorHelper.handle(error, 'delete');
       return null as unknown as T;

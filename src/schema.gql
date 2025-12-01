@@ -140,7 +140,7 @@ type Mutation {
   gitHub: GitHubUserResponse!
   incrementViews(id: String!, identifier: String!): PostModel!
   signInEmail(signInInput: SignInInput!): SignInEmailUser!
-  signOut: Boolean!
+  signOut: SignOutResponse!
   signUpEmail(signUpInput: SignUpInput!): SignUpEmailUser!
   updatePost(data: UpdatePostInput!, id: String!): PostModel!
 }
@@ -219,6 +219,10 @@ input SignInInput {
   rememberMe: Boolean
 }
 
+type SignOutResponse {
+  success: Boolean!
+}
+
 type SignUpEmailResponse {
   email: String
   id: String!
@@ -235,7 +239,7 @@ input SignUpInput {
   callbackURL: String
   email: String!
   image: String
-  name: String
+  name: String!
   password: String!
   rememberMe: Boolean
 }
