@@ -5,7 +5,7 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { Prisma } from 'generated/prisma';
-import { PrismaService } from 'src/prisma/prisma.service';
+import { PrismaService } from '../prisma/prisma.service';
 import { PrismaErrorHelper } from './exceptions/prisma-error.helper';
 
 export interface PaginationResult<T> {

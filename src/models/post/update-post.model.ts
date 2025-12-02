@@ -1,4 +1,3 @@
-// src/modules/posts/dto/update-post.input.ts
 import { Field, InputType } from '@nestjs/graphql';
 import {
   IsOptional,
