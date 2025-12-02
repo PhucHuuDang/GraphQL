@@ -10,7 +10,6 @@ import { UserRepository } from './user.repository';
 import { APIError, User } from 'better-auth';
 import { SignInInput, SignUpInput } from 'src/dto/user.dto';
 import { ChangePasswordInput } from 'src/authors/author.dto';
-import { C, G } from 'node_modules/@upstash/redis/zmscore-Cq_Bzgy4';
 import { GetSessionResponse } from 'src/models/auth.model';
 import { SessionRepository } from 'src/session/session.repository';
 
