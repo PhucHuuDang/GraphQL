@@ -14,8 +14,7 @@ async function bootstrap() {
 
     // bufferLogs: true,
 
-    // ⚠️ CRITICAL: Better Auth REQUIRES body parser enabled for OAuth state management
-    // bodyParser: false,
+    bodyParser: false,
   });
 
   app.enableCors({
@@ -25,10 +24,7 @@ async function bootstrap() {
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],
     allowedHeaders: ['Content-Type', 'Authorization', 'Cookie'],
     credentials: true, // Required for cookies
-    // exposedHeaders: ['Set-Cookie'],
   });
-
-  // console.log('test', process.env.DATABASE_URL);
 
   const port = process.env.PORT || 3001;
 
