@@ -1,7 +1,7 @@
 import { Controller, Get, Req, Res } from '@nestjs/common';
 import { AuthService } from '@thallesp/nestjs-better-auth';
 import { fromNodeHeaders } from 'better-auth/node';
-import { auth } from 'src/lib/auth';
+import { auth } from '../lib/auth';
 
 @Controller('social')
 export class SocialController {

@@ -1,4 +1,3 @@
-// src/common/exceptions/prisma-error.helper.ts
 import {
   BadRequestException,
   ConflictException,

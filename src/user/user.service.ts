@@ -1,17 +1,17 @@
 import { Injectable } from '@nestjs/common';
-import { UserModel } from 'src/models/user.model';
+import { UserModel } from '../models/user.model';
 import { UpdateUser } from './dto/update-user';
 import { CreateUser } from './dto/create-user';
-import { auth } from 'src/lib/auth';
+import { auth } from '../lib/auth';
 import { AuthService } from '@thallesp/nestjs-better-auth';
 import { Request } from 'express';
 import { fromNodeHeaders } from 'better-auth/node';
 import { UserRepository } from './user.repository';
 import { APIError, User } from 'better-auth';
-import { SignInInput, SignUpInput } from 'src/dto/user.dto';
-import { ChangePasswordInput } from 'src/authors/author.dto';
-import { GetSessionResponse } from 'src/models/auth.model';
-import { SessionRepository } from 'src/session/session.repository';
+import { SignInInput, SignUpInput } from '../dto/user.dto';
+import { ChangePasswordInput } from '../authors/author.dto';
+import { GetSessionResponse } from '../models/auth.model';
+import { SessionRepository } from '../session/session.repository';
 
 @Injectable()
 export class UserService {

@@ -24,7 +24,7 @@ import { SessionModule } from './session/session.module';
     GraphQLModule.forRoot<ApolloDriverConfig>({
       driver: ApolloDriver,
       // playground: false,
-      autoSchemaFile: join(process.cwd(), 'src/schema.gql'),
+      autoSchemaFile: join(process.cwd(), '../schema.gql'),
       graphiql: true,
       // autoSchemaFile: true,
       sortSchema: true,
@@ -32,6 +32,8 @@ import { SessionModule } from './session/session.module';
       resolvers: {
         JSON: GraphQLJSON,
       },
+
+      introspection: true,
 
       context: ({ req, res }) => ({ req, res }),
     }),

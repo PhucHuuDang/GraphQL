@@ -3,10 +3,10 @@ import { Args, Context, Int, Mutation, Query, Resolver } from '@nestjs/graphql';
 import { AllowAnonymous } from '@thallesp/nestjs-better-auth';
 import { Request } from 'express';
 import GraphQLJSON from 'graphql-type-json';
-import { PostModel, PostPaginationInput } from 'src/models/post/post.model';
-import { UpdatePostInput } from 'src/models/post/update-post.model';
-import { PostsService } from 'src/posts/post.service';
-import { generateSlug } from 'src/utils/slug-stringify';
+import { PostModel, PostPaginationInput } from '../models/post/post.model';
+import { UpdatePostInput } from '../models/post/update-post.model';
+import { PostsService } from '../posts/post.service';
+import { generateSlug } from '../utils/slug-stringify';
 
 @AllowAnonymous()
 @Resolver(() => PostModel)

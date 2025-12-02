@@ -1,5 +1,5 @@
 import { Module } from '@nestjs/common';
-import { PostResolver } from 'src/resolver/post.resolver';
+import { PostResolver } from '../resolver/post.resolver';
 import { PostsService } from './post.service';
 import { PostRepository } from './post.repository';
 
