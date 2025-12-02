@@ -45,18 +45,6 @@ export const auth = betterAuth({
     // },
   },
 
-  // emailVerification: {
-  //   sendOnSignUp: true,
-  // },
-
-  // advanced: {
-  //   defaultCookieAttributes: {
-  //     sameSite: 'None', // this enables cross-site cookies
-  //     secure: true, // required for SameSite=None
-  //   },
-  //   // defaultRedirect: 'http://localhost:3000/blogs',
-  // },
-
   baseURL: process.env.BACKEND_URL || 'http://localhost:3001',
   basePath: '/api/auth', // ✅ BẮT BUỘC
 
@@ -86,6 +74,15 @@ export const auth = betterAuth({
       redirectURI: 'http://localhost:3001/api/auth/callback/github',
       // Set to false to allow automatic user creation on first GitHub sign-in
       disableImplicitSignUp: false,
+    },
+  },
+  user: {
+    additionalFields: {
+      role: {
+        type: 'string',
+        input: false,
+        defaultValue: 'user',
+      },
     },
   },
 
