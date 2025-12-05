@@ -3,21 +3,21 @@ import { GraphQLModule } from '@nestjs/graphql';
 import { ApolloDriver, ApolloDriverConfig } from '@nestjs/apollo';
 import { join } from 'path';
 import { ApolloServerPluginLandingPageLocalDefault } from '@apollo/server/plugin/landingPage/default';
-import { AuthorsModule } from './authors/authors.module';
+import { AuthorsModule } from './authors/authors.module.js';
 import { ConfigModule } from '@nestjs/config';
-import { UserModule } from './user/user.module';
-import { CategoryModule } from './category/category.module';
-import { PrismaModule } from './prisma/prisma.module';
+import { UserModule } from './user/user.module.js';
+import { CategoryModule } from './category/category.module.js';
+import { PrismaModule } from './prisma/prisma.module.js';
 import GraphQLJSON from 'graphql-type-json';
 import { AuthModule } from '@thallesp/nestjs-better-auth';
-import { auth } from './lib/auth';
+import { auth } from './lib/auth.js';
 // import { CacheModule } from '@nestjs/cache-manager';
-import { CacheModule } from './cache/cache.module';
-import { upstashRedis } from './lib/upstash-client';
+import { CacheModule } from './cache/cache.module.js';
+import { upstashRedis } from './lib/upstash-client.js';
 
 import { Logger, LoggerModule } from 'nestjs-pino';
-import { CallbackModule } from './callback/callback.module';
-import { SessionModule } from './session/session.module';
+import { CallbackModule } from './callback/callback.module.js';
+import { SessionModule } from './session/session.module.js';
 
 @Module({
   imports: [

@@ -1,5 +1,5 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { SessionResolver } from './session.resolver';
+import { SessionResolver } from './session.resolver.js';
 
 describe('SessionResolver', () => {
   let resolver: SessionResolver;

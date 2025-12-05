@@ -19,7 +19,7 @@ export class PostResolver {
       req.socket.remoteAddress ||
       req.ip;
 
-    return ((ip as string) || 'unknown').replace('::ffff:', ''); // Remove IPv6 prefix
+    return ((ip as string) || 'unknown').replace('::ffff:', '');
   }
   private getIdentifier(req: Request, identifier: string) {
     if (identifier) {
@@ -97,8 +97,6 @@ export class PostResolver {
     @Args('slug', { type: () => String }) slug: string,
     @Args('isPublished', { type: () => Boolean }) isPublished: boolean,
   ) {
-    // console.log({ slug });
-
     return this.postsService.createPost({
       title,
       description,
@@ -143,10 +141,7 @@ export class PostResolver {
     @Args('identifier', { type: () => String }) identifier: string,
     @Context() context: { req: Request },
   ) {
-    // console.log({ context });
-
     const identifierResult = this.getIdentifier(context.req, identifier);
-    // console.log({ identifierResult });
     return await this.postsService.incrementViews(id, identifierResult);
   }
 }

@@ -9,11 +9,11 @@ import {
 } from '@nestjs/graphql';
 import { Prisma } from '@prisma/client/extension';
 import { AllowAnonymous } from '@thallesp/nestjs-better-auth';
-import { CreateAuthor } from '../authors/author.dto';
-import { Author } from '../models/author.model';
-import { PostModel } from '../models/post/post.model';
-import { PostsService } from '../posts/post.service';
-import { AuthorsService } from '../services/authors.service';
+import { CreateAuthor } from '../authors/author.dto.js';
+import { Author } from '../models/author.model.js';
+import { PostModel } from '../models/post/post.model.js';
+import { PostsService } from '../posts/post.service.js';
+import { AuthorsService } from '../services/authors.service.js';
 
 @Resolver(() => Author)
 export class AuthorsResolver {

@@ -17,7 +17,7 @@ export class PostModel {
   @Field({ nullable: true })
   description?: string;
 
-  @Field(() => GraphQLJSON) // hoặc (() => GraphQLJSON) nếu content là JSON
+  @Field(() => GraphQLJSON)
   content: JSON;
 
   @Field(() => Int)

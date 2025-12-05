@@ -1,8 +1,8 @@
 import { Args, Mutation, Resolver } from '@nestjs/graphql';
-import { CategoryService } from './category.service';
-import { CategoryModel } from '../models/category.model';
+import { CategoryService } from './category.service.js';
+import { CategoryModel } from '../models/category.model.js';
 import { AllowAnonymous } from '@thallesp/nestjs-better-auth';
-import { CreateCategory } from './category.dto';
+import { CreateCategory } from './category.dto.js';
 
 @Resolver()
 export class CategoryResolver {

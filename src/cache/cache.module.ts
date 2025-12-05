@@ -1,7 +1,7 @@
 import { Global, Module } from '@nestjs/common';
 import { CacheModule as NestCacheModule } from '@nestjs/cache-manager';
-import { upstashRedis } from '../lib/upstash-client';
-import { UPSTASH_REDIS } from '../lib/key';
+import { upstashRedis } from '../lib/upstash-client.js';
+import { UPSTASH_REDIS } from '../lib/key.js';
 
 @Global()
 @Module({

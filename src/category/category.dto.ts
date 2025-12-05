@@ -3,7 +3,7 @@ import { IsString } from 'class-validator';
 
 @InputType()
 export class CreateCategory {
-  @Field()
+  @Field(() => String)
   @IsString()
   name: string;
 }
