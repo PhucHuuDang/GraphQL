@@ -23,7 +23,6 @@ import { SessionModule } from './session/session.module';
   imports: [
     GraphQLModule.forRoot<ApolloDriverConfig>({
       driver: ApolloDriver,
-      // playground: false,
       autoSchemaFile: join(process.cwd(), '../schema.gql'),
       graphiql: true,
       // autoSchemaFile: true,
