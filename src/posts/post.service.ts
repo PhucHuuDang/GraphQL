@@ -1,10 +1,13 @@
 import { Inject, Injectable } from '@nestjs/common';
-import { PrismaService } from '../prisma/prisma.service';
-import { PostRepository } from './post.repository';
-import { Post, Prisma } from 'generated/prisma/client';
-import { PaginationParams, PaginationResult } from '../common/base.repository';
+import { PrismaService } from '../prisma/prisma.service.js';
+import { PostRepository } from './post.repository.js';
+import { Post, Prisma } from '../../generated/prisma/client.js';
+import {
+  PaginationParams,
+  PaginationResult,
+} from '../common/base.repository.js';
 import { Redis } from '@upstash/redis';
-import { UPSTASH_REDIS } from '../lib/key';
+import { UPSTASH_REDIS } from '../lib/key.js';
 
 @Injectable()
 export class PostsService {

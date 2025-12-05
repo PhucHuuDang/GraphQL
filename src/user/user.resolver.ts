@@ -1,12 +1,12 @@
 import { Resolver, Query, Mutation, Args, Int, Context } from '@nestjs/graphql';
-import { UserService } from './user.service';
-import { UserModel } from '../models/user.model';
-import { CreateUser } from './dto/create-user';
-import { UpdateUser } from './dto/update-user';
+import { UserService } from './user.service.js';
+import { UserModel } from '../models/user.model.js';
+import { CreateUser } from './dto/create-user.js';
+import { UpdateUser } from './dto/update-user.js';
 
 import { AllowAnonymous } from '@thallesp/nestjs-better-auth';
 
-import { AccountModel } from '../models/account.model';
+import { AccountModel } from '../models/account.model.js';
 import { Request, Response } from 'express';
 
 import { User } from 'better-auth';
@@ -16,9 +16,9 @@ import {
   SignInEmailUser,
   SignOutResponse,
   SignUpEmailUser,
-} from '../models/auth.model';
-import { SignInInput, SignUpInput } from '../dto/user.dto';
-import { ChangePasswordInput } from '../authors/author.dto';
+} from '../models/auth.model.js';
+import { SignInInput, SignUpInput } from '../dto/user.dto.js';
+import { ChangePasswordInput } from '../authors/author.dto.js';
 
 @AllowAnonymous()
 @Resolver(() => UserModel)

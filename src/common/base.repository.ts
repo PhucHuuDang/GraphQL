@@ -4,9 +4,9 @@ import {
   Logger,
   NotFoundException,
 } from '@nestjs/common';
-import { Prisma } from 'generated/prisma';
-import { PrismaService } from '../prisma/prisma.service';
-import { PrismaErrorHelper } from './exceptions/prisma-error.helper';
+import { Prisma } from '../../generated/prisma/index.js';
+import { PrismaService } from '../prisma/prisma.service.js';
+import { PrismaErrorHelper } from './exceptions/prisma-error.helper.js';
 
 export interface PaginationResult<T> {
   data: T[];
