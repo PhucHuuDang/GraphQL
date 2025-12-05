@@ -1,11 +1,11 @@
 import { Module } from '@nestjs/common';
-import { UserService } from './user.service.js';
-import { UserResolver } from './user.resolver.js';
-import { PrismaModule } from '../prisma/prisma.module.js';
-import { UserRepository } from './user.repository.js';
-import { SessionModule } from '../session/session.module.js';
-import { SessionRepository } from '../session/session.repository.js';
-// import { GithubAuthController } from './github-auth.controller.js';
+import { UserService } from './user.service';
+import { UserResolver } from './user.resolver';
+import { PrismaModule } from '../prisma/prisma.module';
+import { UserRepository } from './user.repository';
+import { SessionModule } from '../session/session.module';
+import { SessionRepository } from '../session/session.repository';
+// import { GithubAuthController } from './github-auth.controller';
 
 @Module({
   providers: [UserResolver, UserService, UserRepository],

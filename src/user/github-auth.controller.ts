@@ -1,6 +1,6 @@
 import { Controller, Get, Query, Req, Res } from '@nestjs/common';
 import { Response } from 'express';
-import { UserService } from './user.service.js';
+import { UserService } from './user.service';
 
 @Controller('api/auth/callback')
 export class GithubAuthController {

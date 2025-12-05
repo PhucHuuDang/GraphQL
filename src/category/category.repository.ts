@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
-import { Category, Prisma } from '../../generated/prisma/index.js';
-import { BaseRepository } from '../common/base.repository.js';
-import { PrismaService } from '../prisma/prisma.service.js';
+import { Category, Prisma } from '../../generated/prisma/index';
+import { BaseRepository } from '../common/base.repository';
+import { PrismaService } from '../prisma/prisma.service';
 
 @Injectable()
 export class CategoryRepository extends BaseRepository<
