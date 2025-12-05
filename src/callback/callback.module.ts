@@ -1,9 +1,9 @@
 import { Module } from '@nestjs/common';
-import { SessionModule } from '../session/session.module.js';
-import { SocialController } from '../social/social.controller.js';
-import { GithubAuthController } from '../user/github-auth.controller.js';
-import { UserModule } from '../user/user.module.js';
-import { UserService } from '../user/user.service.js';
+import { SessionModule } from '../session/session.module';
+import { SocialController } from '../social/social.controller';
+import { GithubAuthController } from '../user/github-auth.controller';
+import { UserModule } from '../user/user.module';
+import { UserService } from '../user/user.service';
 
 @Module({
   controllers: [GithubAuthController, SocialController],

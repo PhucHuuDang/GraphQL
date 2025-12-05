@@ -1,6 +1,6 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
-import { Author, Prisma } from '../../generated/prisma/index.js';
-import { AuthorRepository } from '../authors/author.repository.js';
+import { Author, Prisma } from '../../generated/prisma/index';
+import { AuthorRepository } from '../authors/author.repository';
 
 @Injectable()
 export class AuthorsService {
