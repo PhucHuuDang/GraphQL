@@ -102,8 +102,11 @@ export class UserService {
         headers: fromNodeHeaders(req.headers),
       });
 
+      console.log({ response });
+
       return response;
     } catch (err: any) {
+      console.log({ err });
       if (err instanceof APIError) {
         console.log(err.message, err.status);
       }

@@ -31,20 +31,6 @@ export const auth = betterAuth({
     joins: true,
   },
 
-  advanced: {
-    cookiePrefix: 'devs',
-    // ⚠️ CRITICAL: Must be false for localhost OAuth to work
-    cookieSecure: process.env.NODE_ENV === 'production',
-    // Use lax for OAuth on localhost
-    cookieSameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
-
-    // cookies: {
-    //   session_token: {
-    //     name: 'devs.session_token',
-    //   },
-    // },
-  },
-
   baseURL: process.env.BACKEND_URL || 'http://localhost:3001',
   basePath: '/api/auth', // ✅ BẮT BUỘC
 
@@ -86,22 +72,33 @@ export const auth = betterAuth({
     },
   },
 
-  session: {
-    cookie: {
-      httpOnly: true,
-      sameSite: 'lax',
-      secure: false,
-      path: '/',
-    },
-    cookieCache: {
-      enabled: true,
-      // maxAge: 5 * 60,
-      maxAge: 1 * 60,
+  // session: {
+  //   cookie: {
+  //     httpOnly: true,
+  //     sameSite: 'lax',
+  //     secure: false,
+  //     path: '/',
+  //   },
+  //   cookieCache: {
+  //     enabled: true,
+  //     // maxAge: 5 * 60,
+  //     maxAge: 1 * 60,
+  //   },
+  // },
+
+  advanced: {
+    cookies: {
+      state: {
+        attributes: {
+          sameSite: 'lax',
+          secure: true,
+        },
+      },
     },
   },
 
   // ⚠️ CRITICAL: trustedOrigins is required for OAuth state validation
-  // trustedOrigins: [process.env.FRONTEND_URL || 'http://localhost:3000'],
+  trustedOrigins: [process.env.FRONTEND_URL || 'http://localhost:3000'],
 
   plugins: [skipStateMismatch()],
 });

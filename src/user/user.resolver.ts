@@ -70,6 +70,7 @@ export class UserResolver {
     if ('token' in response) {
       ctx.res.cookie('devs.session_token', response.token, {
         httpOnly: true,
+        // sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
         sameSite: 'lax',
         path: '/',
         maxAge: signInInput.rememberMe

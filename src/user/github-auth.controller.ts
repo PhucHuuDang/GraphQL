@@ -1,5 +1,4 @@
 import { Controller, Get, Query, Req, Res } from '@nestjs/common';
-import { Response } from 'express';
 import { UserService } from './user.service';
 
 @Controller('api/auth/callback')
@@ -8,6 +7,8 @@ export class GithubAuthController {
 
   @Get('github')
   async githubCallback(@Req() req: any) {
+    const { code, state } = req.query;
+
     return this.userService.githubCallback(req);
   }
 }

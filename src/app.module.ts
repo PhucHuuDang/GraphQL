@@ -2,7 +2,6 @@ import { Module } from '@nestjs/common';
 import { GraphQLModule } from '@nestjs/graphql';
 import { ApolloDriver, ApolloDriverConfig } from '@nestjs/apollo';
 import { join } from 'path';
-import { ApolloServerPluginLandingPageLocalDefault } from '@apollo/server/plugin/landingPage/default';
 import { AuthorsModule } from './authors/authors.module';
 import { ConfigModule } from '@nestjs/config';
 import { UserModule } from './user/user.module';
@@ -56,7 +55,7 @@ import { SessionModule } from './session/session.module';
 
     CacheModule,
 
-    // CallbackModule,
+    CallbackModule,
 
     SessionModule,
 
