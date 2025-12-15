@@ -1,6 +1,25 @@
 import { Field, ObjectType, PickType } from '@nestjs/graphql';
 import { UserModel } from './user.model';
 import { SessionModel } from './session.model';
+import GraphQLJSON from 'graphql-type-json';
+
+@ObjectType()
+export class OAuth2UserInfoModel {
+  @Field(() => String)
+  id: string;
+
+  @Field(() => String, { nullable: true })
+  name?: string;
+
+  @Field(() => String, { nullable: true })
+  email?: string;
+
+  @Field(() => String, { nullable: true })
+  image?: string;
+
+  @Field(() => Boolean, { nullable: true })
+  emailVerified?: boolean;
+}
 
 @ObjectType()
 export class SignUpEmailResponse extends PickType(UserModel, [
@@ -71,4 +90,13 @@ export class GetSessionResponse {
 export class SignOutResponse {
   @Field(() => Boolean)
   success: boolean;
+}
+
+@ObjectType()
+export class GetProfileResponse {
+  @Field(() => OAuth2UserInfoModel)
+  user: OAuth2UserInfoModel;
+
+  @Field(() => GraphQLJSON, { nullable: true })
+  data?: Record<string, any>;
 }

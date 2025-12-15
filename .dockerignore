@@ -1,0 +1,49 @@
+# Dependencies
+node_modules
+
+# Build output
+dist
+
+# Git
+.git
+.gitignore
+
+# IDE
+.idea
+.vscode
+*.swp
+*.swo
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Environment files (keep secrets out of image)
+.env
+.env.*
+!.env.example
+
+# Logs
+*.log
+npm-debug.log*
+pnpm-debug.log*
+
+# Test files
+test
+*.spec.ts
+*.test.ts
+coverage
+
+# Generated Prisma (will be regenerated in container)
+generated
+
+# Docker files
+Dockerfile
+.dockerignore
+docker-compose*.yml
+
+# Misc
+README.md
+*.md
+.eslintcache
+

@@ -11,6 +11,7 @@ import { Request, Response } from 'express';
 
 import { User } from 'better-auth';
 import {
+  GetProfileResponse,
   GetSessionResponse,
   GitHubUserResponse,
   SignInEmailUser,
@@ -30,6 +31,13 @@ export class UserResolver {
     const test = await this.userService.getAccounts(context.req);
     console.log({ test });
     return test;
+  }
+
+  @Query(() => GetProfileResponse)
+  async getProfile(@Context() context: { req: Request }) {
+    const response = await this.userService.getProfile(context.req);
+    console.log({ response });
+    return response;
   }
 
   @Mutation((type) => SignUpEmailUser)

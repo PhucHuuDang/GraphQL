@@ -10,7 +10,7 @@ import { UserRepository } from './user.repository';
 import { APIError, User } from 'better-auth';
 import { SignInInput, SignUpInput } from '../dto/user.dto';
 import { ChangePasswordInput } from '../authors/author.dto';
-import { GetSessionResponse } from '../models/auth.model';
+import { GetProfileResponse, GetSessionResponse } from '../models/auth.model';
 import { SessionRepository } from '../session/session.repository';
 
 @Injectable()
@@ -228,6 +228,26 @@ export class UserService {
     return {
       session,
       user,
+    };
+  }
+
+  async getProfile(req: Request): Promise<GetProfileResponse | null> {
+    const response = await this.authService.api.accountInfo({
+      headers: fromNodeHeaders(req.headers),
+    });
+
+    if (!response) return null;
+    console.log({ response });
+
+    return {
+      user: {
+        id: response.user.id.toString(),
+        name: response.user.name,
+        email: response.user.email ?? undefined,
+        image: response.user.image,
+        emailVerified: response.user.emailVerified,
+      },
+      data: response.data,
     };
   }
   async isExists(email: string, id: number) {}

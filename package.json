@@ -51,6 +51,7 @@
     "cache-manager-redis-store": "^3.0.1",
     "cache-manager-redis-yet": "^5.1.5",
     "class-validator": "^0.14.2",
+    "dotenv": "^17.2.3",
     "graphql": "^16.11.0",
     "graphql-type-json": "^0.3.2",
     "nestjs-pino": "^4.5.0",
