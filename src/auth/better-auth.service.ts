@@ -1,4 +1,4 @@
-import { Inject, Injectable } from '@nestjs/common';
+import { Inject, Injectable, OnModuleInit } from '@nestjs/common';
 import { AUTH_INSTANCE_KEY } from 'src/constants/auth.constants';
 import type { Auth } from 'better-auth';
 
