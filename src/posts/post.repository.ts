@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { Post, Prisma } from '../../generated/prisma/client';
+import { Post, Prisma } from '../../generated/prisma';
 import { BaseRepository, PaginationParams } from '../common/base.repository';
 import { PrismaService } from '../prisma/prisma.service';
 
