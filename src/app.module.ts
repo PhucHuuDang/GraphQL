@@ -8,7 +8,6 @@ import { UserModule } from './user/user.module';
 import { CategoryModule } from './category/category.module';
 import { PrismaModule } from './prisma/prisma.module';
 import GraphQLJSON from 'graphql-type-json';
-import { AuthModule } from '@thallesp/nestjs-better-auth';
 import { auth } from './lib/auth';
 // import { CacheModule } from '@nestjs/cache-manager';
 import { CacheModule } from './cache/cache.module';
@@ -47,11 +46,6 @@ import { SessionModule } from './session/session.module';
     CategoryModule,
     PrismaModule,
     // ⚠️ AuthModule MUST come before any custom controllers that might interfere
-    AuthModule.forRoot({
-      auth,
-      isGlobal: true,
-      disableGlobalAuthGuard: true,
-    }),
 
     CacheModule,
 

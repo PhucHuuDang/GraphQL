@@ -1,6 +1,5 @@
 import { BadRequestException } from '@nestjs/common';
 import { Args, Context, Int, Mutation, Query, Resolver } from '@nestjs/graphql';
-import { AllowAnonymous } from '@thallesp/nestjs-better-auth';
 import { Request } from 'express';
 import GraphQLJSON from 'graphql-type-json';
 import { PostModel, PostPaginationInput } from './post.model';
@@ -9,7 +8,6 @@ import { PostsService } from '../../posts/post.service';
 import { generateSlug } from '../../utils/slug-stringify';
 import type { GraphQLContext } from '../../common/graphql.context';
 
-@AllowAnonymous()
 @Resolver(() => PostModel)
 export class PostResolver {
   private getClientIp({ req }: GraphQLContext) {
