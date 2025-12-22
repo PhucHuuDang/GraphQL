@@ -1,7 +1,7 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { PostRepository } from './post.repository';
-import { Post, Prisma } from '../../generated/prisma/client';
+import { Post, Prisma } from '../../generated/prisma';
 import { PaginationParams, PaginationResult } from '../common/base.repository';
 import { Redis } from '@upstash/redis';
 import { UPSTASH_REDIS } from '../lib/key';
