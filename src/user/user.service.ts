@@ -3,7 +3,6 @@ import { UserModel } from '../models/user.model';
 import { UpdateUser } from './dto/update-user';
 import { CreateUser } from './dto/create-user';
 import { auth } from '../lib/auth';
-import { AuthService } from '@thallesp/nestjs-better-auth';
 import { Request } from 'express';
 import { fromNodeHeaders } from 'better-auth/node';
 import { UserRepository } from './user.repository';
@@ -13,6 +12,7 @@ import { ChangePasswordInput } from '../authors/author.dto';
 import { GetProfileResponse, GetSessionResponse } from '../models/auth.model';
 import { SessionRepository } from '../session/session.repository';
 import { GraphQLContext } from 'src/common/graphql.context';
+import { BetterAuthService } from 'src/auth/better-auth.service';
 
 @Injectable()
 export class UserService {
@@ -33,7 +33,7 @@ export class UserService {
     );
   }
   constructor(
-    private readonly authService: AuthService<typeof auth>,
+    private readonly authService: BetterAuthService,
     private readonly userRepository: UserRepository,
 
     private readonly sessionRepository: SessionRepository,

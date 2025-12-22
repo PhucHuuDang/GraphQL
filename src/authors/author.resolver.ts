@@ -8,7 +8,6 @@ import {
   Mutation,
 } from '@nestjs/graphql';
 import { Prisma } from '@prisma/client/extension';
-import { AllowAnonymous } from '@thallesp/nestjs-better-auth';
 import { CreateAuthor } from './author.dto';
 import { Author } from '../models/author.model';
 import { PostModel } from '../models/post/post.model';
@@ -31,7 +30,6 @@ export class AuthorsResolver {
     return this.postsService.findAll();
   }
 
-  @AllowAnonymous()
   @Mutation(() => Author)
   createAuthor(@Args('author') author: CreateAuthor) {
     return this.authorsService.createAuthor(author);

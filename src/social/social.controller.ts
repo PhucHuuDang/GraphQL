@@ -1,11 +1,11 @@
 import { Controller, Get, Req, Res } from '@nestjs/common';
-import { AuthService } from '@thallesp/nestjs-better-auth';
 import { fromNodeHeaders } from 'better-auth/node';
 import { auth } from '../lib/auth';
+import { BetterAuthService } from 'src/auth/better-auth.service';
 
 @Controller('social')
 export class SocialController {
-  constructor(private readonly authService: AuthService<typeof auth>) {}
+  constructor(private readonly authService: BetterAuthService) {}
 
   @Get('github')
   async github(@Req() req: Request, @Res() res: any) {

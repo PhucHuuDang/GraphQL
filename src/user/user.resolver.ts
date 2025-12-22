@@ -4,8 +4,6 @@ import { UserModel } from '../models/user.model';
 import { CreateUser } from './dto/create-user';
 import { UpdateUser } from './dto/update-user';
 
-import { AllowAnonymous } from '@thallesp/nestjs-better-auth';
-
 import { AccountModel } from '../models/account.model';
 
 import { User } from 'better-auth';
@@ -21,7 +19,6 @@ import { SignInInput, SignUpInput } from '../dto/user.dto';
 import { ChangePasswordInput } from '../authors/author.dto';
 import type { GraphQLContext } from '../common/graphql.context';
 
-@AllowAnonymous()
 @Resolver(() => UserModel)
 export class UserResolver {
   constructor(private readonly userService: UserService) {}
