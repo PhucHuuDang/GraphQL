@@ -16,6 +16,9 @@ import { upstashRedis } from './lib/upstash-client';
 import { Logger, LoggerModule } from 'nestjs-pino';
 import { CallbackModule } from './callback/callback.module';
 import { SessionModule } from './session/session.module';
+import { BetterAuthService } from './auth/better-auth.service';
+import { AUTH_INSTANCE_KEY } from './constants/auth.constants';
+import { AuthModule } from './auth/auth.module';
 
 @Module({
   imports: [
@@ -52,6 +55,8 @@ import { SessionModule } from './session/session.module';
     CallbackModule,
 
     SessionModule,
+
+    AuthModule,
 
     // LoggerModule.forRoot({
     //   pinoHttp: {

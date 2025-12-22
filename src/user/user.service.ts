@@ -3,7 +3,6 @@ import { UserModel } from '../models/user.model';
 import { UpdateUser } from './dto/update-user';
 import { CreateUser } from './dto/create-user';
 import { auth } from '../lib/auth';
-import { Request } from 'express';
 import { fromNodeHeaders } from 'better-auth/node';
 import { UserRepository } from './user.repository';
 import { APIError, User } from 'better-auth';

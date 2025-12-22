@@ -7,6 +7,7 @@ import { BetterAuthService } from 'src/auth/better-auth.service';
 @Module({
   // ⚠️ Removed GithubAuthController - Better Auth handles /api/auth/callback/* automatically
   controllers: [SocialController],
-  imports: [UserModule, SessionModule, BetterAuthService],
+  imports: [UserModule, SessionModule],
+  providers: [BetterAuthService],
 })
 export class CallbackModule {}

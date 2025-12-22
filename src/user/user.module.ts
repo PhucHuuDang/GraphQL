@@ -5,11 +5,12 @@ import { PrismaModule } from '../prisma/prisma.module';
 import { UserRepository } from './user.repository';
 import { SessionModule } from '../session/session.module';
 import { SessionRepository } from '../session/session.repository';
+import { BetterAuthService } from 'src/auth/better-auth.service';
 // import { GithubAuthController } from './github-auth.controller';
 
 @Module({
-  providers: [UserResolver, UserService, UserRepository],
-  exports: [UserResolver, UserService, UserRepository],
+  providers: [UserResolver, UserService, UserRepository, BetterAuthService],
+  exports: [UserResolver, UserService, UserRepository, BetterAuthService],
   imports: [PrismaModule, SessionModule],
   // If you need custom callback logic, register the controller here:
   // controllers: [GithubAuthController],
