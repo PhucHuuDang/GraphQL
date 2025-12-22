@@ -9,7 +9,7 @@ import {
 } from '@nestjs/graphql';
 import { Prisma } from '@prisma/client/extension';
 import { AllowAnonymous } from '@thallesp/nestjs-better-auth';
-import { CreateAuthor } from '../authors/author.dto';
+import { CreateAuthor } from './author.dto';
 import { Author } from '../models/author.model';
 import { PostModel } from '../models/post/post.model';
 import { PostsService } from '../posts/post.service';

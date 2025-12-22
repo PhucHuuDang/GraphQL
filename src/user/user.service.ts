@@ -12,6 +12,7 @@ import { SignInInput, SignUpInput } from '../dto/user.dto';
 import { ChangePasswordInput } from '../authors/author.dto';
 import { GetProfileResponse, GetSessionResponse } from '../models/auth.model';
 import { SessionRepository } from '../session/session.repository';
+import { GraphQLContext } from 'src/common/graphql.context';
 
 @Injectable()
 export class UserService {
@@ -38,7 +39,7 @@ export class UserService {
     private readonly sessionRepository: SessionRepository,
   ) {}
 
-  async getAccounts(req: Request) {
+  async getAccounts({ req }: GraphQLContext) {
     const accounts = await this.authService.api.listUserAccounts({
       headers: fromNodeHeaders(req.headers),
     });
@@ -47,7 +48,7 @@ export class UserService {
     };
   }
 
-  async getAccessToken(req: Request) {
+  async getAccessToken({ req }: GraphQLContext) {
     const accessToken = await this.authService.api.getAccessToken({
       body: {
         providerId: 'email',
@@ -86,7 +87,7 @@ export class UserService {
     return response;
   }
 
-  async signInEmail(signInInput: SignInInput, req: Request) {
+  async signInEmail(signInInput: SignInInput, { req }: GraphQLContext) {
     const { email, password, callbackURL, rememberMe } = signInInput;
 
     console.log('signInEmail', { email, password, callbackURL, rememberMe });
@@ -118,15 +119,17 @@ export class UserService {
     }
   }
 
-  async changePassword(changePasswordInput: ChangePasswordInput, req: Request) {
-    const { currentPassword, newPassword, revokeOtherSessions } =
-      changePasswordInput;
+  async changePassword(
+    changePasswordInput: ChangePasswordInput,
+    { req }: GraphQLContext,
+  ) {
+    const { currentPassword, newPassword } = changePasswordInput;
 
     const response = await this.authService.api.changePassword({
       body: {
         currentPassword,
         newPassword,
-        revokeOtherSessions,
+        revokeOtherSessions: true,
       },
 
       headers: fromNodeHeaders(req.headers),
@@ -134,7 +137,7 @@ export class UserService {
     return response;
   }
 
-  async signOut(req: Request) {
+  async signOut({ req }: GraphQLContext) {
     console.log(req.headers);
 
     const headers = fromNodeHeaders(req.headers);
@@ -163,7 +166,7 @@ export class UserService {
     }
   }
 
-  async gitHub(req: Request) {
+  async gitHub({ req }: GraphQLContext) {
     try {
       const data = await this.authService.api.signInSocial({
         body: {
@@ -188,16 +191,16 @@ export class UserService {
     }
   }
 
-  async githubCallback(req: any) {
+  async githubCallback({ req }: GraphQLContext) {
     return await this.authService.api.callbackOAuth({
       method: 'GET',
       headers: fromNodeHeaders(req.headers),
       params: { id: 'github' }, // <-- đây thay thế cho provider
-      request: req,
+      request: req as any,
     });
   }
 
-  async getSession(req: Request) {
+  async getSession({ req }: GraphQLContext) {
     console.log(
       fromNodeHeaders(req.headers)
         .get('cookie')
@@ -231,7 +234,9 @@ export class UserService {
     };
   }
 
-  async getProfile(req: Request): Promise<GetProfileResponse | null> {
+  async getProfile({
+    req,
+  }: GraphQLContext): Promise<GetProfileResponse | null> {
     const response = await this.authService.api.accountInfo({
       headers: fromNodeHeaders(req.headers),
     });

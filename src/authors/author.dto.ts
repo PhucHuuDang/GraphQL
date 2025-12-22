@@ -88,8 +88,8 @@ export class ChangePasswordInput {
   @IsString()
   newPassword: string;
 
-  @Field(() => Boolean, { nullable: true })
-  @IsOptional()
-  @IsBoolean()
-  revokeOtherSessions?: boolean;
+  // @Field(() => Boolean, { nullable: true })
+  // @IsOptional()
+  // @IsBoolean()
+  // revokeOtherSessions?: boolean;
 }
