@@ -1,6 +1,6 @@
 import { Module } from '@nestjs/common';
 import { PostModule } from '../posts/post.module';
-import { AuthorsResolver } from '../resolver/author.resolver';
+import { AuthorsResolver } from './author.resolver';
 import { AuthorsService } from '../services/authors.service';
 import { AuthorRepository } from './author.repository';
 import { PrismaModule } from '../prisma/prisma.module';

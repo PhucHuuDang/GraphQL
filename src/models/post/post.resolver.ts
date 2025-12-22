@@ -3,31 +3,32 @@ import { Args, Context, Int, Mutation, Query, Resolver } from '@nestjs/graphql';
 import { AllowAnonymous } from '@thallesp/nestjs-better-auth';
 import { Request } from 'express';
 import GraphQLJSON from 'graphql-type-json';
-import { PostModel, PostPaginationInput } from '../models/post/post.model';
-import { UpdatePostInput } from '../models/post/update-post.model';
-import { PostsService } from '../posts/post.service';
-import { generateSlug } from '../utils/slug-stringify';
+import { PostModel, PostPaginationInput } from './post.model';
+import { UpdatePostInput } from './update-post.model';
+import { PostsService } from '../../posts/post.service';
+import { generateSlug } from '../../utils/slug-stringify';
+import type { GraphQLContext } from '../../common/graphql.context';
 
 @AllowAnonymous()
 @Resolver(() => PostModel)
 export class PostResolver {
-  private getClientIp(req: Request) {
+  private getClientIp({ req }: GraphQLContext) {
     const ip =
       req.headers['cf-connecting-ip'] ||
       req.headers['x-real-ip'] ||
       req.headers['x-forwarded-for']?.toString().split(',')[0] ||
       req.socket.remoteAddress ||
-      req.ip;
+      (req.ip as string | undefined);
 
     return ((ip as string) || 'unknown').replace('::ffff:', '');
   }
-  private getIdentifier(req: Request, identifier: string) {
+  private getIdentifier({ req, res }: GraphQLContext, identifier: string) {
     if (identifier) {
       return `guest:${identifier}`;
     }
 
     if (req) {
-      const ip = this.getClientIp(req);
+      const ip = this.getClientIp({ req, res });
       return `ip:${ip}`;
     }
 
@@ -139,9 +140,9 @@ export class PostResolver {
   async incrementViews(
     @Args('id', { type: () => String }) id: string,
     @Args('identifier', { type: () => String }) identifier: string,
-    @Context() context: { req: Request },
+    @Context() context: GraphQLContext,
   ) {
-    const identifierResult = this.getIdentifier(context.req, identifier);
+    const identifierResult = this.getIdentifier(context, identifier);
     return await this.postsService.incrementViews(id, identifierResult);
   }
 }

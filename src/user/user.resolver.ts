@@ -7,7 +7,6 @@ import { UpdateUser } from './dto/update-user';
 import { AllowAnonymous } from '@thallesp/nestjs-better-auth';
 
 import { AccountModel } from '../models/account.model';
-import { Request, Response } from 'express';
 
 import { User } from 'better-auth';
 import {
@@ -20,6 +19,7 @@ import {
 } from '../models/auth.model';
 import { SignInInput, SignUpInput } from '../dto/user.dto';
 import { ChangePasswordInput } from '../authors/author.dto';
+import type { GraphQLContext } from '../common/graphql.context';
 
 @AllowAnonymous()
 @Resolver(() => UserModel)
@@ -27,15 +27,15 @@ export class UserResolver {
   constructor(private readonly userService: UserService) {}
 
   @Query(() => [AccountModel])
-  async getAccounts(@Context() context: { req: Request }) {
-    const test = await this.userService.getAccounts(context.req);
+  async getAccounts(@Context() context: GraphQLContext) {
+    const test = await this.userService.getAccounts(context);
     console.log({ test });
     return test;
   }
 
   @Query(() => GetProfileResponse)
-  async getProfile(@Context() context: { req: Request }) {
-    const response = await this.userService.getProfile(context.req);
+  async getProfile(@Context() context: GraphQLContext) {
+    const response = await this.userService.getProfile(context);
     console.log({ response });
     return response;
   }
@@ -43,7 +43,7 @@ export class UserResolver {
   @Mutation((type) => SignUpEmailUser)
   async signUpEmail(
     @Args('signUpInput') signUpInput: SignUpInput,
-    @Context() ctx: { req: Request; res: Response },
+    @Context() ctx: GraphQLContext,
   ) {
     const { email, password, name, image, callbackURL, rememberMe } =
       signUpInput;
@@ -66,9 +66,9 @@ export class UserResolver {
   @Mutation(() => SignInEmailUser)
   async signInEmail(
     @Args('signInInput') signInInput: SignInInput,
-    @Context() ctx: { req: Request; res: Response },
+    @Context() ctx: GraphQLContext,
   ) {
-    const response = await this.userService.signInEmail(signInInput, ctx.req);
+    const response = await this.userService.signInEmail(signInInput, ctx);
 
     if ('errors' in response) {
       console.log('Auth error:', response.errors);
@@ -76,17 +76,20 @@ export class UserResolver {
     }
 
     if ('token' in response) {
-      ctx.res.cookie('devs.session_token', response.token, {
-        httpOnly: true,
-        // sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
-        sameSite: 'lax',
-        path: '/',
-        maxAge: signInInput.rememberMe
-          ? 30 * 24 * 3600 * 1000
-          : 7 * 24 * 3600 * 1000, // 30 ngày vs 7 ngày
+      ctx.res
+        .switchToHttp()
+        .getResponse()
+        .cookie('devs.session_token', response.token, {
+          httpOnly: true,
+          // sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
+          sameSite: 'lax',
+          path: '/',
+          maxAge: signInInput.rememberMe
+            ? 30 * 24 * 3600 * 1000
+            : 7 * 24 * 3600 * 1000, // 30 ngày vs 7 ngày
 
-        secure: false,
-      });
+          secure: false,
+        });
     }
 
     return response;
@@ -95,29 +98,38 @@ export class UserResolver {
   @Mutation(() => Boolean)
   async changePassword(
     @Args('changePasswordInput') changePasswordInput: ChangePasswordInput,
-    @Context() ctx: { req: Request },
+    @Context() ctx: GraphQLContext,
   ) {
+    const { currentPassword, newPassword } = changePasswordInput;
+
+    if (!currentPassword || !newPassword) {
+      return {
+        error: 'Current password and new password are required',
+        statusCode: 400,
+      };
+    }
+
     const response = await this.userService.changePassword(
       changePasswordInput,
-      ctx.req,
+      ctx,
     );
     return response;
   }
 
   @Mutation(() => SignOutResponse)
-  async signOut(@Context() ctx: { req: Request; res: Response }) {
-    const response = await this.userService.signOut(ctx.req);
+  async signOut(@Context() ctx: GraphQLContext) {
+    const response = await this.userService.signOut(ctx);
 
     if (response.success) {
-      ctx.res.clearCookie('devs.session_token');
+      ctx.res.switchToHttp().getResponse().clearCookie('devs.session_token');
     }
 
     return response;
   }
 
   @Mutation(() => GitHubUserResponse)
-  async gitHub(@Context() ctx: { req: Request }) {
-    const response = await this.userService.gitHub(ctx.req);
+  async gitHub(@Context() ctx: GraphQLContext) {
+    const response = await this.userService.gitHub(ctx);
 
     console.log('cookies before redirect:', ctx.req.headers.cookie);
 
@@ -130,9 +142,9 @@ export class UserResolver {
   }
 
   @Query(() => GetSessionResponse)
-  async getSession(@Context() ctx: { req: Request }) {
+  async getSession(@Context() ctx: GraphQLContext) {
     console.log(ctx.req);
-    const response = await this.userService.getSession(ctx.req);
+    const response = await this.userService.getSession(ctx);
 
     console.log({ response });
     return response;
