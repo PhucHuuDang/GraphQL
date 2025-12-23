@@ -47,7 +47,7 @@
     "@prisma/extension-accelerate": "^2.0.2",
     "@upstash/redis": "^1.35.6",
     "bcrypt": "^6.0.0",
-    "better-auth": "1.4",
+    "better-auth": "1.2.10",
     "cache-manager": "^7.2.4",
     "cache-manager-redis-store": "^3.0.1",
     "cache-manager-redis-yet": "^5.1.5",
