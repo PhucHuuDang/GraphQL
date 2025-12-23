@@ -36,6 +36,15 @@ export class PostResolver {
 
   @Query(() => [PostModel], { name: 'allPosts' })
   async findAllPosts() {
+    const test = await this.postsService.findAll({
+      include: {
+        author: true,
+        category: true,
+      },
+    });
+
+    console.log({ test });
+
     return await this.postsService.findAll({
       include: {
         author: true,

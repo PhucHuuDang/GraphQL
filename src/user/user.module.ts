@@ -5,7 +5,7 @@ import { PrismaModule } from '../prisma/prisma.module';
 import { UserRepository } from './user.repository';
 import { SessionModule } from '../session/session.module';
 import { SessionRepository } from '../session/session.repository';
-import { BetterAuthService } from 'src/auth/better-auth.service';
+import { BetterAuthService } from '../auth/better-auth.service';
 // import { GithubAuthController } from './github-auth.controller';
 
 @Module({

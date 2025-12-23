@@ -10,8 +10,8 @@ import { SignInInput, SignUpInput } from '../dto/user.dto';
 import { ChangePasswordInput } from '../authors/author.dto';
 import { GetProfileResponse, GetSessionResponse } from '../models/auth.model';
 import { SessionRepository } from '../session/session.repository';
-import { GraphQLContext } from 'src/common/graphql.context';
-import { BetterAuthService } from 'src/auth/better-auth.service';
+import { GraphQLContext } from '../common/graphql.context';
+import { BetterAuthService } from '../auth/better-auth.service';
 
 @Injectable()
 export class UserService {
