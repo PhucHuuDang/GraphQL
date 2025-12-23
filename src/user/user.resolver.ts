@@ -6,7 +6,8 @@ import { UpdateUser } from './dto/update-user';
 
 import { AccountModel } from '../models/account.model';
 
-import { User } from 'better-auth';
+// import { User } from 'better-auth';
+
 import {
   GetProfileResponse,
   GetSessionResponse,
@@ -19,6 +20,8 @@ import { SignInInput, SignUpInput } from '../dto/user.dto';
 import { ChangePasswordInput } from '../authors/author.dto';
 import type { GraphQLContext } from '../common/graphql.context';
 
+// eslint-disable-next-line @typescript-eslint/no-require-imports
+const { User } = require('better-auth');
 @Resolver(() => UserModel)
 export class UserResolver {
   constructor(private readonly userService: UserService) {}
