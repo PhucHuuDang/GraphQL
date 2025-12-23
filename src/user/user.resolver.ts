@@ -45,6 +45,8 @@ export class UserResolver {
     const { email, password, name, image, callbackURL, rememberMe } =
       signUpInput;
 
+    console.log({ signUpInput });
+
     const response = await this.userService.signUpEmail(signUpInput);
 
     console.log({ response });
@@ -73,20 +75,12 @@ export class UserResolver {
     }
 
     if ('token' in response) {
-      ctx.res
-        .switchToHttp()
-        .getResponse()
-        .cookie('devs.session_token', response.token, {
-          httpOnly: true,
-          // sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
-          sameSite: 'lax',
-          path: '/',
-          maxAge: signInInput.rememberMe
-            ? 30 * 24 * 3600 * 1000
-            : 7 * 24 * 3600 * 1000, // 30 ngày vs 7 ngày
-
-          secure: false,
-        });
+      ctx.res.setHeader(
+        'Set-Cookie',
+        `devs.session_token=${response.token}; HttpOnly; Path=/; Max-Age=${
+          signInInput.rememberMe ? 30 * 24 * 3600 : 7 * 24 * 3600
+        }; SameSite=Lax`,
+      );
     }
 
     return response;
@@ -118,7 +112,10 @@ export class UserResolver {
     const response = await this.userService.signOut(ctx);
 
     if (response.success) {
-      ctx.res.switchToHttp().getResponse().clearCookie('devs.session_token');
+      ctx.res.setHeader(
+        'Set-Cookie',
+        'devs.session_token=; HttpOnly; Path=/; Max-Age=0; SameSite=Lax',
+      );
     }
 
     return response;

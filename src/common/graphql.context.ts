@@ -8,5 +8,5 @@ export interface GraphQLContext {
     ip: string;
   };
 
-  res: GqlExecutionContext;
+  res: ServerResponse;
 }

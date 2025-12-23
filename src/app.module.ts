@@ -16,8 +16,6 @@ import { upstashRedis } from './lib/upstash-client';
 import { Logger, LoggerModule } from 'nestjs-pino';
 import { CallbackModule } from './callback/callback.module';
 import { SessionModule } from './session/session.module';
-import { BetterAuthService } from './auth/better-auth.service';
-import { AUTH_INSTANCE_KEY } from './constants/auth.constants';
 import { AuthModule } from './auth/auth.module';
 
 @Module({
@@ -49,7 +47,6 @@ import { AuthModule } from './auth/auth.module';
     CategoryModule,
     PrismaModule,
     // ⚠️ AuthModule MUST come before any custom controllers that might interfere
-
     CacheModule,
 
     CallbackModule,

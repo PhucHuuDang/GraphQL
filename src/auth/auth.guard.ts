@@ -13,7 +13,7 @@ import {
   AUTH_INSTANCE_KEY,
   IS_OPTIONAL_AUTH,
   IS_PUBLIC_AUTH,
-} from 'src/constants/auth.constants';
+} from '../constants/auth.constants';
 import type { Auth } from 'better-auth';
 import { fromNodeHeaders } from 'better-auth/node';
 import { FastifyRequest } from 'fastify';

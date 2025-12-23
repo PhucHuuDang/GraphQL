@@ -14,16 +14,16 @@ async function bootstrap() {
 
     // bufferLogs: true,
 
-    bodyParser: false,
+    // bodyParser: false,
   });
 
-  app.useGlobalPipes(
-    new ValidationPipe({
-      whitelist: true,
-      forbidNonWhitelisted: true,
-      transform: true,
-    }),
-  );
+  // app.useGlobalPipes(
+  //   new ValidationPipe({
+  //     whitelist: true,
+  //     forbidNonWhitelisted: true,
+  //     transform: true,
+  //   }),
+  // );
 
   app.enableCors({
     // ⚠️ CRITICAL: Specify exact origin for OAuth state cookies to work

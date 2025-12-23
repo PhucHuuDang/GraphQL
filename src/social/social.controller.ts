@@ -1,7 +1,7 @@
 import { Controller, Get, Req, Res } from '@nestjs/common';
 import { fromNodeHeaders } from 'better-auth/node';
 import { auth } from '../lib/auth';
-import { BetterAuthService } from 'src/auth/better-auth.service';
+import { BetterAuthService } from '../auth/better-auth.service';
 
 @Controller('social')
 export class SocialController {
