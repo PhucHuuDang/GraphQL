@@ -14,9 +14,13 @@ import {
   IS_OPTIONAL_AUTH,
   IS_PUBLIC_AUTH,
 } from '../constants/auth.constants';
-import type { Auth } from 'better-auth';
-import { fromNodeHeaders } from 'better-auth/node';
+// import type { Auth } from 'better-auth';
 import { FastifyRequest } from 'fastify';
+
+// eslint-disable-next-line @typescript-eslint/no-require-imports
+const { Auth } = require('better-auth');
+// eslint-disable-next-line @typescript-eslint/no-require-imports
+const { fromNodeHeaders } = require('better-auth/node');
 
 @Injectable()
 export class AuthGuard implements CanActivate {
@@ -24,7 +28,7 @@ export class AuthGuard implements CanActivate {
     @Inject(Reflector)
     private readonly reflector: Reflector,
     @Inject(AUTH_INSTANCE_KEY)
-    private readonly auth: Auth,
+    private readonly auth: typeof Auth,
   ) {}
 
   /**
