@@ -20,7 +20,6 @@ export class PrismaErrorHelper {
 
     console.error({ contextMsg });
 
-    // ✅ Xử lý lỗi Prisma Known Request Error
     if (error instanceof PrismaClientKnownRequestError) {
       switch (error.code) {
         // --- Connection errors ---
