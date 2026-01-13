@@ -16,11 +16,10 @@ import {
 } from '../../constants/auth.constants';
 // import type { Auth } from 'better-auth';
 import { FastifyRequest } from 'fastify';
+import { fromNodeHeaders } from '../../lib/transform-node-headers';
 
 // eslint-disable-next-line @typescript-eslint/no-require-imports
 const { Auth } = require('better-auth');
-// eslint-disable-next-line @typescript-eslint/no-require-imports
-const { fromNodeHeaders } = require('better-auth/node');
 
 @Injectable()
 export class AuthGuard implements CanActivate {

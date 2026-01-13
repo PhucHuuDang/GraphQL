@@ -1,4 +1,4 @@
-import { Field, InputType } from '@nestjs/graphql';
+import { ArgsType, Field, InputType } from '@nestjs/graphql';
 
 @InputType()
 export class SignUpInput {
@@ -34,4 +34,22 @@ export class SignInInput {
 
   @Field(() => String, { nullable: true })
   callbackURL?: string;
+}
+
+@ArgsType()
+export class UpdateProfileArgs {
+  @Field({ nullable: true })
+  email: string;
+
+  @Field({ nullable: true })
+  name: string;
+
+  @Field({ nullable: true })
+  image: string;
+
+  @Field({ nullable: true })
+  password: string;
+
+  @Field(() => Boolean, { nullable: true })
+  rememberMe?: boolean;
 }

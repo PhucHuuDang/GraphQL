@@ -4,7 +4,7 @@ import { ApolloDriver, ApolloDriverConfig } from '@nestjs/apollo';
 import { join } from 'path';
 import { AuthorsModule } from './modules/authors/authors.module';
 import { ConfigModule } from '@nestjs/config';
-import { UserModule } from './user/user.module';
+import { UserModule } from './modules/user/user.module';
 import { CategoryModule } from './modules/category/category.module';
 import { PrismaModule } from './prisma/prisma.module';
 import GraphQLJSON from 'graphql-type-json';

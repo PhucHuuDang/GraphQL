@@ -1,24 +1,18 @@
 import { Injectable } from '@nestjs/common';
-import { UserModel } from '../models/user.model';
-import { UpdateUser } from './dto/update-user';
+import { UserModel } from '../../models/user.model';
 import { CreateUser } from './dto/create-user';
-import { auth } from '../lib/auth';
-import { fromNodeHeaders } from 'better-auth/node';
+import { auth } from '../../lib/auth';
 import { UserRepository } from './user.repository';
-// import { APIError, User } from 'better-auth';
 
-import { SignInInput, SignUpInput } from '../dto/user.dto';
-import { ChangePasswordInput } from '../modules/authors/author.dto';
-import {
-  GetProfileResponse,
-  GetSessionResponse,
-} from '../modules/auth/auth.model';
-import { SessionRepository } from '../modules/session/session.repository';
-import { GraphQLContext } from '../interface/graphql.context';
-import { BetterAuthService } from '../modules/auth/better-auth.service';
-// eslint-disable-next-line @typescript-eslint/no-require-imports
-const { APIError, User } = require('better-auth');
-import type { User as UserType } from 'better-auth';
+import { SignInInput, SignUpInput, UpdateProfileArgs } from './dto/user.dto';
+import { GetProfileResponse, GetSessionResponse } from './auth.model';
+import { SessionRepository } from '../../modules/session/session.repository';
+import { GraphQLContext } from '../../interface/graphql.context';
+import { BetterAuthService } from '../../modules/auth/better-auth.service';
+
+import { APIError, type User as UserType } from 'better-auth';
+import { ChangePasswordInput } from '../authors/author.dto';
+import { fromNodeHeaders } from '../../lib/transform-node-headers';
 
 @Injectable()
 export class UserService {
@@ -125,24 +119,6 @@ export class UserService {
     }
   }
 
-  async changePassword(
-    changePasswordInput: ChangePasswordInput,
-    { req }: GraphQLContext,
-  ) {
-    const { currentPassword, newPassword } = changePasswordInput;
-
-    const response = await this.authService.api.changePassword({
-      body: {
-        currentPassword,
-        newPassword,
-        revokeOtherSessions: true,
-      },
-
-      headers: fromNodeHeaders(req.headers),
-    });
-    return response;
-  }
-
   async signOut({ req }: GraphQLContext) {
     console.log(req.headers);
 
@@ -170,6 +146,46 @@ export class UserService {
       }
       throw err;
     }
+  }
+
+  async updateProfile(
+    updateProfileArgs: UpdateProfileArgs,
+    { req }: GraphQLContext,
+  ) {
+    const { email, name, image, password, rememberMe } = updateProfileArgs;
+
+    const headers = fromNodeHeaders(req.headers);
+
+    const response = await this.authService.api.updateProfile({
+      body: {
+        email,
+        name,
+        image,
+        password,
+        rememberMe,
+      },
+      headers,
+    });
+
+    return response;
+  }
+
+  async changePassword(
+    changePasswordInput: ChangePasswordInput,
+    { req }: GraphQLContext,
+  ) {
+    const { currentPassword, newPassword } = changePasswordInput;
+
+    const response = await this.authService.api.changePassword({
+      body: {
+        currentPassword,
+        newPassword,
+        revokeOtherSessions: true,
+      },
+
+      headers: fromNodeHeaders(req.headers),
+    });
+    return response;
   }
 
   async gitHub({ req }: GraphQLContext) {

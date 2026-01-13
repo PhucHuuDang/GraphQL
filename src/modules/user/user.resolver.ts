@@ -1,10 +1,9 @@
 import { Resolver, Query, Mutation, Args, Int, Context } from '@nestjs/graphql';
 import { UserService } from './user.service';
-import { UserModel } from '../models/user.model';
+import { UserModel } from '../../models/user.model';
 import { CreateUser } from './dto/create-user';
-import { UpdateUser } from './dto/update-user';
 
-import { AccountModel } from '../models/account.model';
+import { AccountModel } from '../../models/account.model';
 
 // import { User } from 'better-auth';
 
@@ -15,10 +14,10 @@ import {
   SignInEmailUser,
   SignOutResponse,
   SignUpEmailUser,
-} from '../modules/auth/auth.model';
-import { SignInInput, SignUpInput } from '../dto/user.dto';
-import type { GraphQLContext } from '../interface/graphql.context';
-import { ChangePasswordInput } from '../modules/authors/author.dto';
+} from './auth.model';
+import { SignInInput, SignUpInput, UpdateProfileArgs } from './dto/user.dto';
+import type { GraphQLContext } from '../../interface/graphql.context';
+import { ChangePasswordInput } from '../authors/author.dto';
 
 // eslint-disable-next-line @typescript-eslint/no-require-imports
 const { User } = require('better-auth');
@@ -40,6 +39,15 @@ export class UserResolver {
     return response;
   }
 
+  @Mutation(() => UserModel)
+  async updateProfile(
+    @Args() args: UpdateProfileArgs,
+    @Context() context: GraphQLContext,
+  ) {
+    const response = await this.userService.updateProfile(args, context);
+    return response;
+  }
+
   @Mutation((type) => SignUpEmailUser)
   async signUpEmail(
     @Args('signUpInput') signUpInput: SignUpInput,
@@ -52,15 +60,7 @@ export class UserResolver {
 
     const response = await this.userService.signUpEmail(signUpInput);
 
-    console.log({ response });
-
-    // ctx.res.cookie('devs.session_token', response.token, {
-    //   secure: process.env.NODE_ENV === 'production',
-    //   httpOnly: true,
-    //   sameSite: 'lax',
-    //   path: '/',
-    //   maxAge: 7 * 24 * 3600 * 1000,
-    // });
+    // console.log({ response });
 
     return response;
   }

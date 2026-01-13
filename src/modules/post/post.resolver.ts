@@ -1,4 +1,4 @@
-import { BadRequestException } from '@nestjs/common';
+import { BadRequestException, UnauthorizedException } from '@nestjs/common';
 import { Args, Context, Int, Mutation, Query, Resolver } from '@nestjs/graphql';
 import { Request } from 'express';
 import GraphQLJSON from 'graphql-type-json';
@@ -123,6 +123,8 @@ export class PostResolver {
     @Args('id', { type: () => String }) id: string,
     @Args('data', { type: () => UpdatePostInput })
     data: UpdatePostInput,
+
+    @Context() context: GraphQLContext,
   ) {
     if (!id) {
       throw new BadRequestException('Id is required for update');
@@ -131,11 +133,15 @@ export class PostResolver {
       throw new BadRequestException('Data is required for update');
     }
 
-    return await this.postsService.updatePost(id, {
-      ...data,
-      ...(data.slug ? { slug: generateSlug(data.slug) } : {}),
-      updatedAt: new Date(),
-    });
+    return await this.postsService.updatePost(
+      id,
+      {
+        ...data,
+        ...(data.slug ? { slug: generateSlug(data.slug) } : {}),
+        updatedAt: new Date(),
+      },
+      context,
+    );
   }
 
   @Mutation(() => PostModel)

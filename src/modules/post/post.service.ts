@@ -1,4 +1,9 @@
-import { Inject, Injectable } from '@nestjs/common';
+import {
+  ForbiddenException,
+  Inject,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service';
 import { PostRepository } from './post.repository';
 import { Post, Prisma } from '../../../generated/prisma';
@@ -8,6 +13,7 @@ import {
 } from '../../common/base.repository';
 import { Redis } from '@upstash/redis';
 import { UPSTASH_REDIS } from '../../lib/key';
+import { GraphQLContext } from '../../interface/graphql.context';
 
 @Injectable()
 export class PostsService {
@@ -64,7 +70,25 @@ export class PostsService {
     return await this.postRepository.create(data);
   }
 
-  async updatePost(id: string, data: Prisma.PostUpdateInput): Promise<Post> {
+  async updatePost(
+    id: string,
+    data: Prisma.PostUpdateInput,
+    context: GraphQLContext,
+  ): Promise<Post> {
+    const post = await this.postRepository.findById(id);
+
+    const { req } = context;
+
+    const headers = req.headers['authorization']?.split(' ')[1];
+
+    if (!post) {
+      throw new NotFoundException('Post not found');
+    }
+
+    // if (post.authorId !== context.req.user.id) {
+    //   throw new ForbiddenException('You are not the owner of this post');
+    // }
+
     return await this.postRepository.update(id, data);
   }
 
