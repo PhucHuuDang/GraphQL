@@ -16,6 +16,7 @@ export class PostResolver {
       req.headers['x-real-ip'] ||
       req.headers['x-forwarded-for']?.toString().split(',')[0] ||
       req.socket.remoteAddress ||
+      // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
       (req.ip as string | undefined);
 
     return ((ip as string) || 'unknown').replace('::ffff:', '');

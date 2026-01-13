@@ -1,16 +1,17 @@
-import { Inject, Injectable, OnModuleInit } from '@nestjs/common';
+// src/modules/auth/better-auth.service.ts
+import { Injectable, Inject, OnModuleInit } from '@nestjs/common';
 import { AUTH_INSTANCE_KEY } from '../../constants/auth.constants';
-// import type { Auth } from 'better-auth';
-
-//@ts-nocheck
-// eslint-disable-next-line @typescript-eslint/no-require-imports
-const { Auth } = require('better-auth');
 
 @Injectable()
 export class BetterAuthService {
-  constructor(@Inject(AUTH_INSTANCE_KEY) private readonly auth: typeof Auth) {}
+  constructor(@Inject(AUTH_INSTANCE_KEY) private readonly authInstance: any) {}
 
   get api() {
-    return this.auth.api;
+    return this.authInstance.api;
+  }
+
+  // Nếu cần truy cập toàn bộ auth instance
+  get auth() {
+    return this.authInstance;
   }
 }

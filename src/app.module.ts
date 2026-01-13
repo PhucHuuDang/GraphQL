@@ -8,7 +8,6 @@ import { UserModule } from './modules/user/user.module';
 import { CategoryModule } from './modules/category/category.module';
 import { PrismaModule } from './prisma/prisma.module';
 import GraphQLJSON from 'graphql-type-json';
-import { auth } from './lib/auth';
 // import { CacheModule } from '@nestjs/cache-manager';
 import { CacheModule } from './cache/cache.module';
 import { upstashRedis } from './lib/upstash-client';

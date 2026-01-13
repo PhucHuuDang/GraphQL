@@ -1,9 +1,10 @@
+// src/lib/auth.ts
 import { betterAuth, BetterAuthPlugin } from 'better-auth';
-
 import { prismaAdapter } from 'better-auth/adapters/prisma';
 import bcrypt from 'bcrypt';
-// import { PrismaClient } from 'generated/prisma';
-import prisma from './prisma';
+// import prisma from './prisma';
+
+import { prismaForAuth } from './prisma';
 
 export function skipStateMismatch(): BetterAuthPlugin {
   return {
@@ -13,7 +14,7 @@ export function skipStateMismatch(): BetterAuthPlugin {
         context: {
           ...ctx,
           oauthConfig: {
-            skipStateCookieCheck: true,
+            skipStateMismatch: true,
             ...ctx?.oauthConfig,
           },
         },
@@ -22,8 +23,9 @@ export function skipStateMismatch(): BetterAuthPlugin {
   };
 }
 
+// ✅ Export auth instance
 export const auth = betterAuth({
-  database: prismaAdapter(prisma, {
+  database: prismaAdapter(prismaForAuth, {
     provider: 'postgresql',
     debugLogs: true,
   }),
@@ -33,7 +35,7 @@ export const auth = betterAuth({
   },
 
   baseURL: process.env.BACKEND_URL || 'http://localhost:3001',
-  basePath: '/api/auth', // ✅ BẮT BUỘC
+  basePath: '/api/auth',
 
   emailAndPassword: {
     enabled: true,
@@ -49,20 +51,17 @@ export const auth = betterAuth({
         return await bcrypt.compare(data.password, data.hash);
       },
     },
-    // requireEmailVerification: true,
-    // sendVerificationEmail: true,
   },
 
   socialProviders: {
     github: {
-      clientId: process.env.GITHUB_CLIENT_ID!,
-      clientSecret: process.env.GITHUB_CLIENT_SECRET!,
-
+      clientId: process.env.GITHUB_CLIENT_ID,
+      clientSecret: process.env.GITHUB_CLIENT_SECRET,
       redirectURI: 'http://localhost:3001/api/auth/callback/github',
-      // Set to false to allow automatic user creation on first GitHub sign-in
       disableImplicitSignUp: false,
     },
   },
+
   user: {
     additionalFields: {
       role: {
@@ -73,32 +72,17 @@ export const auth = betterAuth({
     },
   },
 
-  // session: {
-  //   cookie: {
-  //     httpOnly: true,
-  //     sameSite: 'lax',
-  //     secure: false,
-  //     path: '/',
-  //   },
-  //   cookieCache: {
-  //     enabled: true,
-  //     // maxAge: 5 * 60,
-  //     maxAge: 1 * 60,
-  //   },
-  // },
-
   advanced: {
     cookies: {
       state: {
         attributes: {
           sameSite: 'lax',
-          secure: true,
+          secure: process.env.NODE_ENV === 'production', // ✅ Chỉ secure khi production
         },
       },
     },
   },
 
-  // ⚠️ CRITICAL: trustedOrigins is required for OAuth state validation
   trustedOrigins: [process.env.FRONTEND_URL || 'http://localhost:3000'],
 
   plugins: [skipStateMismatch()],

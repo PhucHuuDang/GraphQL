@@ -9,6 +9,7 @@ export class AuthorsService {
   async createAuthor(author: Prisma.AuthorCreateInput): Promise<Author> {
     const existingAuthor = await this.authorRepository.findUnique({
       ...{
+        // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
         email: author.email as string,
       },
     });
