@@ -26,13 +26,11 @@ async function bootstrap() {
   // );
 
   app.enableCors({
-    // ⚠️ CRITICAL: Specify exact origin for OAuth state cookies to work
-    // origin: process.env.FRONTEND_URL || 'http://localhost:3000',
-    origin: true,
-    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],
-    allowedHeaders: ['Content-Type', 'Authorization', 'Cookie'],
-    credentials: true, // Required for cookies
+    origin: true, // Cho phép tất cả origins hoặc chỉ định cụ thể
+    credentials: true,
   });
+
+  await app.init();
 
   const port = process.env.PORT || 3001;
 

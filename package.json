@@ -24,7 +24,8 @@
     "format:check": "prettier --check \"src/**/*.ts\" \"test/**/*.ts\"",
     "prisma:generate": "prisma generate",
     "build": "nest build",
-    "build:vercel": "prisma generate && nest build"
+    "build:vercel": "prisma generate && nest build",
+    "vercel-build": "nest build"
   },
   "lint-staged": {
     "*.ts": [
