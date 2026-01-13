@@ -108,7 +108,7 @@ export abstract class BaseRepository<
 
   async findFirst(
     where: Prisma.SelectSubset<any, any>,
-    params?: Prisma.SelectSubset<any, any>,
+    params: Prisma.SelectSubset<any, any> = {},
   ): Promise<T | null> {
     try {
       return await this.model.findFirst({ where, ...(params as any) });

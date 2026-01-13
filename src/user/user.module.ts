@@ -3,9 +3,9 @@ import { UserService } from './user.service';
 import { UserResolver } from './user.resolver';
 import { PrismaModule } from '../prisma/prisma.module';
 import { UserRepository } from './user.repository';
-import { SessionModule } from '../session/session.module';
-import { SessionRepository } from '../session/session.repository';
-import { BetterAuthService } from '../auth/better-auth.service';
+import { SessionModule } from '../modules/session/session.module';
+import { SessionRepository } from '../modules/session/session.repository';
+import { BetterAuthService } from '../modules/auth/better-auth.service';
 // import { GithubAuthController } from './github-auth.controller';
 
 @Module({

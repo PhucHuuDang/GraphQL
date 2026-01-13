@@ -8,11 +8,14 @@ import { UserRepository } from './user.repository';
 // import { APIError, User } from 'better-auth';
 
 import { SignInInput, SignUpInput } from '../dto/user.dto';
-import { ChangePasswordInput } from '../authors/author.dto';
-import { GetProfileResponse, GetSessionResponse } from '../models/auth.model';
-import { SessionRepository } from '../session/session.repository';
-import { GraphQLContext } from '../common/graphql.context';
-import { BetterAuthService } from '../auth/better-auth.service';
+import { ChangePasswordInput } from '../modules/authors/author.dto';
+import {
+  GetProfileResponse,
+  GetSessionResponse,
+} from '../modules/auth/auth.model';
+import { SessionRepository } from '../modules/session/session.repository';
+import { GraphQLContext } from '../interface/graphql.context';
+import { BetterAuthService } from '../modules/auth/better-auth.service';
 // eslint-disable-next-line @typescript-eslint/no-require-imports
 const { APIError, User } = require('better-auth');
 import type { User as UserType } from 'better-auth';

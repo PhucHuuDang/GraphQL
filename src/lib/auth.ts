@@ -1,13 +1,11 @@
-// import { betterAuth, BetterAuthPlugin } from 'better-auth';
+import { betterAuth, BetterAuthPlugin } from 'better-auth';
 
 import { prismaAdapter } from 'better-auth/adapters/prisma';
 import bcrypt from 'bcrypt';
 // import { PrismaClient } from 'generated/prisma';
 import prisma from './prisma';
-// eslint-disable-next-line @typescript-eslint/no-require-imports
-const { betterAuth, BetterAuthPlugin } = require('better-auth');
 
-export function skipStateMismatch(): typeof BetterAuthPlugin {
+export function skipStateMismatch(): BetterAuthPlugin {
   return {
     id: 'skip-state-mismatch',
     init(ctx) {

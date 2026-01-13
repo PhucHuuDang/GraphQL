@@ -1,5 +1,5 @@
 import { Inject, Injectable, OnModuleInit } from '@nestjs/common';
-import { AUTH_INSTANCE_KEY } from '../constants/auth.constants';
+import { AUTH_INSTANCE_KEY } from '../../constants/auth.constants';
 // import type { Auth } from 'better-auth';
 
 //@ts-nocheck

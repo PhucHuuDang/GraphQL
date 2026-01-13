@@ -1,7 +1,7 @@
 import { Module } from '@nestjs/common';
 import { CategoryService } from './category.service';
 import { CategoryResolver } from './category.resolver';
-import { PrismaModule } from '../prisma/prisma.module';
+import { PrismaModule } from '../../prisma/prisma.module';
 import { CategoryRepository } from './category.repository';
 
 @Module({

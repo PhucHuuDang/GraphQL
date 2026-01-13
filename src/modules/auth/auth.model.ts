@@ -1,6 +1,6 @@
 import { Field, ObjectType, PickType } from '@nestjs/graphql';
-import { UserModel } from './user.model';
-import { SessionModel } from './session.model';
+import { UserModel } from '../../models/user.model';
+import { SessionModel } from '../../models/session.model';
 import GraphQLJSON from 'graphql-type-json';
 
 @ObjectType()

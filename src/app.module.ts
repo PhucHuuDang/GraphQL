@@ -2,10 +2,10 @@ import { Module } from '@nestjs/common';
 import { GraphQLModule } from '@nestjs/graphql';
 import { ApolloDriver, ApolloDriverConfig } from '@nestjs/apollo';
 import { join } from 'path';
-import { AuthorsModule } from './authors/authors.module';
+import { AuthorsModule } from './modules/authors/authors.module';
 import { ConfigModule } from '@nestjs/config';
 import { UserModule } from './user/user.module';
-import { CategoryModule } from './category/category.module';
+import { CategoryModule } from './modules/category/category.module';
 import { PrismaModule } from './prisma/prisma.module';
 import GraphQLJSON from 'graphql-type-json';
 import { auth } from './lib/auth';
@@ -15,8 +15,8 @@ import { upstashRedis } from './lib/upstash-client';
 
 import { Logger, LoggerModule } from 'nestjs-pino';
 import { CallbackModule } from './callback/callback.module';
-import { SessionModule } from './session/session.module';
-import { AuthModule } from './auth/auth.module';
+import { SessionModule } from './modules/session/session.module';
+import { AuthModule } from './modules/auth/auth.module';
 
 @Module({
   imports: [

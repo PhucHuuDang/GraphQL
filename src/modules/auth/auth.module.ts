@@ -1,7 +1,7 @@
 import { Global, Module } from '@nestjs/common';
 import { BetterAuthService } from './better-auth.service';
-import { auth } from '../lib/auth';
-import { AUTH_INSTANCE_KEY } from '../constants/auth.constants';
+import { auth } from '../../lib/auth';
+import { AUTH_INSTANCE_KEY } from '../../constants/auth.constants';
 
 @Global()
 @Module({

@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
-import { Post, Prisma } from '../../generated/prisma';
-import { BaseRepository, PaginationParams } from '../common/base.repository';
-import { PrismaService } from '../prisma/prisma.service';
+import { Post, Prisma } from '../../../generated/prisma';
+import { BaseRepository, PaginationParams } from '../../common/base.repository';
+import { PrismaService } from '../../prisma/prisma.service';
 
 @Injectable()
 export class PostRepository extends BaseRepository<Post, Prisma.PostDelegate> {

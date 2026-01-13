@@ -1,7 +1,7 @@
 import { Args, Mutation, Resolver } from '@nestjs/graphql';
 import { CategoryService } from './category.service';
-import { CategoryModel } from '../models/category.model';
 import { CreateCategory } from './category.dto';
+import { CategoryModel } from '../../models/category.model';
 
 @Resolver()
 export class CategoryResolver {

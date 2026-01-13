@@ -15,10 +15,10 @@ import {
   SignInEmailUser,
   SignOutResponse,
   SignUpEmailUser,
-} from '../models/auth.model';
+} from '../modules/auth/auth.model';
 import { SignInInput, SignUpInput } from '../dto/user.dto';
-import { ChangePasswordInput } from '../authors/author.dto';
-import type { GraphQLContext } from '../common/graphql.context';
+import type { GraphQLContext } from '../interface/graphql.context';
+import { ChangePasswordInput } from '../modules/authors/author.dto';
 
 // eslint-disable-next-line @typescript-eslint/no-require-imports
 const { User } = require('better-auth');

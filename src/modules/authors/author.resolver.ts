@@ -9,10 +9,10 @@ import {
 } from '@nestjs/graphql';
 import { Prisma } from '@prisma/client/extension';
 import { CreateAuthor } from './author.dto';
-import { Author } from '../models/author.model';
-import { PostModel } from '../models/post/post.model';
-import { PostsService } from '../posts/post.service';
-import { AuthorsService } from '../services/authors.service';
+import { AuthorsService } from '../../services/authors.service';
+import { PostsService } from '../post/post.service';
+import { Author } from './author.model';
+import { PostModel } from '../post/post.model';
 
 @Resolver(() => Author)
 export class AuthorsResolver {
