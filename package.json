@@ -25,7 +25,8 @@
     "prisma:generate": "prisma generate",
     "build": "nest build",
     "build:vercel": "prisma generate && nest build",
-    "vercel-build": "nest build"
+    "vercel-build": "nest build",
+    "prisma:migrate": "prisma migrate dev"
   },
   "lint-staged": {
     "*.ts": [

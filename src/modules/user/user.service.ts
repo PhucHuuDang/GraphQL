@@ -2,20 +2,21 @@ import { Injectable } from '@nestjs/common';
 import { UserModel } from '../../models/user.model';
 import { CreateUser } from './dto/create-user';
 import { auth } from '../../lib/auth';
-import { UserRepository } from './user.repository';
+import { User, Prisma } from '../../../generated/prisma';
+import { BaseRepository } from '../../common/base.repository';
 
 import { SignInInput, SignUpInput, UpdateProfileArgs } from './dto/user.dto';
 import { GetProfileResponse, GetSessionResponse } from './auth.model';
-import { SessionRepository } from '../../modules/session/session.repository';
+import { SessionService } from '../../modules/session/session.service';
 import { GraphQLContext } from '../../interface/graphql.context';
 import { BetterAuthService } from '../../modules/auth/better-auth.service';
 
 import { APIError, type User as UserType } from 'better-auth';
-import { ChangePasswordInput } from '../authors/author.dto';
 import { fromNodeHeaders } from '../../lib/transform-node-headers';
+import { PrismaService } from '../../prisma/prisma.service';
 
 @Injectable()
-export class UserService {
+export class UserService extends BaseRepository<User, Prisma.UserDelegate> {
   // ⚠️ This is where the USER is redirected AFTER authentication completes
   // NOT the OAuth callback URL (Better Auth handles that automatically)
   private readonly callbackURL: string = 'http://localhost:3000/blogs';
@@ -33,11 +34,12 @@ export class UserService {
     );
   }
   constructor(
+    prisma: PrismaService,
     private readonly authService: BetterAuthService,
-    private readonly userRepository: UserRepository,
-
-    private readonly sessionRepository: SessionRepository,
-  ) {}
+    private readonly sessionService: SessionService,
+  ) {
+    super(prisma.user, 'UserService');
+  }
 
   async getAccounts({ req }: GraphQLContext) {
     const accounts = await this.authService.api.listUserAccounts({
@@ -63,28 +65,32 @@ export class UserService {
     token: string | null;
     user: UserType | null;
   }> {
-    const { email, password, callbackURL, image, name, rememberMe } =
-      signUpInput;
+    const { email, password, avatarUrl, name, rememberMe } = signUpInput;
 
     const body = {
       email,
       password,
-      name: name || '',
-      image: image || '',
-      callbackURL: callbackURL || this.callbackURL,
-      rememberMe: rememberMe || false,
+      name,
     };
+    try {
+      const response = await this.authService.api.signUpEmail({
+        body,
+      });
+      console.log({ response });
 
-    console.log({ body });
+      return response;
+    } catch (error) {
+      console.log({ error });
+      if (error instanceof APIError) {
+        console.log(error.message, error.status);
+      }
 
-    const response = await this.authService.api.signUpEmail({
-      body,
-    });
-    console.log({ response });
-
-    console.log(response.user);
-
-    return response;
+      return {
+        token: null,
+        user: null,
+        // statusCode: 401,
+      };
+    }
   }
 
   async signInEmail(signInInput: SignInInput, { req }: GraphQLContext) {
@@ -135,7 +141,7 @@ export class UserService {
 
         if (!token) return { success: false };
 
-        const test = await this.sessionRepository.delete({
+        const test = await this.sessionService.delete({
           where: {
             token,
           },
@@ -170,23 +176,23 @@ export class UserService {
     return response;
   }
 
-  async changePassword(
-    changePasswordInput: ChangePasswordInput,
-    { req }: GraphQLContext,
-  ) {
-    const { currentPassword, newPassword } = changePasswordInput;
+  // async changePassword(
+  //   changePasswordInput: ChangePasswordInput,
+  //   { req }: GraphQLContext,
+  // ) {
+  //   const { currentPassword, newPassword } = changePasswordInput;
 
-    const response = await this.authService.api.changePassword({
-      body: {
-        currentPassword,
-        newPassword,
-        revokeOtherSessions: true,
-      },
+  //   const response = await this.authService.api.changePassword({
+  //     body: {
+  //       currentPassword,
+  //       newPassword,
+  //       revokeOtherSessions: true,
+  //     },
 
-      headers: fromNodeHeaders(req.headers),
-    });
-    return response;
-  }
+  //     headers: fromNodeHeaders(req.headers),
+  //   });
+  //   return response;
+  // }
 
   async gitHub({ req }: GraphQLContext) {
     try {
@@ -240,13 +246,13 @@ export class UserService {
     const token = this.getSessionToken(headers);
 
     if (!token) return null;
-    const session = await this.sessionRepository.findOne({
+    const session = await this.sessionService.findOne({
       token,
     });
 
     if (!session) return null;
 
-    const user = await this.userRepository.findById(session?.userId);
+    const user = await this.findById(session?.userId);
 
     if (!user) return null;
 
@@ -278,7 +284,7 @@ export class UserService {
     };
   }
   async isExists(email: string, id: number) {}
-  async create(createUserInput: CreateUser): Promise<
+  async createUser(createUserInput: CreateUser): Promise<
     | UserModel
     | {
         error: string;

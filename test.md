@@ -1,0 +1,176 @@
+<!-- generator client {
+// provider = "prisma-client"
+provider = "prisma-client-js"
+output = "../generated/prisma"
+binaryTargets = ["native", "rhel-openssl-3.0.x"]
+
+}
+
+datasource db {
+provider = "postgresql"
+url = env("DATABASE_URL")
+}
+
+model User {
+// id Int @id @default(autoincrement())
+id String @id @default(cuid())
+name String?
+email String? @unique
+comments Comment[]
+likes Like[]
+createdAt DateTime @default(now())
+updatedAt DateTime? @updatedAt
+
+emailVerified Boolean @default(false)
+image String?
+sessions Session[]
+accounts Account[]
+
+role String?
+
+@@map("users")
+}
+
+model Author {
+// id Int @id @default(autoincrement())
+id String @id @default(cuid())
+name String
+designation String?
+bio String?
+avatarUrl String?
+verified Boolean @default(false)
+email String? @unique
+password String?
+role String @default("user")
+isActive Boolean @default(true)
+isVerified Boolean @default(false)
+isDeleted Boolean @default(false)
+isSuspended Boolean @default(false)
+isLocked Boolean @default(false)
+isExpired Boolean @default(false)
+isBlocked Boolean @default(false)
+socialLinks Json?
+posts Post[]
+createdAt DateTime @default(now())
+updatedAt DateTime? @updatedAt
+
+@@map("authors")
+}
+
+model Category {
+// id Int @id @default(autoincrement())
+id String @id @default(cuid())
+name String @unique
+posts Post[]
+createdAt DateTime @default(now())
+updatedAt DateTime? @updatedAt
+
+@@map("categories")
+}
+
+model Post {
+// id Int @id @default(autoincrement())
+id String @id @default(cuid())
+title String
+mainImage String?
+description String?
+content Json
+votes Int @default(0)
+authorId String
+author Author @relation(fields: [authorId], references: [id], onDelete: Cascade)
+categoryId String?
+category Category? @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+comments Comment[]
+likes Like[]
+createdAt DateTime @default(now())
+updatedAt DateTime @updatedAt
+tags String[] @default([])
+
+slug String @unique
+
+views Int @default(0)
+isPublished Boolean @default(false)
+isPriority Boolean @default(false)
+isPinned Boolean @default(false)
+isDeleted Boolean @default(false)
+
+@@map("posts")
+}
+
+model Comment {
+// id Int @id @default(autoincrement())
+id String @id @default(cuid())
+content String
+userId String
+user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+postId String?
+post Post? @relation(fields: [postId], references: [id], onDelete: Cascade)
+createdAt DateTime @default(now())
+updatedAt DateTime @updatedAt
+
+@@map("comments")
+}
+
+model Like {
+// id Int @id @default(autoincrement())
+id String @id @default(cuid())
+userId String
+user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+postId String
+post Post @relation(fields: [postId], references: [id], onDelete: Cascade)
+createdAt DateTime @default(now())
+
+@@unique([userId, postId])
+@@map("likes")
+}
+
+model Session {
+// id String @id
+id String @id @default(cuid())
+expiresAt DateTime
+token String
+createdAt DateTime @default(now())
+updatedAt DateTime @updatedAt
+ipAddress String?
+userAgent String?
+userId String
+user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+@@unique([token])
+@@map("session")
+@@index([userId])
+}
+
+model Account {
+// id String @id
+id String @id @default(cuid())
+accountId String
+providerId String
+userId String
+user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+accessToken String?
+refreshToken String?
+idToken String?
+accessTokenExpiresAt DateTime?
+refreshTokenExpiresAt DateTime?
+scope String?
+password String?
+createdAt DateTime @default(now())
+updatedAt DateTime @updatedAt
+
+@@map("account")
+@@index([userId])
+}
+
+model Verification {
+// id String @id
+id String @id @default(cuid())
+identifier String
+value String
+expiresAt DateTime
+createdAt DateTime @default(now())
+updatedAt DateTime @default(now()) @updatedAt
+
+@@map("verification")
+@@index([identifier])
+} -->

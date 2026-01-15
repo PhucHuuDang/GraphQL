@@ -5,9 +5,9 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service';
-import { PostRepository } from './post.repository';
 import { Post, Prisma } from '../../../generated/prisma';
 import {
+  BaseRepository,
   PaginationParams,
   PaginationResult,
 } from '../../common/base.repository';
@@ -16,19 +16,17 @@ import { UPSTASH_REDIS } from '../../lib/key';
 import { GraphQLContext } from '../../interface/graphql.context';
 
 @Injectable()
-export class PostsService {
+export class PostsService extends BaseRepository<Post, Prisma.PostDelegate> {
   constructor(
-    private readonly postRepository: PostRepository,
+    prisma: PrismaService,
     // @Inject(CACHE_MANAGER) private readonly cacheManager: Cache,
     @Inject(UPSTASH_REDIS) private readonly upstashRedis: Redis,
-  ) {}
-
-  async findAll(params?: Prisma.SelectSubset<any, any>): Promise<Post[]> {
-    return await this.postRepository.findAll(params);
+  ) {
+    super(prisma.post, 'PostsService');
   }
 
   async findBySlug(slug: string): Promise<Post | null> {
-    return await this.postRepository.findUnique(
+    return await this.findUnique(
       { slug },
       {
         include: {
@@ -39,35 +37,75 @@ export class PostsService {
     );
   }
 
-  async findPriorityPosts(limit: number = 10): Promise<Post[]> {
-    return await this.postRepository.findPriorityPosts(limit);
+  async findBySlugOrFail(slug: string) {
+    return this.findOneOrFail({ slug });
   }
 
-  async searchPosts(
-    searchTerm: string,
-    params: PaginationParams,
-  ): Promise<PaginationResult<Post>> {
-    return await this.postRepository.searchPosts(searchTerm, params);
-  }
-  async findPublishedPosts(
-    params: PaginationParams,
-  ): Promise<PaginationResult<Post>> {
-    return await this.postRepository.findPublishedPosts(params);
+  async findPublishedPosts(params?: PaginationParams) {
+    return this.findManyPaginated({
+      where: {
+        isPublished: true,
+        isDeleted: false,
+      },
+      orderBy: {
+        createdAt: 'desc',
+      },
+      ...params,
+    });
   }
 
-  async findById(id: string): Promise<Post | null> {
-    return await this.postRepository.findById(id);
+  async searchPosts(searchTerm: string, params?: PaginationParams) {
+    return this.findManyPaginated({
+      where: {
+        OR: [
+          { title: { contains: searchTerm }, mode: 'insensitive' },
+          { description: { contains: searchTerm }, mode: 'insensitive' },
+        ],
+        isPublished: true,
+        isDeleted: false,
+      },
+
+      orderBy: {
+        createdAt: 'desc',
+      },
+      ...params,
+    });
   }
 
   async postPaginated(
-    params: PaginationParams,
-  ): Promise<PaginationResult<Post>> {
-    return await this.postRepository.postPaginated(params);
+    params: PaginationParams & Prisma.SelectSubset<any, any>,
+  ) {
+    return this.findManyPaginated(params);
+  }
+
+  async findPriorityPosts(limit: number = 10) {
+    return this.findAll({
+      where: {
+        isPublished: true,
+        isDeleted: false,
+        isPriority: true,
+      },
+
+      orderBy: {
+        createdAt: 'desc',
+      },
+
+      take: limit,
+      include: {
+        author: {
+          select: {
+            id: true,
+            name: true,
+            avatarUrl: true,
+          },
+        },
+      },
+    });
   }
 
   async createPost(data: Prisma.PostCreateInput): Promise<Post> {
     // console.log({ data });
-    return await this.postRepository.create(data);
+    return await this.create(data);
   }
 
   async updatePost(
@@ -75,7 +113,7 @@ export class PostsService {
     data: Prisma.PostUpdateInput,
     context: GraphQLContext,
   ): Promise<Post> {
-    const post = await this.postRepository.findById(id);
+    const post = await this.findById(id);
 
     const { req } = context;
 
@@ -89,7 +127,7 @@ export class PostsService {
     //   throw new ForbiddenException('You are not the owner of this post');
     // }
 
-    return await this.postRepository.update(id, data);
+    return await this.update(id, { data });
   }
 
   async incrementViews(id: string, identifier: string) {
@@ -100,7 +138,7 @@ export class PostsService {
     // console.log('Cache check:', { cacheKey, hasViewed });
 
     if (hasViewed) {
-      const blog = await this.postRepository.findById(id);
+      const blog = await this.findById(id);
 
       // console.log('Already viewed, returning current views:', blog?.views);
 
@@ -109,16 +147,23 @@ export class PostsService {
 
     await this.upstashRedis.set(cacheKey, identifier, { ex: 3600 });
 
-    const updatedPost = await this.postRepository.incrementViews(id);
+    const updatedPost = await this.update(id, {
+      data: {
+        views: { increment: 1 },
+      },
+
+      include: {
+        author: true,
+        category: true,
+      },
+    });
 
     console.log('View incremented:', updatedPost?.views);
 
     return updatedPost;
-
-    // return await this.postRepository.incrementViews(id);
   }
 
   async deletePost(id: string): Promise<Post> {
-    return await this.postRepository.delete(id);
+    return await this.delete({ where: { id } });
   }
 }

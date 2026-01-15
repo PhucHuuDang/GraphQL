@@ -1,7 +1,7 @@
 import { ObjectType, Field, Int, InputType } from '@nestjs/graphql';
 import GraphQLJSON from 'graphql-type-json';
-import { Author } from '../authors/author.model';
 import { CategoryModel } from '../../models/category.model';
+import { UserModel } from '../../models/user.model';
 
 @ObjectType()
 export class PostModel {
@@ -56,8 +56,8 @@ export class PostModel {
   @Field(() => String, { nullable: true })
   categoryId?: string;
 
-  @Field(() => Author)
-  author: Author;
+  @Field(() => UserModel)
+  user: UserModel;
 
   @Field(() => CategoryModel, { nullable: true })
   category?: CategoryModel;

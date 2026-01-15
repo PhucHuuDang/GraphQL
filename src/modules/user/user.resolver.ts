@@ -17,7 +17,6 @@ import {
 } from './auth.model';
 import { SignInInput, SignUpInput, UpdateProfileArgs } from './dto/user.dto';
 import type { GraphQLContext } from '../../interface/graphql.context';
-import { ChangePasswordInput } from '../authors/author.dto';
 
 @Resolver(() => UserModel)
 export class UserResolver {
@@ -48,17 +47,12 @@ export class UserResolver {
 
   @Mutation((type) => SignUpEmailUser)
   async signUpEmail(
-    @Args('signUpInput') signUpInput: SignUpInput,
+    @Args('signUpInput', { type: () => SignUpInput }) signUpInput: SignUpInput,
     @Context() ctx: GraphQLContext,
   ) {
-    const { email, password, name, image, callbackURL, rememberMe } =
-      signUpInput;
-
     console.log({ signUpInput });
 
     const response = await this.userService.signUpEmail(signUpInput);
-
-    // console.log({ response });
 
     return response;
   }
@@ -87,26 +81,26 @@ export class UserResolver {
     return response;
   }
 
-  @Mutation(() => Boolean)
-  async changePassword(
-    @Args('changePasswordInput') changePasswordInput: ChangePasswordInput,
-    @Context() ctx: GraphQLContext,
-  ) {
-    const { currentPassword, newPassword } = changePasswordInput;
+  // @Mutation(() => Boolean)
+  // async changePassword(
+  //   @Args('changePasswordInput') changePasswordInput: ChangePasswordInput,
+  //   @Context() ctx: GraphQLContext,
+  // ) {
+  //   const { currentPassword, newPassword } = changePasswordInput;
 
-    if (!currentPassword || !newPassword) {
-      return {
-        error: 'Current password and new password are required',
-        statusCode: 400,
-      };
-    }
+  //   if (!currentPassword || !newPassword) {
+  //     return {
+  //       error: 'Current password and new password are required',
+  //       statusCode: 400,
+  //     };
+  //   }
 
-    const response = await this.userService.changePassword(
-      changePasswordInput,
-      ctx,
-    );
-    return response;
-  }
+  //   const response = await this.userService.changePassword(
+  //     changePasswordInput,
+  //     ctx,
+  //   );
+  //   return response;
+  // }
 
   @Mutation(() => SignOutResponse)
   async signOut(@Context() ctx: GraphQLContext) {
@@ -133,7 +127,7 @@ export class UserResolver {
 
   @Mutation(() => UserModel)
   createUser(@Args('createUserInput') createUserInput: CreateUser) {
-    return this.userService.create(createUserInput);
+    return this.userService.createUser(createUserInput);
   }
 
   @Query(() => GetSessionResponse)

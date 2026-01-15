@@ -2,10 +2,8 @@ import { Module } from '@nestjs/common';
 import { GraphQLModule } from '@nestjs/graphql';
 import { ApolloDriver, ApolloDriverConfig } from '@nestjs/apollo';
 import { join } from 'path';
-import { AuthorsModule } from './modules/authors/authors.module';
 import { ConfigModule } from '@nestjs/config';
 import { UserModule } from './modules/user/user.module';
-import { CategoryModule } from './modules/category/category.module';
 import { PrismaModule } from './prisma/prisma.module';
 import GraphQLJSON from 'graphql-type-json';
 // import { CacheModule } from '@nestjs/cache-manager';
@@ -40,9 +38,7 @@ import { AuthModule } from './modules/auth/auth.module';
       skipProcessEnv: true,
     }),
 
-    AuthorsModule,
     UserModule,
-    CategoryModule,
     PrismaModule,
     // ⚠️ AuthModule MUST come before any custom controllers that might interfere
     CacheModule,

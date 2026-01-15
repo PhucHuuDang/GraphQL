@@ -17,9 +17,8 @@ import {
 // import type { Auth } from 'better-auth';
 import { FastifyRequest } from 'fastify';
 import { fromNodeHeaders } from '../../lib/transform-node-headers';
-
-// eslint-disable-next-line @typescript-eslint/no-require-imports
-const { Auth } = require('better-auth');
+import type { Auth } from 'better-auth';
+import { BetterAuthService } from './better-auth.service';
 
 @Injectable()
 export class AuthGuard implements CanActivate {
@@ -27,7 +26,7 @@ export class AuthGuard implements CanActivate {
     @Inject(Reflector)
     private readonly reflector: Reflector,
     @Inject(AUTH_INSTANCE_KEY)
-    private readonly auth: typeof Auth,
+    private readonly auth: BetterAuthService,
   ) {}
 
   /**

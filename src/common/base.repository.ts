@@ -6,7 +6,6 @@ import {
 } from '@nestjs/common';
 import { Prisma } from '../../generated/prisma';
 import { PrismaService } from '../prisma/prisma.service';
-import { PrismaErrorHelper } from './exceptions/prisma-error.helper';
 
 export interface PaginationResult<T> {
   data: T[];
@@ -45,26 +44,17 @@ export abstract class BaseRepository<
 
   // READ OPERATIONS
   async findAll(params?: Prisma.SelectSubset<any, any>): Promise<T[]> {
-    try {
-      return await this.model.findMany(params);
-    } catch (error) {
-      PrismaErrorHelper.handle(error, 'findAll');
-    }
+    return await this.model.findMany(params);
   }
 
   async findById(
     id: string,
     params?: Prisma.SelectSubset<any, any>,
   ): Promise<T | null> {
-    try {
-      if (!id) {
-        throw new BadRequestException('Id is required for findById');
-      }
-      return await this.model.findUnique({ where: { id }, ...(params as any) });
-    } catch (error) {
-      PrismaErrorHelper.handle(error, 'findById');
-      return null as T;
+    if (!id) {
+      throw new BadRequestException('Id is required for findById');
     }
+    return await this.model.findUnique({ where: { id }, ...(params as any) });
   }
 
   async findByIdOrFail(
@@ -84,37 +74,25 @@ export abstract class BaseRepository<
     where: Prisma.SelectSubset<any, any>,
     params?: Prisma.SelectSubset<any, any>,
   ): Promise<T | null> {
-    try {
-      if (!where) {
-        throw new BadRequestException('Where is required for findOne');
-      }
-
-      return await this.model.findFirst({ where, ...(params as any) });
-    } catch (error) {
-      PrismaErrorHelper.handle(error, 'findOne');
+    if (!where) {
+      throw new BadRequestException('Where is required for findOne');
     }
+
+    return await this.model.findFirst({ where, ...(params as any) });
   }
 
   async findUnique(
     where: Prisma.SelectSubset<any, any>,
     params?: Prisma.SelectSubset<any, any>,
   ): Promise<T | null> {
-    try {
-      return await this.model.findUnique({ where, ...((params as any) ?? {}) });
-    } catch (error) {
-      PrismaErrorHelper.handle(error, 'findUnique');
-    }
+    return await this.model.findUnique({ where, ...((params as any) ?? {}) });
   }
 
   async findFirst(
     where: Prisma.SelectSubset<any, any>,
     params: Prisma.SelectSubset<any, any> = {},
   ): Promise<T | null> {
-    try {
-      return await this.model.findFirst({ where, ...(params as any) });
-    } catch (error) {
-      PrismaErrorHelper.handle(error, 'findFirst');
-    }
+    return await this.model.findFirst({ where, ...(params as any) });
   }
 
   async findOneOrFail(
@@ -131,110 +109,86 @@ export abstract class BaseRepository<
   async findFirstWithConditions(
     condition: Prisma.SelectSubset<any, any>,
   ): Promise<T | null> {
-    try {
-      if (!condition) {
-        throw new BadRequestException(
-          'Condition is required for findFirstWithConditions',
-        );
-      }
-      return await this.model.findFirst(condition);
-    } catch (error) {
-      PrismaErrorHelper.handle(error, 'findFirstWithConditions');
+    if (!condition) {
+      throw new BadRequestException(
+        'Condition is required for findFirstWithConditions',
+      );
     }
+    return await this.model.findFirst(condition);
   }
 
   async findManyPaginated(
     params: PaginationParams & Prisma.SelectSubset<any, any>,
   ): Promise<PaginationResult<T>> {
-    try {
-      const {
-        page = 1,
-        limit = 10,
-        ...prismaParams
-      } = params as {
-        page?: number;
-        limit?: number;
-        [key: string]: any;
-      };
+    const {
+      page = 1,
+      limit = 10,
+      ...prismaParams
+    } = params as {
+      page?: number;
+      limit?: number;
+      [key: string]: any;
+    };
 
-      if (page < 1) {
-        throw new BadRequestException('Page must be greater than 0');
-      }
-
-      if (limit < 1) {
-        throw new BadRequestException('Limit must be greater than 0');
-      }
-
-      const skip = (page - 1) * limit;
-
-      const [data, total] = await Promise.all([
-        this.model.findMany({
-          ...prismaParams,
-          skip,
-          take: limit,
-        }),
-        this.model.count({ where: prismaParams.where }),
-      ]);
-
-      const totalPages = Math.ceil(total / limit);
-
-      return {
-        data,
-        meta: {
-          total,
-          page,
-          limit,
-          totalPages,
-          hasNext: page < totalPages,
-          hasPrev: page > 1,
-        },
-      };
-    } catch (error) {
-      PrismaErrorHelper.handle(error, 'findManyPaginated');
+    if (page < 1) {
+      throw new BadRequestException('Page must be greater than 0');
     }
+
+    if (limit < 1) {
+      throw new BadRequestException('Limit must be greater than 0');
+    }
+
+    const skip = (page - 1) * limit;
+
+    const [data, total] = await Promise.all([
+      this.model.findMany({
+        ...prismaParams,
+        skip,
+        take: limit,
+      }),
+      this.model.count({ where: prismaParams.where }),
+    ]);
+
+    const totalPages = Math.ceil(total / limit);
+
+    return {
+      data,
+      meta: {
+        total,
+        page,
+        limit,
+        totalPages,
+        hasNext: page < totalPages,
+        hasPrev: page > 1,
+      },
+    };
   }
 
   //* CREATE OPERATIONS
   async create(data: any, include?: any): Promise<T> {
-    // console.log({ data });
-    try {
-      if (!data) {
-        throw new BadRequestException('Data is required for create');
-      }
-      return await this.model.create({ data, include });
-    } catch (error) {
-      // console.log({ error });
-      PrismaErrorHelper.handle(error, 'create');
+    if (!data) {
+      throw new BadRequestException('Data is required for create');
     }
+    return await this.model.create({ data, include });
   }
 
   async createMany(
     data: any[],
     skipDuplicates: boolean = false,
   ): Promise<number> {
-    try {
-      if (!data || data.length === 0) {
-        throw new BadRequestException('Data is required for createMany');
-      }
-      const result = await this.model.createMany({ data, skipDuplicates });
-
-      return result.count;
-    } catch (error) {
-      PrismaErrorHelper.handle(error, 'createMany');
+    if (!data || data.length === 0) {
+      throw new BadRequestException('Data is required for createMany');
     }
+    const result = await this.model.createMany({ data, skipDuplicates });
+
+    return result.count;
   }
 
   async createManyAndReturn(data: any[]): Promise<T[]> {
-    try {
-      if (!data || data.length === 0) {
-        throw new BadRequestException(
-          'Data is required for createManyAndReturn',
-        );
-      }
-      return await this.model.createManyAndReturn({ data });
-    } catch (error) {
-      PrismaErrorHelper.handle(error, 'createManyAndReturn');
+    if (!data || data.length === 0) {
+      throw new BadRequestException('Data is required for createManyAndReturn');
     }
+    return await this.model.createManyAndReturn({ data });
   }
 
   //* Upsert operation && Update
@@ -244,213 +198,150 @@ export abstract class BaseRepository<
     update: any,
     include?: any,
   ): Promise<T> {
-    try {
-      if (!where || !create || !update) {
-        throw new BadRequestException(
-          'Where, create, and update are required for upsert',
-        );
-      }
-
-      return await this.model.upsert({ where, create, update, include });
-    } catch (error) {
-      PrismaErrorHelper.handle(error, 'upsert');
+    if (!where || !create || !update) {
+      throw new BadRequestException(
+        'Where, create, and update are required for upsert',
+      );
     }
+
+    return await this.model.upsert({ where, create, update, include });
   }
 
   async update(id: string, data: any, include?: any): Promise<T> {
-    try {
-      if (!id) {
-        throw new BadRequestException('Id is required for update');
-      }
-      if (!data) {
-        throw new BadRequestException('Data is required for update');
-      }
-      return await this.model.update({ where: { id }, ...data, include });
-    } catch (error) {
-      PrismaErrorHelper.handle(error, 'update');
+    if (!id) {
+      throw new BadRequestException('Id is required for update');
     }
+    if (!data) {
+      throw new BadRequestException('Data is required for update');
+    }
+    return await this.model.update({ where: { id }, ...data, include });
   }
 
   async updateMany(
     where: Prisma.SelectSubset<any, any>,
     data: any,
   ): Promise<number> {
-    try {
-      if (!where) {
-        throw new BadRequestException(
-          'Where condition is required for updateMany',
-        );
-      }
-      if (!data || Object.keys(data).length === 0) {
-        throw new BadRequestException('Data is required for updateMany');
-      }
-      const result = await this.model.updateMany({ where, ...data });
-      return result.count;
-    } catch (error) {
-      PrismaErrorHelper.handle(error, 'updateMany');
+    if (!where) {
+      throw new BadRequestException(
+        'Where condition is required for updateMany',
+      );
     }
+    if (!data || Object.keys(data).length === 0) {
+      throw new BadRequestException('Data is required for updateMany');
+    }
+    const result = await this.model.updateMany({ where, ...data });
+    return result.count;
   }
 
   //* Delete operation
 
   async delete(where: any): Promise<T> {
-    try {
-      if (!where) {
-        throw new BadRequestException('Where is required for delete');
-      }
-      return await this.model.delete({ ...where });
-    } catch (error) {
-      PrismaErrorHelper.handle(error, 'delete');
-      return null as unknown as T;
+    if (!where) {
+      throw new BadRequestException('Where is required for delete');
     }
+    return await this.model.delete({ ...where });
   }
 
   async deleteMany(where: any): Promise<number> {
-    try {
-      if (!where) {
-        throw new BadRequestException(
-          'Where condition is required for deleteMany',
-        );
-      }
-      const result = await this.model.deleteMany({ where });
-      return result.count;
-    } catch (error) {
-      PrismaErrorHelper.handle(error, 'deleteMany');
+    if (!where) {
+      throw new BadRequestException(
+        'Where condition is required for deleteMany',
+      );
     }
+    const result = await this.model.deleteMany({ where });
+    return result.count;
   }
 
   async softDeleted(id: string): Promise<T> {
-    try {
-      if (!id) {
-        throw new BadRequestException('Id is required for softDeleted');
-      }
-
-      return await this.model.update({
-        where: { id },
-        data: { isDeleted: true, deletedAt: new Date() },
-      });
-    } catch (error) {
-      PrismaErrorHelper.handle(error, 'softDeleted');
+    if (!id) {
+      throw new BadRequestException('Id is required for softDeleted');
     }
+
+    return await this.model.update({
+      where: { id },
+      data: { isDeleted: true, deletedAt: new Date() },
+    });
   }
 
   async restore(id: string): Promise<T> {
-    try {
-      if (!id) {
-        throw new BadRequestException('Id is required for restore');
-      }
-
-      return await this.model.update({
-        where: { id },
-        data: { isDeleted: false, deletedAt: null },
-      });
-    } catch (error) {
-      PrismaErrorHelper.handle(error, 'restore');
+    if (!id) {
+      throw new BadRequestException('Id is required for restore');
     }
+
+    return await this.model.update({
+      where: { id },
+      data: { isDeleted: false, deletedAt: null },
+    });
   }
 
   //* run multiple operations in a single transaction
 
   async transaction<R>(operations: (tx: any) => Promise<R>): Promise<R> {
-    try {
-      const prisma = this.model._client as PrismaService;
-      return await prisma.$transaction(async (tx) => operations(tx));
-    } catch (error) {
-      PrismaErrorHelper.handle(error, 'transaction');
-    }
+    const prisma = this.model._client as PrismaService;
+    return await prisma.$transaction(async (tx) => operations(tx));
   }
 
-  async count(
-    where?: Prisma.SelectSubset<Prisma.LikeCountArgs, Prisma.LikeCountArgs>,
-  ): Promise<number> {
-    try {
-      return await this.model.count({ where });
-    } catch (error) {
-      PrismaErrorHelper.handle(error, 'count');
-      return 0;
-    }
-  }
+  // async count(
+  //   where?: Prisma.SelectSubset<Prisma.$VotePayload, Prisma.$Vote>,
+  // ): Promise<number> {
+  //   try {
+  //     return await this.model.count({ where });
+  //   } catch (error) {
+  //     PrismaErrorHelper.handle(error, 'count');
+  //     return 0;
+  //   }
+  // }
 
   //* check if record exist
   async exists(
-    where: Prisma.SelectSubset<Prisma.LikeCountArgs, Prisma.LikeCountArgs>,
+    where: Prisma.SelectSubset<Prisma.VoteCountArgs, Prisma.VoteCountArgs>,
   ): Promise<boolean> {
-    try {
-      const count = await this.model.count({ where });
-
-      return count > 0;
-    } catch (error) {
-      PrismaErrorHelper.handle(error, 'exists');
-    }
+    const count = await this.model.count({ where });
+    return count > 0;
   }
 
   async aggregate(params: any): Promise<any> {
-    try {
-      return await this.model.aggregate(params);
-    } catch (error) {
-      PrismaErrorHelper.handle(error, 'aggregate');
-    }
+    return await this.model.aggregate(params);
   }
 
   async groupBy(params: any): Promise<any> {
-    try {
-      return await this.model.groupBy(params);
-    } catch (error) {
-      PrismaErrorHelper.handle(error, 'groupBy');
-    }
+    return await this.model.groupBy(params);
   }
 
   async bulkUpsert(
     records: Array<{ where: any; create: any; update: any }>,
   ): Promise<T[]> {
-    try {
-      if (!records || records.length === 0) {
-        throw new BadRequestException('Records are required for bulkUpsert');
-      }
-
-      return await this.model.transaction(async (tx) => {
-        const results = await Promise.all(
-          records.map((record) => tx[this.model.name].upsert(record)),
-        );
-
-        return results;
-      });
-    } catch (error) {
-      PrismaErrorHelper.handle(error, 'bulkUpsert');
+    if (!records || records.length === 0) {
+      throw new BadRequestException('Records are required for bulkUpsert');
     }
+
+    return await this.model.transaction(async (tx) => {
+      const results = await Promise.all(
+        records.map((record) => tx[this.model.name].upsert(record)),
+      );
+
+      return results;
+    });
   }
 
   async findWithRelations(id: string, include: any): Promise<T | null> {
-    try {
-      if (!id) {
-        throw new BadRequestException('Id is required ');
-      }
-      return await this.model.findUnique({
-        where: { id },
-        include,
-      });
-    } catch (error) {
-      PrismaErrorHelper.handle(error, 'findWithRelations');
+    if (!id) {
+      throw new BadRequestException('Id is required ');
     }
+    return await this.model.findUnique({
+      where: { id },
+      include,
+    });
   }
 
   // Raw query support
   async executeRaw(query: string, params?: any[]): Promise<any> {
-    try {
-      const prisma = this.model._client as PrismaService;
-      return await prisma.$executeRawUnsafe(query, ...(params || []));
-    } catch (error) {
-      PrismaErrorHelper.handle(error, 'executeRaw');
-    }
+    const prisma = this.model._client as PrismaService;
+    return await prisma.$executeRawUnsafe(query, ...(params || []));
   }
 
   async queryRaw<R = any>(query: string, params?: any[]): Promise<R[]> {
-    try {
-      const prisma = this.model._client as PrismaService;
-
-      return await prisma.$queryRawUnsafe(query, ...(params || []));
-    } catch (error) {
-      PrismaErrorHelper.handle(error, 'queryRaw');
-    }
+    const prisma = this.model._client as PrismaService;
+    return await prisma.$queryRawUnsafe(query, ...(params || []));
   }
 }

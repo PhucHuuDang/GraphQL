@@ -1,74 +1,65 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
 
 generator client {
-  // provider = "prisma-client"
   provider      = "prisma-client-js"
   output        = "../generated/prisma"
-  // binaryTargets = ["native", "rhel-openssl-3.0.x"]
   binaryTargets = ["native", "rhel-openssl-3.0.x"]
 
 }
-  // binaryTargets = ["native", "rhel-openssl-3.0.x"]
 
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
 }
 
+// Hợp nhất User và Author thành một model User duy nhất
 model User {
-  // id        Int       @id @default(autoincrement())
   id        String    @id @default(cuid())
   name      String?
   email     String?   @unique
-  comments  Comment[]
-  likes     Like[]
-  createdAt DateTime  @default(now())
-  updatedAt DateTime? @updatedAt
-
-  emailVerified Boolean   @default(false)
-  image         String?
-  sessions      Session[]
-  accounts      Account[]
-
-  role String?
-
-  @@map("users")
-}
-
-model Author {
-  // id          Int       @id @default(autoincrement())
-  id          String    @id @default(cuid())
-  name        String
+  password  String?
+  
+  // Profile information
   designation String?
   bio         String?
   avatarUrl   String?
-  verified    Boolean   @default(false)
-  email       String?   @unique
-  password    String?
-  role        String    @default("user")
+  socialLinks Json?
+  
+  // Authentication & Authorization
+  role        UserRole  @default(USER)
+  emailVerified Boolean @default(false)
+  
+  // Account status
   isActive    Boolean   @default(true)
   isVerified  Boolean   @default(false)
   isDeleted   Boolean   @default(false)
   isSuspended Boolean   @default(false)
-  isLocked    Boolean   @default(false)
-  isExpired   Boolean   @default(false)
   isBlocked   Boolean   @default(false)
-  socialLinks Json?
+  
+  // Relations
   posts       Post[]
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime? @updatedAt
+  comments    Comment[]
+  votes       Vote[]
+  sessions    Session[]
+  accounts    Account[]
+  moderationActions ModerationAction[]
+  
+  createdAt DateTime  @default(now())
+  updatedAt DateTime? @updatedAt
 
-  @@map("authors")
+  @@map("users")
+}
+
+enum UserRole {
+  USER
+  ADMIN
+  MODERATOR
 }
 
 model Category {
-  // id        Int      @id @default(autoincrement())
   id        String    @id @default(cuid())
   name      String    @unique
+  slug      String    @unique
+  description String?
   posts     Post[]
   createdAt DateTime  @default(now())
   updatedAt DateTime? @updatedAt
@@ -77,66 +68,150 @@ model Category {
 }
 
 model Post {
-  // id          Int       @id @default(autoincrement())
   id          String    @id @default(cuid())
   title       String
+  slug        String    @unique
   mainImage   String?
   description String?
   content     Json
-  votes       Int       @default(0)
+  tags        String[]  @default([])
+  // Author
   authorId    String
-  author      Author    @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  author      User      @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  
+  // Category
   categoryId  String?
   category    Category? @relation(fields: [categoryId], references: [id], onDelete: SetNull)
-  comments    Comment[]
-  likes       Like[]
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
-  tags        String[]  @default([])
-
-  slug String @unique
-
+  
+  // Moderation Status
+  status      PostStatus @default(PENDING)
+  
+  // Engagement metrics
   views       Int     @default(0)
+  
+  // Flags
   isPublished Boolean @default(false)
   isPriority  Boolean @default(false)
   isPinned    Boolean @default(false)
   isDeleted   Boolean @default(false)
+  
+  // Relations
+  comments    Comment[]
+  votes       Vote[]
+  moderationActions ModerationAction[]
+  
+  // Timestamps
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  publishedAt DateTime?
+  submittedForReviewAt DateTime?
 
   @@map("posts")
+  @@index([status])
+  @@index([authorId])
+  @@index([categoryId])
+  @@index([createdAt])
+}
+
+enum PostStatus {
+  DRAFT          
+  PENDING        
+  APPROVED        
+  REJECTED       
+  PUBLISHED      
+  UNPUBLISHED     
+}
+
+model ModerationAction {
+  id          String   @id @default(cuid())
+  postId      String
+  post        Post     @relation(fields: [postId], references: [id], onDelete: Cascade)
+  
+  moderatorId String
+  moderator   User     @relation(fields: [moderatorId], references: [id], onDelete: Cascade)
+  
+  action      ModerationActionType
+  oldStatus   PostStatus?
+  newStatus   PostStatus
+  
+  // Feedback from admin
+  feedback    String?   // Reason for rejection or suggestion for improvement
+  isPrivate   Boolean   @default(true) // Feedback only author can see
+  
+  createdAt   DateTime @default(now())
+
+  @@map("moderation_actions")
+  @@index([postId])
+  @@index([moderatorId])
+}
+
+enum ModerationActionType {
+  SUBMIT_FOR_REVIEW
+  APPROVE
+  REJECT
+  PUBLISH
+  UNPUBLISH
+  REQUEST_CHANGES
 }
 
 model Comment {
-  // id        Int      @id @default(autoincrement())
-  id        String   @id @default(cuid())
+  id        String      @id @default(cuid())
   content   String
+  
   userId    String
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user      User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
   postId    String?
-  post      Post?    @relation(fields: [postId], references: [id], onDelete: Cascade)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  post      Post?       @relation(fields: [postId], references: [id], onDelete: Cascade)
+  
+  // Comment threading (reply to another comment)
+  parentId  String?
+  parent    Comment?    @relation("CommentReplies", fields: [parentId], references: [id], onDelete: Cascade)
+  replies   Comment[]   @relation("CommentReplies")
+  
+  // Moderation
+  isDeleted Boolean     @default(false)
+  isEdited  Boolean     @default(false)
+  
+  createdAt DateTime    @default(now())
+  updatedAt DateTime    @updatedAt
 
   @@map("comments")
+  @@index([postId])
+  @@index([userId])
+  @@index([parentId])
 }
 
-model Like {
-  // id        Int      @id @default(autoincrement())
-  id        String   @id @default(cuid())
+// Model mới: Voting system rõ ràng
+model Vote {
+  id        String    @id @default(cuid())
+  
   userId    String
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
   postId    String
-  post      Post     @relation(fields: [postId], references: [id], onDelete: Cascade)
-  createdAt DateTime @default(now())
+  post      Post      @relation(fields: [postId], references: [id], onDelete: Cascade)
+  
+  value     VoteType  // UPVOTE or DOWNVOTE
+  
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
 
   @@unique([userId, postId])
-  @@map("likes")
+  @@map("votes")
+  @@index([postId])
+  @@index([userId])
+}
+
+enum VoteType {
+  UPVOTE
+  DOWNVOTE
 }
 
 model Session {
-  // id        String   @id
   id        String   @id @default(cuid())
   expiresAt DateTime
-  token     String
+  token     String   @unique
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   ipAddress String?
@@ -144,13 +219,12 @@ model Session {
   userId    String
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  @@unique([token])
   @@map("session")
   @@index([userId])
+  @@index([token])
 }
 
 model Account {
-  // id                    String    @id
   id                    String    @id @default(cuid())
   accountId             String
   providerId            String
@@ -171,7 +245,6 @@ model Account {
 }
 
 model Verification {
-  // id         String   @id
   id         String   @id @default(cuid())
   identifier String
   value      String
