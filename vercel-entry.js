@@ -1,5 +1,5 @@
-// vercel-entry.js
-import { NestFactory } from '@nestjs/core';
+const { NestFactory } = require('@nestjs/core');
+const path = require('path');
 
 let cachedApp;
 
@@ -8,7 +8,14 @@ async function bootstrap() {
     return cachedApp;
   }
 
-  const { AppModule } = await import('./dist/app.module.js');
+  console.log('Current directory:', __dirname);
+  console.log(
+    'Looking for app.module.js at:',
+    path.join(__dirname, 'dist', 'app.module.js'),
+  );
+
+  // Use CommonJS require for the compiled NestJS app
+  const { AppModule } = require('./dist/app.module.js');
 
   const app = await NestFactory.create(AppModule, {
     logger: ['error', 'warn', 'log'],
@@ -25,18 +32,18 @@ async function bootstrap() {
   return app;
 }
 
-export default async (req, res) => {
+module.exports = async (req, res) => {
   try {
     const app = await bootstrap();
     const expressApp = app.getHttpAdapter().getInstance();
 
-    // Handle the request with Express
     expressApp(req, res);
   } catch (error) {
-    console.error('Error:', error);
+    console.error('Bootstrap error:', error);
     res.status(500).json({
       error: 'Internal Server Error',
       message: error.message,
+      stack: process.env.NODE_ENV === 'development' ? error.stack : undefined,
     });
   }
 };
