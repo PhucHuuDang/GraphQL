@@ -53,17 +53,27 @@ export class SignInInput {
 @ArgsType()
 export class UpdateProfileArgs {
   @Field({ nullable: true })
-  email: string;
+  @IsEmail()
+  @IsOptional()
+  email?: string;
 
   @Field({ nullable: true })
-  name: string;
+  @IsString()
+  @IsOptional()
+  name?: string;
 
   @Field({ nullable: true })
-  image: string;
+  @IsString()
+  @IsOptional()
+  avatarUrl?: string;
 
   @Field({ nullable: true })
-  password: string;
+  @IsString()
+  @IsOptional()
+  password?: string;
 
   @Field(() => Boolean, { nullable: true })
+  @IsBoolean()
+  @IsOptional()
   rememberMe?: boolean;
 }

@@ -61,10 +61,7 @@ export class UserService extends BaseRepository<User, Prisma.UserDelegate> {
     });
     return accessToken;
   }
-  async signUpEmail(signUpInput: SignUpInput): Promise<{
-    token: string | null;
-    user: UserType | null;
-  }> {
+  async signUpEmail(signUpInput: SignUpInput) {
     const { email, password, avatarUrl, name, rememberMe } = signUpInput;
 
     const body = {
@@ -72,24 +69,18 @@ export class UserService extends BaseRepository<User, Prisma.UserDelegate> {
       password,
       name,
     };
+
     try {
       const response = await this.authService.api.signUpEmail({
         body,
       });
-      console.log({ response });
-
       return response;
     } catch (error) {
-      console.log({ error });
       if (error instanceof APIError) {
         console.log(error.message, error.status);
       }
 
-      return {
-        token: null,
-        user: null,
-        // statusCode: 401,
-      };
+      throw error;
     }
   }
 
@@ -135,8 +126,6 @@ export class UserService extends BaseRepository<User, Prisma.UserDelegate> {
       });
     } catch (err: any) {
       if (err?.body?.code === 'FAILED_TO_GET_SESSION') {
-        // ✅ Không có session cũng coi là sign out thành công
-
         const token = this.getSessionToken(headers);
 
         if (!token) return { success: false };
@@ -158,17 +147,14 @@ export class UserService extends BaseRepository<User, Prisma.UserDelegate> {
     updateProfileArgs: UpdateProfileArgs,
     { req }: GraphQLContext,
   ) {
-    const { email, name, image, password, rememberMe } = updateProfileArgs;
+    const { email, name, avatarUrl, password, rememberMe } = updateProfileArgs;
 
     const headers = fromNodeHeaders(req.headers);
 
-    const response = await this.authService.api.updateProfile({
+    const response = await this.authService.api.updateUser({
       body: {
-        email,
+        image: avatarUrl,
         name,
-        image,
-        password,
-        rememberMe,
       },
       headers,
     });

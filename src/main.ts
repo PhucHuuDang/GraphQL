@@ -12,10 +12,6 @@ async function bootstrap() {
       timestamp: true,
       colors: true,
     }),
-
-    // bufferLogs: true,
-
-    // bodyParser: false,
   });
 
   // Global exception filters
@@ -31,7 +27,7 @@ async function bootstrap() {
   );
 
   app.enableCors({
-    origin: true, // Cho phép tất cả origins hoặc chỉ định cụ thể
+    origin: true,
     credentials: true,
   });
 

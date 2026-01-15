@@ -1,12 +1,17 @@
-// src/lib/auth.ts
-import { betterAuth, BetterAuthPlugin } from 'better-auth';
+import {
+  betterAuth,
+  BetterAuthPlugin,
+  type BetterAuthOptions,
+} from 'better-auth';
 import { prismaAdapter } from 'better-auth/adapters/prisma';
 import bcrypt from 'bcrypt';
-// import prisma from './prisma';
-
 import { prismaForAuth } from './prisma';
 
-export function skipStateMismatch(): BetterAuthPlugin {
+/**
+ * Plugin to skip OAuth state mismatch errors
+ * Useful for development and testing
+ */
+function createSkipStateMismatchPlugin(): BetterAuthPlugin {
   return {
     id: 'skip-state-mismatch',
     init(ctx) {
@@ -23,67 +28,115 @@ export function skipStateMismatch(): BetterAuthPlugin {
   };
 }
 
-// ✅ Export auth instance
-export const auth = betterAuth({
-  database: prismaAdapter(prismaForAuth, {
-    provider: 'postgresql',
-    debugLogs: true,
-  }),
+/**
+ * Authentication configuration interface
+ */
+interface AuthConfig {
+  backendUrl?: string;
+  frontendUrl?: string;
+  githubClientId?: string;
+  githubClientSecret?: string;
+  nodeEnv?: string;
+}
 
-  experimental: {
-    joins: true,
-  },
+/**
+ * Default user role for new signups
+ */
+const DEFAULT_USER_ROLE = 'USER';
 
-  baseURL: process.env.BACKEND_URL || 'http://localhost:3001',
-  basePath: '/api/auth',
+/**
+ * Password hash rounds for bcrypt
+ */
+const BCRYPT_ROUNDS = 10;
 
-  emailAndPassword: {
-    enabled: true,
-    signInRedirect: '/blogs',
-    signUpRedirect: '/sign-up-success',
-    signOutRedirect: '/sign-out',
+/**
+ * Creates Better Auth configuration
+ */
+function createAuthConfig(config: AuthConfig = {}): BetterAuthOptions {
+  const {
+    backendUrl = process.env.BACKEND_URL || 'http://localhost:3001',
+    frontendUrl = process.env.FRONTEND_URL || 'http://localhost:3000',
+    githubClientId = process.env.GITHUB_CLIENT_ID,
+    githubClientSecret = process.env.GITHUB_CLIENT_SECRET,
+    nodeEnv = process.env.NODE_ENV,
+  } = config;
 
-    password: {
-      hash: async (password) => {
-        return await bcrypt.hash(password, 10);
-      },
-      verify: async (data) => {
-        return await bcrypt.compare(data.password, data.hash);
-      },
-    },
-  },
+  const isProduction = nodeEnv === 'production';
 
-  socialProviders: {
-    github: {
-      clientId: process.env.GITHUB_CLIENT_ID,
-      clientSecret: process.env.GITHUB_CLIENT_SECRET,
-      redirectURI: 'http://localhost:3001/api/auth/callback/github',
-      disableImplicitSignUp: false,
-    },
-  },
+  return {
+    database: prismaAdapter(prismaForAuth, {
+      provider: 'postgresql',
+      debugLogs: !isProduction,
+    }),
 
-  user: {
-    additionalFields: {
-      role: {
-        type: 'string',
-        input: false,
-        defaultValue: 'user',
-      },
-    },
-  },
+    appName: 'Devs',
 
-  advanced: {
-    cookies: {
-      state: {
-        attributes: {
-          sameSite: 'lax',
-          secure: process.env.NODE_ENV === 'production', // ✅ Chỉ secure khi production
+    // User hooks for custom logic
+    user: {
+      additionalFields: {
+        role: {
+          type: 'string',
+          defaultValue: DEFAULT_USER_ROLE,
+          required: false,
         },
       },
     },
-  },
 
-  trustedOrigins: [process.env.FRONTEND_URL || 'http://localhost:3000'],
+    experimental: {
+      joins: true,
+    },
 
-  plugins: [skipStateMismatch()],
-});
+    baseURL: backendUrl,
+    basePath: '/api/auth',
+
+    // Email and password authentication
+    emailAndPassword: {
+      enabled: true,
+      password: {
+        hash: async (password: string) => {
+          return await bcrypt.hash(password, BCRYPT_ROUNDS);
+        },
+        verify: async (data: { password: string; hash: string }) => {
+          return await bcrypt.compare(data.password, data.hash);
+        },
+      },
+    },
+
+    // Social authentication providers
+    socialProviders: {
+      github: {
+        clientId: githubClientId,
+        clientSecret: githubClientSecret,
+        redirectURI: `${backendUrl}/api/auth/callback/github`,
+        disableImplicitSignUp: false,
+      },
+    },
+
+    // Advanced cookie configuration
+    advanced: {
+      cookies: {
+        state: {
+          attributes: {
+            sameSite: 'lax',
+            secure: isProduction,
+          },
+        },
+      },
+    },
+
+    trustedOrigins: [frontendUrl],
+
+    plugins: [createSkipStateMismatchPlugin()],
+  };
+}
+
+/**
+ * Better Auth instance
+ * This is initialized once and reused across the application
+ */
+export const auth = betterAuth(createAuthConfig());
+
+/**
+ * Export configuration creator for testing purposes
+ */
+export { createAuthConfig };
