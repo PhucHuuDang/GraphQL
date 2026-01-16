@@ -1,9 +1,11 @@
 import { Module } from '@nestjs/common';
-import { UserService } from './user.service';
-import { UserResolver } from './user.resolver';
-import { SessionModule } from '../../modules/session/session.module';
+
 import { BetterAuthService } from '../../modules/auth/better-auth.service';
+import { SessionModule } from '../../modules/session/session.module';
 import { PrismaModule } from '../../prisma/prisma.module';
+
+import { UserResolver } from './user.resolver';
+import { UserService } from './user.service';
 // import { GithubAuthController } from './github-auth.controller';
 
 @Module({

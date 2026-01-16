@@ -6,20 +6,19 @@ import {
   NotFoundException,
   UnauthorizedException,
 } from '@nestjs/common';
-import { PrismaService } from '../../prisma/prisma.service';
-import { Post, Prisma, PostStatus } from '../../../generated/prisma';
-import {
-  BaseRepository,
-  PaginationParams,
-  PaginationResult,
-} from '../../common/base.repository';
+
 import { Redis } from '@upstash/redis';
-import { UPSTASH_REDIS } from '../../lib/key';
+
+import { Post, PostStatus, Prisma } from '../../../generated/prisma';
+import { BaseRepository, PaginationParams, PaginationResult } from '../../common/base.repository';
 import { GraphQLContext } from '../../interface/graphql.context';
-import { CreatePostInput } from './dto/create-post.dto';
-import { UpdatePostInput } from './dto/update-post.dto';
-import { PostFiltersInput } from './dto/post-filters.dto';
+import { UPSTASH_REDIS } from '../../lib/key';
+import { PrismaService } from '../../prisma/prisma.service';
 import { generateSlug } from '../../utils/slug-stringify';
+
+import { CreatePostInput } from './dto/create-post.dto';
+import { PostFiltersInput } from './dto/post-filters.dto';
+import { UpdatePostInput } from './dto/update-post.dto';
 
 @Injectable()
 export class PostsService extends BaseRepository<Post, Prisma.PostDelegate> {
@@ -36,9 +35,7 @@ export class PostsService extends BaseRepository<Post, Prisma.PostDelegate> {
   private getAuthenticatedUser(context: GraphQLContext) {
     const session = context.req['session'];
     if (!session || !session.user) {
-      throw new UnauthorizedException(
-        'You must be logged in to perform this action',
-      );
+      throw new UnauthorizedException('You must be logged in to perform this action');
     }
     return session.user;
   }
@@ -46,10 +43,7 @@ export class PostsService extends BaseRepository<Post, Prisma.PostDelegate> {
   /**
    * Verify post ownership
    */
-  private async verifyPostOwnership(
-    postId: string,
-    userId: string,
-  ): Promise<Post> {
+  private async verifyPostOwnership(postId: string, userId: string): Promise<Post> {
     const post = await this.findById(postId);
 
     if (!post) {
@@ -117,9 +111,7 @@ export class PostsService extends BaseRepository<Post, Prisma.PostDelegate> {
     });
   }
 
-  async postPaginated(
-    params: PaginationParams & Prisma.SelectSubset<any, any>,
-  ) {
+  async postPaginated(params: PaginationParams & Prisma.SelectSubset<any, any>) {
     return this.findManyPaginated(params);
   }
 
@@ -151,10 +143,7 @@ export class PostsService extends BaseRepository<Post, Prisma.PostDelegate> {
   /**
    * Create a new post
    */
-  async createPost(
-    input: CreatePostInput,
-    context: GraphQLContext,
-  ): Promise<Post> {
+  async createPost(input: CreatePostInput, context: GraphQLContext): Promise<Post> {
     const user = this.getAuthenticatedUser(context);
 
     // Generate slug from title
@@ -222,19 +211,14 @@ export class PostsService extends BaseRepository<Post, Prisma.PostDelegate> {
   /**
    * Update a post
    */
-  async updatePost(
-    id: string,
-    input: UpdatePostInput,
-    context: GraphQLContext,
-  ): Promise<Post> {
+  async updatePost(id: string, input: UpdatePostInput, context: GraphQLContext): Promise<Post> {
     const user = this.getAuthenticatedUser(context);
 
     // Verify ownership
     const post = await this.verifyPostOwnership(id, user.id);
 
     // Generate new slug if title is being updated
-    const slug =
-      input.slug || (input.title ? generateSlug(input.title) : undefined);
+    const slug = input.slug || (input.title ? generateSlug(input.title) : undefined);
 
     // Check slug uniqueness if it's being changed
     if (slug && slug !== post.slug) {
@@ -354,9 +338,7 @@ export class PostsService extends BaseRepository<Post, Prisma.PostDelegate> {
   /**
    * Find posts with advanced filters
    */
-  async findPostsWithFilters(
-    filters: PostFiltersInput,
-  ): Promise<PaginationResult<Post>> {
+  async findPostsWithFilters(filters: PostFiltersInput): Promise<PaginationResult<Post>> {
     const {
       page = 1,
       limit = 10,

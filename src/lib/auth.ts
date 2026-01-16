@@ -1,10 +1,7 @@
-import {
-  betterAuth,
-  BetterAuthPlugin,
-  type BetterAuthOptions,
-} from 'better-auth';
-import { prismaAdapter } from 'better-auth/adapters/prisma';
 import bcrypt from 'bcrypt';
+import { betterAuth, type BetterAuthOptions, BetterAuthPlugin } from 'better-auth';
+import { prismaAdapter } from 'better-auth/adapters/prisma';
+
 import { prismaForAuth } from './prisma';
 
 /**
@@ -93,12 +90,9 @@ function createAuthConfig(config: AuthConfig = {}): BetterAuthOptions {
     emailAndPassword: {
       enabled: true,
       password: {
-        hash: async (password: string) => {
-          return await bcrypt.hash(password, BCRYPT_ROUNDS);
-        },
-        verify: async (data: { password: string; hash: string }) => {
-          return await bcrypt.compare(data.password, data.hash);
-        },
+        hash: async (password: string) => await bcrypt.hash(password, BCRYPT_ROUNDS),
+        verify: async (data: { password: string; hash: string }) =>
+          await bcrypt.compare(data.password, data.hash),
       },
     },
 

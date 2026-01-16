@@ -1,5 +1,6 @@
-import type { IncomingMessage, ServerResponse } from 'http';
 import { GqlExecutionContext } from '@nestjs/graphql';
+
+import type { IncomingMessage, ServerResponse } from 'http';
 
 export interface GraphQLContext {
   req: IncomingMessage & {

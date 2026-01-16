@@ -1,19 +1,20 @@
 import { Injectable } from '@nestjs/common';
-import { UserModel } from '../../models/user.model';
-import { CreateUser } from './dto/create-user';
-import { auth } from '../../lib/auth';
-import { User, Prisma } from '../../../generated/prisma';
-import { BaseRepository } from '../../common/base.repository';
-
-import { SignInInput, SignUpInput, UpdateProfileArgs } from './dto/user.dto';
-import { GetProfileResponse, GetSessionResponse } from './auth.model';
-import { SessionService } from '../../modules/session/session.service';
-import { GraphQLContext } from '../../interface/graphql.context';
-import { BetterAuthService } from '../../modules/auth/better-auth.service';
 
 import { APIError, type User as UserType } from 'better-auth';
+
+import { Prisma, User } from '../../../generated/prisma';
+import { BaseRepository } from '../../common/base.repository';
+import { GraphQLContext } from '../../interface/graphql.context';
+import { auth } from '../../lib/auth';
 import { fromNodeHeaders } from '../../lib/transform-node-headers';
+import { UserModel } from '../../models/user.model';
+import { BetterAuthService } from '../../modules/auth/better-auth.service';
+import { SessionService } from '../../modules/session/session.service';
 import { PrismaService } from '../../prisma/prisma.service';
+
+import { CreateUser } from './dto/create-user';
+import { SignInInput, SignUpInput, UpdateProfileArgs } from './dto/user.dto';
+import { GetProfileResponse, GetSessionResponse } from './auth.model';
 
 @Injectable()
 export class UserService extends BaseRepository<User, Prisma.UserDelegate> {
@@ -143,10 +144,7 @@ export class UserService extends BaseRepository<User, Prisma.UserDelegate> {
     }
   }
 
-  async updateProfile(
-    updateProfileArgs: UpdateProfileArgs,
-    { req }: GraphQLContext,
-  ) {
+  async updateProfile(updateProfileArgs: UpdateProfileArgs, { req }: GraphQLContext) {
     const { email, name, avatarUrl, password, rememberMe } = updateProfileArgs;
 
     const headers = fromNodeHeaders(req.headers);
@@ -248,9 +246,7 @@ export class UserService extends BaseRepository<User, Prisma.UserDelegate> {
     };
   }
 
-  async getProfile({
-    req,
-  }: GraphQLContext): Promise<GetProfileResponse | null> {
+  async getProfile({ req }: GraphQLContext): Promise<GetProfileResponse | null> {
     const response = await this.authService.api.accountInfo({
       headers: fromNodeHeaders(req.headers),
     });

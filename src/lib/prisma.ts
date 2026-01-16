@@ -14,6 +14,7 @@
 // export default prisma;
 
 import { withAccelerate } from '@prisma/extension-accelerate';
+
 import { PrismaClient } from '../../generated/prisma';
 
 // ✅ Sửa type để accept extended client

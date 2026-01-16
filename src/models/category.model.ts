@@ -1,7 +1,10 @@
 import { Field, Int, ObjectType } from '@nestjs/graphql';
-import { PostModel } from '../modules/post/post.model';
-import { IsArray, IsDate, IsOptional, IsString } from 'class-validator';
+
 import { isNullableType } from 'graphql';
+
+import { IsArray, IsDate, IsOptional, IsString } from 'class-validator';
+
+import { PostModel } from '../modules/post/post.model';
 
 @ObjectType()
 export class CategoryModel {

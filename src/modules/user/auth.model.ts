@@ -1,7 +1,9 @@
 import { Field, ObjectType, PickType } from '@nestjs/graphql';
-import { UserModel } from '../../models/user.model';
-import { SessionModel } from '../../models/session.model';
+
 import GraphQLJSON from 'graphql-type-json';
+
+import { SessionModel } from '../../models/session.model';
+import { UserModel } from '../../models/user.model';
 
 @ObjectType()
 export class OAuth2UserInfoModel {

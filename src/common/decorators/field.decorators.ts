@@ -1,23 +1,25 @@
 import { applyDecorators } from '@nestjs/common';
+
 import { Field, FieldOptions, Int } from '@nestjs/graphql';
+
+import { Type } from 'class-transformer';
 import {
-  IsString,
-  IsInt,
-  IsBoolean,
-  IsOptional,
-  IsNotEmpty,
   IsArray,
+  IsBoolean,
+  IsDate,
   IsEnum,
-  MinLength,
+  IsInt,
+  IsNotEmpty,
+  IsNumber,
+  IsOptional,
+  IsString,
+  Max,
   MaxLength,
   Min,
-  Max,
+  MinLength,
   ValidateNested,
   ValidationOptions,
-  IsNumber,
-  IsDate,
 } from 'class-validator';
-import { Type } from 'class-transformer';
 
 /**
  * Reusable field decorator options
@@ -219,10 +221,7 @@ export function OptionalBooleanField(options: FieldOptions = {}) {
  * Required array field
  * @example @ArrayField(() => String)
  */
-export function ArrayField(
-  typeFunction: () => any,
-  options: FieldOptions = {},
-) {
+export function ArrayField(typeFunction: () => any, options: FieldOptions = {}) {
   return applyDecorators(
     Field(() => [typeFunction()], {
       nullable: false,
@@ -236,10 +235,7 @@ export function ArrayField(
  * Optional array field
  * @example @OptionalArrayField(() => String)
  */
-export function OptionalArrayField(
-  typeFunction: () => any,
-  options: FieldOptions = {},
-) {
+export function OptionalArrayField(typeFunction: () => any, options: FieldOptions = {}) {
   return applyDecorators(
     Field(() => [typeFunction()], {
       nullable: true,
@@ -254,10 +250,7 @@ export function OptionalArrayField(
  * Optional enum field
  * @example @OptionalEnumField(PostStatusFilter)
  */
-export function OptionalEnumField<T extends object>(
-  enumType: T,
-  options: FieldOptions = {},
-) {
+export function OptionalEnumField<T extends object>(enumType: T, options: FieldOptions = {}) {
   return applyDecorators(
     Field(() => enumType as any, {
       nullable: true,
@@ -272,10 +265,7 @@ export function OptionalEnumField<T extends object>(
  * Required enum field
  * @example @EnumField(PostStatusFilter)
  */
-export function EnumField<T extends object>(
-  enumType: T,
-  options: FieldOptions = {},
-) {
+export function EnumField<T extends object>(enumType: T, options: FieldOptions = {}) {
   return applyDecorators(
     Field(() => String, {
       nullable: false,
@@ -289,10 +279,7 @@ export function EnumField<T extends object>(
  * Optional nested object field
  * @example @OptionalObjectField(() => CreateAuthorInput)
  */
-export function OptionalObjectField(
-  typeFunction: () => any,
-  options: FieldOptions = {},
-) {
+export function OptionalObjectField(typeFunction: () => any, options: FieldOptions = {}) {
   return applyDecorators(
     Field(typeFunction, {
       nullable: true,
@@ -308,10 +295,7 @@ export function OptionalObjectField(
  * Required nested object field
  * @example @ObjectField(() => CreateAuthorInput)
  */
-export function ObjectField(
-  typeFunction: () => any,
-  options: FieldOptions = {},
-) {
+export function ObjectField(typeFunction: () => any, options: FieldOptions = {}) {
   return applyDecorators(
     Field(typeFunction, {
       nullable: false,

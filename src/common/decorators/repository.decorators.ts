@@ -4,11 +4,7 @@ import { BadRequestException } from '@nestjs/common';
  * Validates that the ID parameter is provided
  */
 export function ValidateId() {
-  return function (
-    target: any,
-    propertyKey: string,
-    descriptor: PropertyDescriptor,
-  ) {
+  return function (target: any, propertyKey: string, descriptor: PropertyDescriptor) {
     const originalMethod = descriptor.value;
 
     descriptor.value = async function (...args: any[]) {
@@ -27,22 +23,13 @@ export function ValidateId() {
  * Validates that the where condition is provided
  */
 export function ValidateWhere(paramIndex: number = 0) {
-  return function (
-    target: any,
-    propertyKey: string,
-    descriptor: PropertyDescriptor,
-  ) {
+  return function (target: any, propertyKey: string, descriptor: PropertyDescriptor) {
     const originalMethod = descriptor.value;
 
     descriptor.value = async function (...args: any[]) {
       const where = args[paramIndex];
-      if (
-        !where ||
-        (typeof where === 'object' && Object.keys(where).length === 0)
-      ) {
-        throw new BadRequestException(
-          `Where condition is required for ${propertyKey}`,
-        );
+      if (!where || (typeof where === 'object' && Object.keys(where).length === 0)) {
+        throw new BadRequestException(`Where condition is required for ${propertyKey}`);
       }
       return await originalMethod.apply(this, args);
     };
@@ -55,19 +42,12 @@ export function ValidateWhere(paramIndex: number = 0) {
  * Validates that data is provided and not empty
  */
 export function ValidateData(paramIndex: number = 0) {
-  return function (
-    target: any,
-    propertyKey: string,
-    descriptor: PropertyDescriptor,
-  ) {
+  return function (target: any, propertyKey: string, descriptor: PropertyDescriptor) {
     const originalMethod = descriptor.value;
 
     descriptor.value = async function (...args: any[]) {
       const data = args[paramIndex];
-      if (
-        !data ||
-        (typeof data === 'object' && Object.keys(data).length === 0)
-      ) {
+      if (!data || (typeof data === 'object' && Object.keys(data).length === 0)) {
         throw new BadRequestException(`Data is required for ${propertyKey}`);
       }
       return await originalMethod.apply(this, args);
@@ -81,19 +61,13 @@ export function ValidateData(paramIndex: number = 0) {
  * Validates that array data is provided and not empty
  */
 export function ValidateArray(paramIndex: number = 0) {
-  return function (
-    target: any,
-    propertyKey: string,
-    descriptor: PropertyDescriptor,
-  ) {
+  return function (target: any, propertyKey: string, descriptor: PropertyDescriptor) {
     const originalMethod = descriptor.value;
 
     descriptor.value = async function (...args: any[]) {
       const data = args[paramIndex];
       if (!data || !Array.isArray(data) || data.length === 0) {
-        throw new BadRequestException(
-          `Non-empty array is required for ${propertyKey}`,
-        );
+        throw new BadRequestException(`Non-empty array is required for ${propertyKey}`);
       }
       return await originalMethod.apply(this, args);
     };
@@ -106,11 +80,7 @@ export function ValidateArray(paramIndex: number = 0) {
  * Validates pagination parameters
  */
 export function ValidatePagination() {
-  return function (
-    target: any,
-    propertyKey: string,
-    descriptor: PropertyDescriptor,
-  ) {
+  return function (target: any, propertyKey: string, descriptor: PropertyDescriptor) {
     const originalMethod = descriptor.value;
 
     descriptor.value = async function (...args: any[]) {

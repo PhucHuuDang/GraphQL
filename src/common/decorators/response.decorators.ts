@@ -3,13 +3,7 @@ import { SetMetadata } from '@nestjs/common';
 /**
  * Response type options
  */
-export type ResponseType =
-  | 'single'
-  | 'array'
-  | 'paginated'
-  | 'delete'
-  | 'bulk'
-  | 'raw';
+export type ResponseType = 'single' | 'array' | 'paginated' | 'delete' | 'bulk' | 'raw';
 
 /**
  * Decorator to specify response transformation type
@@ -74,5 +68,4 @@ export const BulkOperation = (message?: string) =>
  * @RawResponse()
  * async getCustomData() { ... }
  */
-export const RawResponse = () =>
-  SetMetadata('response:metadata', { type: 'raw' });
+export const RawResponse = () => SetMetadata('response:metadata', { type: 'raw' });

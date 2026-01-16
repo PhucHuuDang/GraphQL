@@ -1,6 +1,9 @@
 import { Field, InputType } from '@nestjs/graphql';
-import { IsOptional } from 'class-validator';
+
 import GraphQLJSON from 'graphql-type-json';
+
+import { IsOptional } from 'class-validator';
+
 import {
   OptionalBooleanField,
   OptionalStringArrayField,

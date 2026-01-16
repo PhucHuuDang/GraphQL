@@ -1,12 +1,10 @@
-import {
-  Injectable,
-  NestInterceptor,
-  ExecutionContext,
-  CallHandler,
-} from '@nestjs/common';
+import { CallHandler, ExecutionContext, Injectable, NestInterceptor } from '@nestjs/common';
+
 import { GqlExecutionContext } from '@nestjs/graphql';
+
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
+
 import { PaginationResult } from '../base.repository';
 
 /**
@@ -37,12 +35,7 @@ function isPaginationResult(data: any): data is PaginationResult<any> {
  * Check if response is already transformed
  */
 function isAlreadyTransformed(data: any): boolean {
-  return (
-    data &&
-    typeof data === 'object' &&
-    'success' in data &&
-    typeof data.success === 'boolean'
-  );
+  return data && typeof data === 'object' && 'success' in data && typeof data.success === 'boolean';
 }
 
 /**
@@ -107,12 +100,7 @@ export class ResponseTransformInterceptor implements NestInterceptor {
         }
 
         // Transform based on response type
-        return this.transformResponse(
-          data,
-          operationName,
-          operationType,
-          metadata,
-        );
+        return this.transformResponse(data, operationName, operationType, metadata);
       }),
     );
   }
@@ -182,10 +170,7 @@ export class ResponseTransformInterceptor implements NestInterceptor {
     };
   }
 
-  private getDefaultMessage(
-    operationName: string,
-    operationType: string,
-  ): string {
+  private getDefaultMessage(operationName: string, operationType: string): string {
     if (operationType === 'mutation') {
       if (operationName.toLowerCase().includes('create')) {
         return 'Resource created successfully';

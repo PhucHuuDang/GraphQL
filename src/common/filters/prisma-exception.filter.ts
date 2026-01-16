@@ -6,14 +6,18 @@ import {
   HttpStatus,
   Logger,
 } from '@nestjs/common';
+
+import { GqlArgumentsHost, GqlContextType } from '@nestjs/graphql';
+
+import { GraphQLError } from 'graphql';
+
 import {
   PrismaClientInitializationError,
   PrismaClientKnownRequestError,
-  PrismaClientValidationError,
   PrismaClientRustPanicError,
+  PrismaClientValidationError,
 } from '@prisma/client/runtime/library';
-import { GqlArgumentsHost, GqlContextType } from '@nestjs/graphql';
-import { GraphQLError } from 'graphql';
+
 import { Response } from 'express';
 
 interface PrismaErrorMapping {
@@ -141,9 +145,7 @@ export class PrismaExceptionFilter implements ExceptionFilter {
         // ==================== Constraint Violations ====================
         case 'P2002': {
           const target = error.meta?.target;
-          const fields = Array.isArray(target)
-            ? target.join(', ')
-            : target || 'unknown';
+          const fields = Array.isArray(target) ? target.join(', ') : target || 'unknown';
 
           return {
             status: HttpStatus.CONFLICT,

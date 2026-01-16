@@ -1,11 +1,12 @@
 import { ObjectType } from '@nestjs/graphql';
-import { PostModel } from '../post.model';
+
 import {
   ArrayResponse,
   DeleteResponse,
   PaginatedResponse,
   SingleResponse,
 } from '../../../common/types/response.types';
+import { PostModel } from '../post.model';
 
 /**
  * Paginated posts response

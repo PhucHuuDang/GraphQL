@@ -7,13 +7,10 @@
  * Usage: Import and call this function at app initialization
  */
 
-import {
-  batchRegisterEnums,
-  dynamicRegisterEnum,
-} from './dynamic-register-enum';
-
 // Import all your enums
 import { PostStatusFilter } from '../../modules/post/dto/post-filters.dto';
+
+import { batchRegisterEnums, dynamicRegisterEnum } from './dynamic-register-enum';
 
 /**
  * Example enums (you would import these from your actual modules)
@@ -56,10 +53,7 @@ export enum NotificationFrequency {
  */
 export function registerAllEnums() {
   batchRegisterEnums<
-    | typeof UserRole
-    | typeof CommentStatus
-    | typeof CategoryType
-    | typeof NotificationFrequency
+    typeof UserRole | typeof CommentStatus | typeof CategoryType | typeof NotificationFrequency
   >([
     // User-related enums
     {
@@ -135,8 +129,7 @@ export function registerEnumsIndividually() {
       GUEST: 'Guest user with read-only access',
     },
     deprecationReasons: {
-      GUEST:
-        'Guest role is being phased out. Use USER with limited permissions instead.',
+      GUEST: 'Guest role is being phased out. Use USER with limited permissions instead.',
     },
     debug: process.env.NODE_ENV === 'development',
   });

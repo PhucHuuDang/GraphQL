@@ -1,12 +1,18 @@
-import type {
+// import type { CanActivate, ContextType, ExecutionContext } from '@nestjs/common';
+import {
   CanActivate,
-  ContextType,
-  ExecutionContext,
+  type ContextType,
+  type ExecutionContext,
+  Inject,
+  Injectable,
+  UnauthorizedException,
 } from '@nestjs/common';
-import { Inject, Injectable, UnauthorizedException } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
+
 import { GqlExecutionContext } from '@nestjs/graphql';
 
+// import type { Auth } from 'better-auth';
+import { FastifyRequest } from 'fastify';
 import { Socket } from 'socket.io';
 
 import {
@@ -14,11 +20,11 @@ import {
   IS_OPTIONAL_AUTH,
   IS_PUBLIC_AUTH,
 } from '../../constants/auth.constants';
-// import type { Auth } from 'better-auth';
-import { FastifyRequest } from 'fastify';
 import { fromNodeHeaders } from '../../lib/transform-node-headers';
-import type { Auth } from 'better-auth';
+
 import { BetterAuthService } from './better-auth.service';
+
+import type { Auth } from 'better-auth';
 
 @Injectable()
 export class AuthGuard implements CanActivate {
@@ -36,10 +42,10 @@ export class AuthGuard implements CanActivate {
    * @returns True if the request is authorized to proceed, throws an error otherwise
    */
   async canActivate(context: ExecutionContext): Promise<boolean> {
-    const isAuthPublic = this.reflector.getAllAndOverride<boolean>(
-      IS_PUBLIC_AUTH,
-      [context.getHandler(), context.getClass()],
-    );
+    const isAuthPublic = this.reflector.getAllAndOverride<boolean>(IS_PUBLIC_AUTH, [
+      context.getHandler(),
+      context.getClass(),
+    ]);
 
     if (isAuthPublic) return true;
 
@@ -75,10 +81,10 @@ export class AuthGuard implements CanActivate {
     request['session'] = session;
     request['user'] = session?.user ?? null; // For Sentry
 
-    const isAuthOptional = this.reflector.getAllAndOverride<boolean>(
-      IS_OPTIONAL_AUTH,
-      [context.getHandler(), context.getClass()],
-    );
+    const isAuthOptional = this.reflector.getAllAndOverride<boolean>(IS_OPTIONAL_AUTH, [
+      context.getHandler(),
+      context.getClass(),
+    ]);
 
     if (isAuthOptional && !session) return true;
 

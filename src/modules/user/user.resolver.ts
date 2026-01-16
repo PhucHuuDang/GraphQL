@@ -1,12 +1,11 @@
-import { Resolver, Query, Mutation, Args, Int, Context } from '@nestjs/graphql';
-import { UserService } from './user.service';
-import { UserModel } from '../../models/user.model';
-import { CreateUser } from './dto/create-user';
+import { Args, Context, Int, Mutation, Query, Resolver } from '@nestjs/graphql';
 
 import { AccountModel } from '../../models/account.model';
+import { UserModel } from '../../models/user.model';
 
+import { CreateUser } from './dto/create-user';
+import { SignInInput, SignUpInput, UpdateProfileArgs } from './dto/user.dto';
 // import { User } from 'better-auth';
-
 import {
   GetProfileResponse,
   GetSessionResponse,
@@ -15,7 +14,8 @@ import {
   SignOutResponse,
   SignUpEmailUser,
 } from './auth.model';
-import { SignInInput, SignUpInput, UpdateProfileArgs } from './dto/user.dto';
+import { UserService } from './user.service';
+
 import type { GraphQLContext } from '../../interface/graphql.context';
 
 @Resolver(() => UserModel)
@@ -37,10 +37,7 @@ export class UserResolver {
   }
 
   @Mutation(() => UserModel)
-  async updateProfile(
-    @Args() args: UpdateProfileArgs,
-    @Context() context: GraphQLContext,
-  ) {
+  async updateProfile(@Args() args: UpdateProfileArgs, @Context() context: GraphQLContext) {
     const response = await this.userService.updateProfile(args, context);
     return response;
   }
@@ -58,10 +55,7 @@ export class UserResolver {
   }
 
   @Mutation(() => SignInEmailUser)
-  async signInEmail(
-    @Args('signInInput') signInInput: SignInInput,
-    @Context() ctx: GraphQLContext,
-  ) {
+  async signInEmail(@Args('signInInput') signInInput: SignInInput, @Context() ctx: GraphQLContext) {
     const response = await this.userService.signInEmail(signInInput, ctx);
 
     if ('errors' in response) {

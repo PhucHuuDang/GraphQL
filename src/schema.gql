@@ -234,22 +234,22 @@ type PostResponse {
 
 """Filter posts by their status"""
 enum PostStatusFilter {
-  """Approved posts"""
+  """Approved posts ready to be published"""
   APPROVED
 
-  """Posts in draft state"""
+  """Posts in draft state - not visible to public"""
   DRAFT
 
-  """Posts pending approval"""
+  """Posts pending moderator approval"""
   PENDING
 
-  """Published posts"""
+  """Published posts visible to everyone"""
   PUBLISHED
 
-  """Rejected posts"""
+  """Rejected posts that failed moderation"""
   REJECTED
 
-  """Unpublished posts"""
+  """Previously published posts that are now hidden"""
   UNPUBLISHED
 }
 

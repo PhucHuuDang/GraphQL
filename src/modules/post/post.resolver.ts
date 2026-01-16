@@ -1,9 +1,17 @@
 import { UseGuards } from '@nestjs/common';
+
 import { Args, Context, Int, Mutation, Query, Resolver } from '@nestjs/graphql';
-import { PostModel } from './post.model';
-import { PostsService } from './post.service';
+
+import {
+  ArrayItems,
+  DeleteOperation,
+  Paginated,
+  SingleItem,
+} from '../../common/decorators/response.decorators';
+import { generateSlug } from '../../utils/slug-stringify';
+import { AuthGuard } from '../auth/auth.guard';
+
 import { CreatePostInput } from './dto/create-post.dto';
-import { UpdatePostInput } from './dto/update-post.dto';
 import { PostFiltersInput } from './dto/post-filters.dto';
 import {
   DeletePostResponse,
@@ -11,15 +19,11 @@ import {
   PostResponse,
   PostsArrayResponse,
 } from './dto/post-response.dto';
+import { UpdatePostInput } from './dto/update-post.dto';
+import { PostModel } from './post.model';
+import { PostsService } from './post.service';
+
 import type { GraphQLContext } from '../../interface/graphql.context';
-import { AuthGuard } from '../auth/auth.guard';
-import { generateSlug } from '../../utils/slug-stringify';
-import {
-  ArrayItems,
-  DeleteOperation,
-  Paginated,
-  SingleItem,
-} from '../../common/decorators/response.decorators';
 
 /**
  * GraphQL Resolver for Post operations
@@ -47,10 +51,7 @@ export class PostResolver {
   /**
    * Get unique identifier for view tracking
    */
-  private getIdentifier(
-    { req, res }: GraphQLContext,
-    identifier: string,
-  ): string {
+  private getIdentifier({ req, res }: GraphQLContext, identifier: string): string {
     if (identifier) {
       return `guest:${identifier}`;
     }
@@ -100,9 +101,7 @@ export class PostResolver {
    */
   @ArrayItems('Priority posts retrieved successfully')
   @Query(() => PostsArrayResponse, { name: 'priorityPosts' })
-  async getPriorityPosts(
-    @Args('limit', { type: () => Int, defaultValue: 10 }) limit: number,
-  ) {
+  async getPriorityPosts(@Args('limit', { type: () => Int, defaultValue: 10 }) limit: number) {
     return await this.postsService.findPriorityPosts(limit);
   }
 
@@ -140,10 +139,7 @@ export class PostResolver {
     name: 'myPosts',
     description: "Get current user's posts",
   })
-  async getMyPosts(
-    @Args('filters') filters: PostFiltersInput,
-    @Context() context: GraphQLContext,
-  ) {
+  async getMyPosts(@Args('filters') filters: PostFiltersInput, @Context() context: GraphQLContext) {
     return await this.postsService.getMyPosts(filters, context);
   }
 
@@ -158,10 +154,7 @@ export class PostResolver {
   @Mutation(() => PostResponse, {
     description: 'Create a new post (requires authentication)',
   })
-  async createPost(
-    @Args('input') input: CreatePostInput,
-    @Context() context: GraphQLContext,
-  ) {
+  async createPost(@Args('input') input: CreatePostInput, @Context() context: GraphQLContext) {
     return await this.postsService.createPost(input, context);
   }
 

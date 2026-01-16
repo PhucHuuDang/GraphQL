@@ -1,4 +1,5 @@
 import { Controller, Get, Query, Req, Res } from '@nestjs/common';
+
 import { UserService } from './user.service';
 
 @Controller('api/auth/callback')

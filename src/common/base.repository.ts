@@ -1,11 +1,8 @@
-import {
-  BadRequestException,
-  ConflictException,
-  Logger,
-  NotFoundException,
-} from '@nestjs/common';
+import { BadRequestException, ConflictException, Logger, NotFoundException } from '@nestjs/common';
+
 import { Prisma } from '../../generated/prisma';
 import { PrismaService } from '../prisma/prisma.service';
+
 import {
   ValidateArray,
   ValidateData,
@@ -48,10 +45,7 @@ export interface BulkOperationResult {
   success: boolean;
 }
 
-export abstract class BaseRepository<
-  T,
-  ModelDelegate extends { [key: string]: any },
-> {
+export abstract class BaseRepository<T, ModelDelegate extends { [key: string]: any }> {
   protected readonly logger: Logger;
 
   constructor(
@@ -103,10 +97,7 @@ export abstract class BaseRepository<
    * Find record by ID
    */
   @ValidateId()
-  async findById(
-    id: string,
-    params?: Prisma.SelectSubset<any, any>,
-  ): Promise<T | null> {
+  async findById(id: string, params?: Prisma.SelectSubset<any, any>): Promise<T | null> {
     return await this.model.findUnique({ where: { id }, ...(params as any) });
   }
 
@@ -114,10 +105,7 @@ export abstract class BaseRepository<
    * Find record by ID or throw NotFoundException
    */
   @ValidateId()
-  async findByIdOrFail(
-    id: string,
-    params?: Prisma.SelectSubset<any, any>,
-  ): Promise<T> {
+  async findByIdOrFail(id: string, params?: Prisma.SelectSubset<any, any>): Promise<T> {
     const result = await this.findById(id, params);
     if (!result) {
       throw new NotFoundException(`Record with id ${id} not found`);
@@ -220,10 +208,7 @@ export abstract class BaseRepository<
    * Create multiple records
    */
   @ValidateArray()
-  async createMany(
-    data: any[],
-    skipDuplicates: boolean = false,
-  ): Promise<BulkOperationResult> {
+  async createMany(data: any[], skipDuplicates: boolean = false): Promise<BulkOperationResult> {
     const result = await this.model.createMany({ data, skipDuplicates });
     return { count: result.count, success: true };
   }
@@ -252,10 +237,7 @@ export abstract class BaseRepository<
    */
   @ValidateWhere()
   @ValidateData(1)
-  async updateMany(
-    where: Prisma.SelectSubset<any, any>,
-    data: any,
-  ): Promise<BulkOperationResult> {
+  async updateMany(where: Prisma.SelectSubset<any, any>, data: any): Promise<BulkOperationResult> {
     const result = await this.model.updateMany({ where, ...data });
     return { count: result.count, success: true };
   }
@@ -263,16 +245,9 @@ export abstract class BaseRepository<
   /**
    * Upsert operation (update or create)
    */
-  async upsert(
-    where: any,
-    create: any,
-    update: any,
-    include?: any,
-  ): Promise<T> {
+  async upsert(where: any, create: any, update: any, include?: any): Promise<T> {
     if (!where || !create || !update) {
-      throw new BadRequestException(
-        'Where, create, and update are required for upsert',
-      );
+      throw new BadRequestException('Where, create, and update are required for upsert');
     }
     return await this.model.upsert({ where, create, update, include });
   }
@@ -281,12 +256,8 @@ export abstract class BaseRepository<
    * Bulk upsert operations
    */
   @ValidateArray()
-  async bulkUpsert(
-    records: Array<{ where: any; create: any; update: any }>,
-  ): Promise<T[]> {
-    return await this.prisma.$transaction(
-      records.map((record) => this.model.upsert(record)),
-    );
+  async bulkUpsert(records: Array<{ where: any; create: any; update: any }>): Promise<T[]> {
+    return await this.prisma.$transaction(records.map((record) => this.model.upsert(record)));
   }
 
   // ==================== DELETE OPERATIONS ====================
@@ -370,12 +341,10 @@ export abstract class BaseRepository<
   /**
    * Run multiple operations in parallel within a transaction
    */
-  async transactionBatch<R>(
-    operations: Array<(tx: any) => Promise<R>>,
-  ): Promise<R[]> {
-    return await this.prisma.$transaction(async (tx) => {
-      return await Promise.all(operations.map((op) => op(tx)));
-    });
+  async transactionBatch<R>(operations: Array<(tx: any) => Promise<R>>): Promise<R[]> {
+    return await this.prisma.$transaction(
+      async (tx) => await Promise.all(operations.map((op) => op(tx))),
+    );
   }
 
   // ==================== AGGREGATION OPERATIONS ====================
@@ -501,11 +470,7 @@ export abstract class BaseRepository<
   /**
    * Search records with full-text search
    */
-  async search(
-    searchTerm: string,
-    searchFields: string[],
-    options?: QueryOptions,
-  ): Promise<T[]> {
+  async search(searchTerm: string, searchFields: string[], options?: QueryOptions): Promise<T[]> {
     const searchConditions = searchFields.map((field) => ({
       [field]: { contains: searchTerm, mode: 'insensitive' as any },
     }));

@@ -1,5 +1,7 @@
-import { ObjectType, Field, Int, InputType } from '@nestjs/graphql';
+import { Field, InputType, Int, ObjectType } from '@nestjs/graphql';
+
 import GraphQLJSON from 'graphql-type-json';
+
 import { CategoryModel } from '../../models/category.model';
 import { UserModel } from '../../models/user.model';
 

@@ -1,8 +1,9 @@
-import { ObjectType, Field, Int, PickType, InputType } from '@nestjs/graphql';
+import { Field, InputType, Int, ObjectType, PickType } from '@nestjs/graphql';
+
+import { AccountModel } from './account.model';
 import { Comment } from './comment.model';
 import { LikeModel } from './like.model';
 import { SessionModel } from './session.model';
-import { AccountModel } from './account.model';
 
 @ObjectType()
 export class UserModel {

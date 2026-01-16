@@ -1,6 +1,9 @@
-import { Global, Module, Logger } from '@nestjs/common';
-import { BetterAuthService } from './better-auth.service';
+import { Global, Logger, Module } from '@nestjs/common';
+
 import { AUTH_INSTANCE_KEY } from '../../constants/auth.constants';
+
+import { BetterAuthService } from './better-auth.service';
+
 import type { Auth } from 'better-auth';
 
 /**
