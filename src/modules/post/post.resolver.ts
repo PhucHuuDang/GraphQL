@@ -1,16 +1,26 @@
-import { BadRequestException, UnauthorizedException } from '@nestjs/common';
+import { UseGuards } from '@nestjs/common';
 import { Args, Context, Int, Mutation, Query, Resolver } from '@nestjs/graphql';
-import { Request } from 'express';
-import GraphQLJSON from 'graphql-type-json';
-import { PostModel, PostPaginationInput } from './post.model';
-import { UpdatePostInput } from './update-post.model';
+import { PostModel } from './post.model';
 import { PostsService } from './post.service';
-import { generateSlug } from '../../utils/slug-stringify';
+import { CreatePostInput } from './dto/create-post.dto';
+import { UpdatePostInput } from './dto/update-post.dto';
+import { PostFiltersInput } from './dto/post-filters.dto';
 import type { GraphQLContext } from '../../interface/graphql.context';
+import { AuthGuard } from '../auth/auth.guard';
+import { generateSlug } from '../../utils/slug-stringify';
 
+/**
+ * GraphQL Resolver for Post operations
+ * Handles CRUD operations for blog posts
+ */
 @Resolver(() => PostModel)
 export class PostResolver {
-  private getClientIp({ req }: GraphQLContext) {
+  constructor(private readonly postsService: PostsService) {}
+
+  /**
+   * Get client IP address from request headers
+   */
+  private getClientIp({ req }: GraphQLContext): string {
     const ip =
       req.headers['cf-connecting-ip'] ||
       req.headers['x-real-ip'] ||
@@ -21,7 +31,14 @@ export class PostResolver {
 
     return ((ip as string) || 'unknown').replace('::ffff:', '');
   }
-  private getIdentifier({ req, res }: GraphQLContext, identifier: string) {
+
+  /**
+   * Get unique identifier for view tracking
+   */
+  private getIdentifier(
+    { req, res }: GraphQLContext,
+    identifier: string,
+  ): string {
     if (identifier) {
       return `guest:${identifier}`;
     }
@@ -33,130 +50,144 @@ export class PostResolver {
 
     return `anonymous:${Date.now()}`;
   }
-  constructor(private readonly postsService: PostsService) {}
 
-  @Query(() => [PostModel], { name: 'allPosts' })
-  async findAllPosts() {
-    const test = await this.postsService.findAll({
-      include: {
-        author: true,
-        category: true,
-      },
-    });
+  // ==================== Queries ====================
 
-    console.log({ test });
+  /**
+   * Get posts with advanced filtering and pagination
+   */
+  @Query(() => Object, {
+    name: 'posts',
+    description: 'Get posts with filters and pagination',
+  })
+  async getPosts(@Args('filters') filters: PostFiltersInput) {
+    return await this.postsService.findPostsWithFilters(filters);
+  }
 
-    return await this.postsService.findAll({
-      include: {
-        author: true,
-        category: true,
-      },
+  /**
+   * Get published posts only
+   */
+  @Query(() => Object, {
+    name: 'publishedPosts',
+    description: 'Get only published posts',
+  })
+  async getPublishedPosts(@Args('filters') filters: PostFiltersInput) {
+    return await this.postsService.findPostsWithFilters({
+      ...filters,
+      isPublished: true,
     });
   }
 
+  /**
+   * Get priority/featured posts
+   */
   @Query(() => [PostModel], { name: 'priorityPosts' })
-  async findPriorityPosts(
+  async getPriorityPosts(
     @Args('limit', { type: () => Int, defaultValue: 10 }) limit: number,
   ) {
-    return this.postsService.findPriorityPosts(limit);
+    return await this.postsService.findPriorityPosts(limit);
   }
 
-  @Query(() => [PostModel], { name: 'postPaginated' })
-  async postPaginated(
-    @Args('params', { type: () => PostPaginationInput })
-    params: PostPaginationInput,
+  /**
+   * Get a single post by ID
+   */
+  @Query(() => PostModel, {
+    name: 'post',
+    description: 'Get a single post by ID',
+  })
+  async getPostById(@Args('id', { type: () => String }) id: string) {
+    return await this.postsService.getPostById(id);
+  }
+
+  /**
+   * Get a single post by slug
+   */
+  @Query(() => PostModel, {
+    name: 'postBySlug',
+    description: 'Get a single post by slug',
+  })
+  async getPostBySlug(@Args('slug', { type: () => String }) slug: string) {
+    const normalizedSlug = generateSlug(slug);
+    return await this.postsService.findBySlug(normalizedSlug);
+  }
+
+  /**
+   * Get my posts (authenticated user's posts)
+   */
+  @UseGuards(AuthGuard)
+  @Query(() => Object, {
+    name: 'myPosts',
+    description: "Get current user's posts",
+  })
+  async getMyPosts(
+    @Args('filters') filters: PostFiltersInput,
+    @Context() context: GraphQLContext,
   ) {
-    return this.postsService.postPaginated({
-      page: params.page,
-      limit: params.limit,
-      extra: params.extra,
-    });
+    return await this.postsService.getMyPosts(filters, context);
   }
 
-  @Query(() => PostModel)
-  async findPostBySlug(
-    @Args(
-      'slug',
-      { type: () => String },
-      {
-        transform(value, metadata) {
-          return generateSlug(value);
-        },
-      },
-    )
-    slug: string,
-  ) {
-    return await this.postsService.findBySlug(slug);
-  }
+  // ==================== Mutations ====================
 
-  @Query(() => PostModel, { name: 'findPostById' })
-  async findPostById(@Args('id', { type: () => String }) id: string) {
-    return await this.postsService.findById(id);
-  }
-
-  @Mutation(() => PostModel)
+  /**
+   * Create a new post
+   * Requires authentication
+   */
+  @UseGuards(AuthGuard)
+  @Mutation(() => PostModel, {
+    description: 'Create a new post (requires authentication)',
+  })
   async createPost(
-    @Args('title') title: string,
-    @Args('description', { type: () => String }) description: string,
-    @Args('tags', { type: () => [String] }) tags: string[],
-    @Args('content', { type: () => GraphQLJSON }) content: any,
-    @Args('mainImage', { type: () => String }) mainImage: string,
-    @Args('authorId', { type: () => String }) authorId: string,
-    @Args('categoryId', { type: () => String }) categoryId: string,
-    @Args('slug', { type: () => String }) slug: string,
-    @Args('isPublished', { type: () => Boolean }) isPublished: boolean,
+    @Args('input') input: CreatePostInput,
+    @Context() context: GraphQLContext,
   ) {
-    return this.postsService.createPost({
-      title,
-      description,
-      mainImage,
-      author: { connect: { id: authorId } },
-      category: categoryId ? { connect: { id: categoryId } } : undefined,
-      tags,
-      content: content,
-      slug,
-      isPublished,
-    });
+    return await this.postsService.createPost(input, context);
   }
 
-  @Mutation(() => PostModel)
+  /**
+   * Update an existing post
+   * Requires authentication and ownership
+   */
+  @UseGuards(AuthGuard)
+  @Mutation(() => PostModel, {
+    description: 'Update a post (requires ownership)',
+  })
   async updatePost(
     @Args('id', { type: () => String }) id: string,
-    @Args('data', { type: () => UpdatePostInput })
-    data: UpdatePostInput,
-
+    @Args('input') input: UpdatePostInput,
     @Context() context: GraphQLContext,
   ) {
-    if (!id) {
-      throw new BadRequestException('Id is required for update');
-    }
-    if (!data) {
-      throw new BadRequestException('Data is required for update');
-    }
-
-    return await this.postsService.updatePost(
-      id,
-      {
-        ...data,
-        ...(data.slug ? { slug: generateSlug(data.slug) } : {}),
-        updatedAt: new Date(),
-      },
-      context,
-    );
+    return await this.postsService.updatePost(id, input, context);
   }
 
-  @Mutation(() => PostModel)
-  async deletePost(@Args('id', { type: () => String }) id: string) {
-    return this.postsService.deletePost(id);
+  /**
+   * Delete a post (soft delete)
+   * Requires authentication and ownership
+   */
+  @UseGuards(AuthGuard)
+  @Mutation(() => PostModel, {
+    description: 'Delete a post (requires ownership)',
+  })
+  async deletePost(
+    @Args('id', { type: () => String }) id: string,
+    @Context() context: GraphQLContext,
+  ) {
+    return await this.postsService.deletePost(id, context);
   }
 
-  @Mutation(() => PostModel)
+  /**
+   * Increment view count for a post
+   * Uses caching to prevent duplicate views
+   */
+  @Mutation(() => PostModel, {
+    description: 'Increment post view count',
+  })
   async incrementViews(
     @Args('id', { type: () => String }) id: string,
-    @Args('identifier', { type: () => String }) identifier: string,
+    @Args('identifier', { type: () => String, nullable: true })
+    identifier: string,
     @Context() context: GraphQLContext,
   ) {
-    const identifierResult = this.getIdentifier(context, identifier);
-    return await this.postsService.incrementViews(id, identifierResult);
+    const viewIdentifier = this.getIdentifier(context, identifier);
+    return await this.postsService.incrementViews(id, viewIdentifier);
   }
 }
