@@ -1,0 +1,217 @@
+# Test GraphQL Queries for PostStatusFilter Enum
+
+# 1. Get all published posts
+query GetPublishedPosts {
+  posts(
+    filters: {
+      status: PUBLISHED
+      page: 1
+      limit: 10
+    }
+  ) {
+    success
+    message
+    data {
+      id
+      title
+      description
+      mainImage
+      author {
+        id
+        name
+      }
+      createdAt
+    }
+    meta {
+      total
+      page
+      limit
+      totalPages
+      hasNext
+      hasPrev
+    }
+  }
+}
+
+# 2. Get draft posts (authenticated users only)
+query GetDraftPosts {
+  myPosts(
+    filters: {
+      status: DRAFT
+      sortBy: "updatedAt"
+      sortOrder: "desc"
+    }
+  ) {
+    success
+    message
+    data {
+      id
+      title
+      updatedAt
+    }
+  }
+}
+
+# 3. Get pending posts (admin/moderator review)
+query GetPendingPosts {
+  posts(
+    filters: {
+      status: PENDING
+      page: 1
+      limit: 20
+    }
+  ) {
+    success
+    data {
+      id
+      title
+      author {
+        name
+        email
+      }
+      createdAt
+    }
+  }
+}
+
+# 4. Get approved posts
+query GetApprovedPosts {
+  posts(filters: { status: APPROVED }) {
+    success
+    data {
+      id
+      title
+    }
+  }
+}
+
+# 5. Get rejected posts
+query GetRejectedPosts {
+  posts(filters: { status: REJECTED }) {
+    success
+    data {
+      id
+      title
+    }
+  }
+}
+
+# 6. Get unpublished posts
+query GetUnpublishedPosts {
+  posts(filters: { status: UNPUBLISHED }) {
+    success
+    data {
+      id
+      title
+    }
+  }
+}
+
+# 7. Combined filters with status
+query GetFilteredPosts {
+  posts(
+    filters: {
+      status: PUBLISHED
+      search: "javascript"
+      tags: ["tutorial"]
+      isPriority: true
+      page: 1
+      limit: 10
+      sortBy: "views"
+      sortOrder: "desc"
+    }
+  ) {
+    success
+    message
+    data {
+      id
+      title
+      views
+      tags
+    }
+    meta {
+      total
+    }
+  }
+}
+
+# 8. Get single post by ID
+query GetPost {
+  post(id: "some-post-id") {
+    success
+    data {
+      id
+      title
+      content
+      author {
+        name
+      }
+    }
+  }
+}
+
+# 9. Get post by slug
+query GetPostBySlug {
+  postBySlug(slug: "my-awesome-post") {
+    success
+    data {
+      id
+      title
+      slug
+      content
+    }
+  }
+}
+
+# 10. Introspect the enum to verify it's registered
+query IntrospectPostStatusFilter {
+  __type(name: "PostStatusFilter") {
+    name
+    kind
+    description
+    enumValues {
+      name
+      description
+    }
+  }
+}
+
+# Expected response for introspection:
+# {
+#   "data": {
+#     "__type": {
+#       "name": "PostStatusFilter",
+#       "kind": "ENUM",
+#       "description": "Filter posts by their status",
+#       "enumValues": [
+#         { "name": "DRAFT", "description": "Posts in draft state" },
+#         { "name": "PENDING", "description": "Posts pending approval" },
+#         { "name": "APPROVED", "description": "Approved posts" },
+#         { "name": "REJECTED", "description": "Rejected posts" },
+#         { "name": "PUBLISHED", "description": "Published posts" },
+#         { "name": "UNPUBLISHED", "description": "Unpublished posts" }
+#       ]
+#     }
+#   }
+# }
+
+# 11. Test with variables
+query GetPostsByStatus($status: PostStatusFilter!, $page: Int, $limit: Int) {
+  posts(filters: { status: $status, page: $page, limit: $limit }) {
+    success
+    data {
+      id
+      title
+    }
+    meta {
+      total
+    }
+  }
+}
+
+# Variables for query #11:
+# {
+#   "status": "PUBLISHED",
+#   "page": 1,
+#   "limit": 10
+# }

@@ -5,9 +5,21 @@ import { PostsService } from './post.service';
 import { CreatePostInput } from './dto/create-post.dto';
 import { UpdatePostInput } from './dto/update-post.dto';
 import { PostFiltersInput } from './dto/post-filters.dto';
+import {
+  DeletePostResponse,
+  PaginatedPostsResponse,
+  PostResponse,
+  PostsArrayResponse,
+} from './dto/post-response.dto';
 import type { GraphQLContext } from '../../interface/graphql.context';
 import { AuthGuard } from '../auth/auth.guard';
 import { generateSlug } from '../../utils/slug-stringify';
+import {
+  ArrayItems,
+  DeleteOperation,
+  Paginated,
+  SingleItem,
+} from '../../common/decorators/response.decorators';
 
 /**
  * GraphQL Resolver for Post operations
@@ -56,18 +68,23 @@ export class PostResolver {
   /**
    * Get posts with advanced filtering and pagination
    */
-  @Query(() => Object, {
+  @Paginated('Posts retrieved successfully')
+  @Query(() => PaginatedPostsResponse, {
     name: 'posts',
     description: 'Get posts with filters and pagination',
   })
-  async getPosts(@Args('filters') filters: PostFiltersInput) {
-    return await this.postsService.findPostsWithFilters(filters);
+  async getPosts(
+    @Args('filters', { type: () => PostFiltersInput, nullable: true })
+    filters?: PostFiltersInput,
+  ) {
+    return await this.postsService.findPostsWithFilters(filters ?? {});
   }
 
   /**
    * Get published posts only
    */
-  @Query(() => Object, {
+  @Paginated('Published posts retrieved successfully')
+  @Query(() => PaginatedPostsResponse, {
     name: 'publishedPosts',
     description: 'Get only published posts',
   })
@@ -81,7 +98,8 @@ export class PostResolver {
   /**
    * Get priority/featured posts
    */
-  @Query(() => [PostModel], { name: 'priorityPosts' })
+  @ArrayItems('Priority posts retrieved successfully')
+  @Query(() => PostsArrayResponse, { name: 'priorityPosts' })
   async getPriorityPosts(
     @Args('limit', { type: () => Int, defaultValue: 10 }) limit: number,
   ) {
@@ -91,7 +109,8 @@ export class PostResolver {
   /**
    * Get a single post by ID
    */
-  @Query(() => PostModel, {
+  @SingleItem('Post retrieved successfully')
+  @Query(() => PostResponse, {
     name: 'post',
     description: 'Get a single post by ID',
   })
@@ -102,7 +121,8 @@ export class PostResolver {
   /**
    * Get a single post by slug
    */
-  @Query(() => PostModel, {
+  @SingleItem('Post retrieved successfully')
+  @Query(() => PostResponse, {
     name: 'postBySlug',
     description: 'Get a single post by slug',
   })
@@ -114,8 +134,9 @@ export class PostResolver {
   /**
    * Get my posts (authenticated user's posts)
    */
+  @Paginated('Your posts retrieved successfully')
   @UseGuards(AuthGuard)
-  @Query(() => Object, {
+  @Query(() => PaginatedPostsResponse, {
     name: 'myPosts',
     description: "Get current user's posts",
   })
@@ -132,8 +153,9 @@ export class PostResolver {
    * Create a new post
    * Requires authentication
    */
+  @SingleItem('Post created successfully')
   @UseGuards(AuthGuard)
-  @Mutation(() => PostModel, {
+  @Mutation(() => PostResponse, {
     description: 'Create a new post (requires authentication)',
   })
   async createPost(
@@ -147,8 +169,9 @@ export class PostResolver {
    * Update an existing post
    * Requires authentication and ownership
    */
+  @SingleItem('Post updated successfully')
   @UseGuards(AuthGuard)
-  @Mutation(() => PostModel, {
+  @Mutation(() => PostResponse, {
     description: 'Update a post (requires ownership)',
   })
   async updatePost(
@@ -163,8 +186,9 @@ export class PostResolver {
    * Delete a post (soft delete)
    * Requires authentication and ownership
    */
+  @DeleteOperation('Post deleted successfully')
   @UseGuards(AuthGuard)
-  @Mutation(() => PostModel, {
+  @Mutation(() => DeletePostResponse, {
     description: 'Delete a post (requires ownership)',
   })
   async deletePost(
@@ -178,7 +202,8 @@ export class PostResolver {
    * Increment view count for a post
    * Uses caching to prevent duplicate views
    */
-  @Mutation(() => PostModel, {
+  @SingleItem('View count updated successfully')
+  @Mutation(() => PostResponse, {
     description: 'Increment post view count',
   })
   async incrementViews(

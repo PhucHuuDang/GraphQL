@@ -6,10 +6,8 @@ import {
   OptionalStringArrayField,
   OptionalStringField,
 } from '../../../common/decorators/field.decorators';
+import { dynamicRegisterEnum } from '../../../common/registers/dynamic-register-enum';
 
-/**
- * Post status enum for filtering
- */
 export enum PostStatusFilter {
   DRAFT = 'DRAFT',
   PENDING = 'PENDING',
@@ -19,9 +17,19 @@ export enum PostStatusFilter {
   UNPUBLISHED = 'UNPUBLISHED',
 }
 
-/**
- * Input for filtering and paginating posts
- */
+dynamicRegisterEnum(PostStatusFilter, {
+  name: 'PostStatusFilter',
+  description: 'Filter posts by their status',
+  customDescriptions: {
+    DRAFT: 'Posts in draft state - not visible to public',
+    PENDING: 'Posts pending moderator approval',
+    APPROVED: 'Approved posts ready to be published',
+    REJECTED: 'Rejected posts that failed moderation',
+    PUBLISHED: 'Published posts visible to everyone',
+    UNPUBLISHED: 'Previously published posts that are now hidden',
+  },
+});
+
 @InputType()
 export class PostFiltersInput {
   @OptionalIntField({ min: 1, defaultValue: 1 })

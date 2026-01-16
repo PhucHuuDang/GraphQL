@@ -19,36 +19,12 @@ type AccountModel {
   userId: String!
 }
 
-type Author {
-  avatarUrl: String
-  bio: String
-  designation: String
-  id: String!
-  isActive: Boolean
-  isBlocked: Boolean
-  isDeleted: Boolean
-  isExpired: Boolean
-  isLocked: Boolean
-  isSuspended: Boolean
-  isVerified: Boolean
-  name: String!
-  posts: [PostModel!]!
-  socialLinks: JSONObject
-  verified: Boolean
-}
-
 type CategoryModel {
   createdAt: DateTime!
   id: String!
   name: String!
   posts: [PostModel!]
   updatedAt: DateTime!
-}
-
-input ChangePasswordInput {
-  currentPassword: String!
-  newPassword: String!
-  revokeOtherSessions: Boolean
 }
 
 type Comment {
@@ -59,26 +35,27 @@ type Comment {
   user: UserModel!
 }
 
-input CreateAuthor {
-  avatarUrl: String
-  bio: String
-  designation: String
-  email: String
-  isActive: Boolean
-  isBlocked: Boolean
-  isDeleted: Boolean
-  isExpired: Boolean
-  isLocked: Boolean
-  isSuspended: Boolean
-  isVerified: Boolean
-  name: String!
-  password: String
-  role: String
-  socialLinks: JSONObject
-}
+input CreatePostInput {
+  """Category ID"""
+  categoryId: String
 
-input CreateCategory {
-  name: String!
+  """Post content in JSON format"""
+  content: JSON!
+
+  """Post description/excerpt"""
+  description: String
+
+  """Whether to publish immediately or save as draft"""
+  isPublished: Boolean! = false
+
+  """Main image URL"""
+  mainImage: String
+
+  """Post tags"""
+  tags: [String!] = []
+
+  """Post title"""
+  title: String!
 }
 
 input CreateUser {
@@ -92,6 +69,18 @@ input CreateUser {
 A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date-time format.
 """
 scalar DateTime
+
+type DeletePostResponse {
+  code: String
+  deletedId: String
+  message: String!
+  success: Boolean!
+}
+
+type GetProfileResponse {
+  data: JSON
+  user: OAuth2UserInfoModel!
+}
 
 type GetSessionResponse {
   session: SessionModel!
@@ -116,11 +105,6 @@ The `JSON` scalar type represents JSON values as specified by [ECMA-404](http://
 """
 scalar JSON
 
-"""
-The `JSONObject` scalar type represents JSON objects as specified by [ECMA-404](http://www.ecma-international.org/publications/files/ECMA-ST/ECMA-404.pdf).
-"""
-scalar JSONObject
-
 type LikeModel {
   createdAt: DateTime!
   id: Int!
@@ -131,22 +115,95 @@ type LikeModel {
 }
 
 type Mutation {
-  changePassword(changePasswordInput: ChangePasswordInput!): Boolean!
-  createAuthor(author: CreateAuthor!): Author!
-  createCategory(category: CreateCategory!): CategoryModel!
-  createPost(authorId: String!, categoryId: String!, content: JSON!, description: String!, isPublished: Boolean!, mainImage: String!, slug: String!, tags: [String!]!, title: String!): PostModel!
+  """Create a new post (requires authentication)"""
+  createPost(input: CreatePostInput!): PostResponse!
   createUser(createUserInput: CreateUser!): UserModel!
-  deletePost(id: String!): PostModel!
+
+  """Delete a post (requires ownership)"""
+  deletePost(id: String!): DeletePostResponse!
   gitHub: GitHubUserResponse!
-  incrementViews(id: String!, identifier: String!): PostModel!
+
+  """Increment post view count"""
+  incrementViews(id: String!, identifier: String): PostResponse!
   signInEmail(signInInput: SignInInput!): SignInEmailUser!
   signOut: SignOutResponse!
   signUpEmail(signUpInput: SignUpInput!): SignUpEmailUser!
-  updatePost(data: UpdatePostInput!, id: String!): PostModel!
+
+  """Update a post (requires ownership)"""
+  updatePost(id: String!, input: UpdatePostInput!): PostResponse!
+  updateProfile(avatarUrl: String, email: String, name: String, password: String, rememberMe: Boolean): UserModel!
+}
+
+type OAuth2UserInfoModel {
+  email: String
+  emailVerified: Boolean
+  id: String!
+  image: String
+  name: String
+}
+
+type PaginatedPostsResponse {
+  """Array of items"""
+  data: [PostModel!]!
+  message: String
+
+  """Pagination metadata"""
+  meta: PaginationMeta!
+  success: Boolean!
+}
+
+type PaginationMeta {
+  """Has next page"""
+  hasNext: Boolean!
+
+  """Has previous page"""
+  hasPrev: Boolean!
+
+  """Items per page"""
+  limit: Int!
+
+  """Current page number"""
+  page: Int!
+
+  """Total number of items"""
+  total: Int!
+
+  """Total number of pages"""
+  totalPages: Int!
+}
+
+input PostFiltersInput {
+  """Filter by author ID"""
+  authorId: String
+
+  """Filter by category ID"""
+  categoryId: String
+
+  """Show only priority posts"""
+  isPriority: Boolean
+
+  """Show only published posts"""
+  isPublished: Boolean
+  limit: Int = 10
+  page: Int = 1
+
+  """Search term for title/description"""
+  search: String
+
+  """Sort by field"""
+  sortBy: String = "createdAt"
+
+  """Sort order"""
+  sortOrder: String = "desc"
+
+  """Filter by post status"""
+  status: PostStatusFilter
+
+  """Filter by tags"""
+  tags: [String!]
 }
 
 type PostModel {
-  author: Author!
   authorId: String!
   category: CategoryModel
   categoryId: String
@@ -163,25 +220,69 @@ type PostModel {
   tags: [String!]!
   title: String!
   updatedAt: DateTime!
+  user: UserModel!
   views: Int!
   votes: Int!
 }
 
-input PostPaginationInput {
-  extra: JSON
-  limit: Int = 10
-  page: Int = 1
+type PostResponse {
+  """Response data"""
+  data: PostModel
+  message: String
+  success: Boolean!
+}
+
+"""Filter posts by their status"""
+enum PostStatusFilter {
+  """Approved posts"""
+  APPROVED
+
+  """Posts in draft state"""
+  DRAFT
+
+  """Posts pending approval"""
+  PENDING
+
+  """Published posts"""
+  PUBLISHED
+
+  """Rejected posts"""
+  REJECTED
+
+  """Unpublished posts"""
+  UNPUBLISHED
+}
+
+type PostsArrayResponse {
+  """Total count"""
+  count: Int!
+
+  """Array of items"""
+  data: [PostModel!]!
+  message: String
+  success: Boolean!
 }
 
 type Query {
-  allPosts: [PostModel!]!
-  author(id: String!): Author!
-  findPostById(id: String!): PostModel!
-  findPostBySlug(slug: String!): PostModel!
   getAccounts: [AccountModel!]!
+  getProfile: GetProfileResponse!
   getSession: GetSessionResponse!
-  postPaginated(params: PostPaginationInput!): [PostModel!]!
-  priorityPosts(limit: Int! = 10): [PostModel!]!
+
+  """Get current user's posts"""
+  myPosts(filters: PostFiltersInput!): PaginatedPostsResponse!
+
+  """Get a single post by ID"""
+  post(id: String!): PostResponse!
+
+  """Get a single post by slug"""
+  postBySlug(slug: String!): PostResponse!
+
+  """Get posts with filters and pagination"""
+  posts(filters: PostFiltersInput): PaginatedPostsResponse!
+  priorityPosts(limit: Int! = 10): PostsArrayResponse!
+
+  """Get only published posts"""
+  publishedPosts(filters: PostFiltersInput!): PaginatedPostsResponse!
 }
 
 type SessionModel {
@@ -236,17 +337,15 @@ type SignUpEmailUser {
 }
 
 input SignUpInput {
-  callbackURL: String
+  avatarUrl: String
   email: String!
-  image: String
   name: String!
   password: String!
   rememberMe: Boolean
 }
 
 input UpdatePostInput {
-  authorId: Float
-  categoryId: Float
+  categoryId: String
   content: JSON
   description: String
   isPinned: Boolean

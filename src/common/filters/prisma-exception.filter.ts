@@ -43,7 +43,6 @@ export class PrismaExceptionFilter implements ExceptionFilter {
 
     const errorMapping = this.mapPrismaError(exception);
 
-    // Handle GraphQL context
     if (contextType === 'graphql') {
       const gqlHost = GqlArgumentsHost.create(host);
 

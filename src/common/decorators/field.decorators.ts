@@ -259,7 +259,7 @@ export function OptionalEnumField<T extends object>(
   options: FieldOptions = {},
 ) {
   return applyDecorators(
-    Field(() => String, {
+    Field(() => enumType as any, {
       nullable: true,
       ...options,
     }),

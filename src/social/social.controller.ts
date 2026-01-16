@@ -18,7 +18,7 @@ export class SocialController {
       headers: fromNodeHeaders(req.headers as any),
     });
 
-    console.log({ data });
+    // console.log({ data });
 
     // console.log('headers: ', fromNodeHeaders(req.headers as any));
 

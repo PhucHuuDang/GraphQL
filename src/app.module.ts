@@ -6,20 +6,23 @@ import { ConfigModule } from '@nestjs/config';
 import { UserModule } from './modules/user/user.module';
 import { PrismaModule } from './prisma/prisma.module';
 import GraphQLJSON from 'graphql-type-json';
-// import { CacheModule } from '@nestjs/cache-manager';
 import { CacheModule } from './cache/cache.module';
 import { upstashRedis } from './lib/upstash-client';
 
+// Modules
 import { Logger, LoggerModule } from 'nestjs-pino';
 import { CallbackModule } from './callback/callback.module';
 import { SessionModule } from './modules/session/session.module';
 import { AuthModule } from './modules/auth/auth.module';
+import { PostModule } from './modules/post/post.module';
 
 @Module({
   imports: [
+    AuthModule,
+
     GraphQLModule.forRoot<ApolloDriverConfig>({
       driver: ApolloDriver,
-      autoSchemaFile: join(process.cwd(), '../schema.gql'),
+      autoSchemaFile: join(process.cwd(), 'src/schema.gql'),
       graphiql: true,
       sortSchema: true,
       playground: true,
@@ -39,6 +42,7 @@ import { AuthModule } from './modules/auth/auth.module';
     }),
 
     UserModule,
+    PostModule,
     PrismaModule,
     // ⚠️ AuthModule MUST come before any custom controllers that might interfere
     CacheModule,
@@ -46,8 +50,6 @@ import { AuthModule } from './modules/auth/auth.module';
     CallbackModule,
 
     SessionModule,
-
-    AuthModule,
 
     // LoggerModule.forRoot({
     //   pinoHttp: {
