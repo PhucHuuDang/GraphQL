@@ -58,13 +58,6 @@ input CreatePostInput {
   title: String!
 }
 
-input CreateUser {
-  avatarUrl: String
-  email: String
-  name: String!
-  password: String
-}
-
 """
 A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date-time format.
 """
@@ -117,7 +110,6 @@ type LikeModel {
 type Mutation {
   """Create a new post (requires authentication)"""
   createPost(input: CreatePostInput!): PostResponse!
-  createUser(createUserInput: CreateUser!): UserModel!
 
   """Delete a post (requires ownership)"""
   deletePost(id: String!): DeletePostResponse!
@@ -127,11 +119,24 @@ type Mutation {
   incrementViews(id: String!, identifier: String): PostResponse!
   signInEmail(signInInput: SignInInput!): SignInEmailUser!
   signOut: SignOutResponse!
+
+  """Sign up email user"""
   signUpEmail(signUpInput: SignUpInput!): SignUpEmailUser!
 
   """Update a post (requires ownership)"""
   updatePost(id: String!, input: UpdatePostInput!): PostResponse!
-  updateProfile(avatarUrl: String, email: String, name: String, password: String, rememberMe: Boolean): UserModel!
+  updateProfile(
+    """Email can be optional when updating profile"""
+    email: String
+
+    """Image"""
+    image: String = null
+
+    """Name"""
+    name: String = null
+    password: String
+    rememberMe: Boolean
+  ): UserModel!
 }
 
 type OAuth2UserInfoModel {
@@ -139,7 +144,7 @@ type OAuth2UserInfoModel {
   emailVerified: Boolean
   id: String!
   image: String
-  name: String
+  name: String!
 }
 
 type PaginatedPostsResponse {
@@ -298,10 +303,9 @@ type SessionModel {
 }
 
 type SignInEmailUser {
-  redirect: String!
-  token: String!
-  url: String!
-  user: SignInEmailUserResponse!
+  """Token"""
+  token: String
+  user: SignInEmailUserResponse
 }
 
 type SignInEmailUserResponse {
@@ -314,34 +318,38 @@ type SignInEmailUserResponse {
 }
 
 input SignInInput {
-  callbackURL: String
+  """Email"""
   email: String!
+
+  """Password"""
   password: String!
-  rememberMe: Boolean
+
+  """Remember me"""
+  rememberMe: Boolean = false
 }
 
 type SignOutResponse {
   success: Boolean!
 }
 
-type SignUpEmailResponse {
-  email: String
-  id: String!
-  image: String
-  name: String
-}
-
 type SignUpEmailUser {
+  """Token"""
   token: String
-  user: SignUpEmailResponse!
+  user: UserModel
 }
 
 input SignUpInput {
-  avatarUrl: String
+  """Email"""
   email: String!
+
+  """Name"""
   name: String!
+
+  """Password"""
   password: String!
-  rememberMe: Boolean
+
+  """Remember me"""
+  rememberMe: Boolean = false
 }
 
 input UpdatePostInput {
@@ -359,9 +367,9 @@ input UpdatePostInput {
 
 type UserModel {
   accounts: [AccountModel!]!
-  avatarUrl: String
   comments: [Comment!]!
   createdAt: DateTime!
+  designation: String
   email: String
   emailVerified: Boolean!
   id: String!

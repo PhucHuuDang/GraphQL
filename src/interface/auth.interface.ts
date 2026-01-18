@@ -11,8 +11,8 @@ export abstract class UserResponse {
   @Field(() => String)
   email: string;
 
-  @Field(() => String)
-  image: string;
+  @Field(() => String, { nullable: true })
+  image?: string;
 
   @Field(() => Date)
   createdAt: Date;

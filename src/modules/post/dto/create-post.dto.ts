@@ -33,7 +33,7 @@ export class CreatePostInput {
   })
   description?: string;
 
-  @Field(() => GraphQLJSON, { description: 'Post content in JSON format' })
+  @Field(() => GraphQLJSON, { description: 'Post content in JSON format', nullable: false })
   @IsNotEmpty({ message: 'Content is required' })
   content: any;
 

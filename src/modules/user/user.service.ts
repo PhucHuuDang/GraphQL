@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable, UnauthorizedException } from '@nestjs/common';
 
 import { APIError, type User as UserType } from 'better-auth';
 
@@ -12,7 +12,6 @@ import { BetterAuthService } from '../../modules/auth/better-auth.service';
 import { SessionService } from '../../modules/session/session.service';
 import { PrismaService } from '../../prisma/prisma.service';
 
-import { CreateUser } from './dto/create-user';
 import { SignInInput, SignUpInput, UpdateProfileArgs } from './dto/user.dto';
 import { GetProfileResponse, GetSessionResponse } from './auth.model';
 
@@ -62,33 +61,52 @@ export class UserService extends BaseRepository<User, Prisma.UserDelegate> {
     });
     return accessToken;
   }
-  async signUpEmail(signUpInput: SignUpInput) {
-    const { email, password, avatarUrl, name, rememberMe } = signUpInput;
-
-    const body = {
-      email,
-      password,
-      name,
-    };
-
+  async signUpEmail(signUpInput: SignUpInput, { req }: GraphQLContext) {
     try {
       const response = await this.authService.api.signUpEmail({
-        body,
+        body: {
+          name: signUpInput.name,
+          email: signUpInput.email,
+          password: signUpInput.password,
+          rememberMe: signUpInput.rememberMe ?? false,
+        },
+        headers: fromNodeHeaders(req.headers),
       });
+
+      console.log('BetterAuth signUpEmail response:', JSON.stringify(response, null, 2));
+
+      // If user was created successfully, fetch the complete user data from database
+      if (response?.user?.id) {
+        const fullUser = await this.findById(response.user.id);
+
+        if (fullUser) {
+          return {
+            token: response.token,
+            user: {
+              ...fullUser,
+              // Provide default empty arrays for relational fields
+              comments: [],
+              likes: [],
+              sessions: [],
+              accounts: [],
+            },
+          };
+        }
+      }
+
+      console.log('response', response);
+
       return response;
     } catch (error) {
       if (error instanceof APIError) {
         console.log(error.message, error.status);
       }
-
       throw error;
     }
   }
-
   async signInEmail(signInInput: SignInInput, { req }: GraphQLContext) {
-    const { email, password, callbackURL, rememberMe } = signInInput;
+    const { email, password, rememberMe } = signInInput;
 
-    console.log('signInEmail', { email, password, callbackURL, rememberMe });
     try {
       const response = await this.authService.api.signInEmail({
         body: {
@@ -97,23 +115,20 @@ export class UserService extends BaseRepository<User, Prisma.UserDelegate> {
           callbackURL: this.callbackURL,
           rememberMe,
         },
-
         headers: fromNodeHeaders(req.headers),
       });
 
       console.log({ response });
 
       return response;
-    } catch (err: any) {
-      console.log({ err });
-      if (err instanceof APIError) {
-        console.log(err.message, err.status);
+    } catch (error) {
+      if (error instanceof APIError) {
+        if (error.status === 401) {
+          throw new UnauthorizedException(error.message);
+        }
+        throw new BadRequestException(error.message);
       }
-
-      return {
-        error: err?.message ?? 'Invalid credentials',
-        statusCode: 401,
-      };
+      throw error;
     }
   }
 
@@ -145,14 +160,14 @@ export class UserService extends BaseRepository<User, Prisma.UserDelegate> {
   }
 
   async updateProfile(updateProfileArgs: UpdateProfileArgs, { req }: GraphQLContext) {
-    const { email, name, avatarUrl, password, rememberMe } = updateProfileArgs;
+    const { email, name, image, password, rememberMe } = updateProfileArgs;
 
     const headers = fromNodeHeaders(req.headers);
 
     const response = await this.authService.api.updateUser({
       body: {
-        image: avatarUrl,
         name,
+        image,
       },
       headers,
     });
@@ -258,7 +273,7 @@ export class UserService extends BaseRepository<User, Prisma.UserDelegate> {
       user: {
         id: response.user.id.toString(),
         name: response.user.name,
-        email: response.user.email ?? undefined,
+        email: response.user.email ?? null,
         image: response.user.image,
         emailVerified: response.user.emailVerified,
       },
@@ -266,17 +281,4 @@ export class UserService extends BaseRepository<User, Prisma.UserDelegate> {
     };
   }
   async isExists(email: string, id: number) {}
-  async createUser(createUserInput: CreateUser): Promise<
-    | UserModel
-    | {
-        error: string;
-        statusCode: number;
-      }
-  > {
-    const test = await Promise.resolve({
-      error: 'User already exists',
-      statusCode: 400,
-    });
-    return test;
-  }
 }

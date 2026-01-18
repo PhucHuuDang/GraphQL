@@ -1,5 +1,8 @@
 import { Field, InputType, Int, ObjectType, PickType } from '@nestjs/graphql';
 
+import { EnumField } from '../common/decorators/field.decorators';
+import { UserRole } from '../common/registers/register-all-enums.example';
+
 import { AccountModel } from './account.model';
 import { Comment } from './comment.model';
 import { LikeModel } from './like.model';
@@ -17,7 +20,13 @@ export class UserModel {
   email?: string;
 
   @Field({ nullable: true })
-  avatarUrl?: string;
+  image?: string;
+
+  @Field(() => String, { nullable: true })
+  designation?: string;
+
+  // @EnumField(() => UserRole, { nullable: true })
+  // role?: UserRole;
 
   @Field(() => [Comment], { defaultValue: [] })
   comments: Comment[];
@@ -33,9 +42,6 @@ export class UserModel {
 
   @Field(() => Boolean, { defaultValue: false })
   emailVerified: boolean;
-
-  @Field(() => String, { nullable: true })
-  image?: string;
 
   @Field(() => [SessionModel], { defaultValue: [] })
   sessions: SessionModel[];

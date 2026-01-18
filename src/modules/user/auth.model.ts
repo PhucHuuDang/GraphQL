@@ -2,6 +2,11 @@ import { Field, ObjectType, PickType } from '@nestjs/graphql';
 
 import GraphQLJSON from 'graphql-type-json';
 
+import {
+  OptionalObjectField,
+  OptionalStringField,
+  StringField,
+} from '../../common/decorators/field.decorators';
 import { SessionModel } from '../../models/session.model';
 import { UserModel } from '../../models/user.model';
 
@@ -11,12 +16,13 @@ export class OAuth2UserInfoModel {
   id: string;
 
   @Field(() => String, { nullable: true })
+  @StringField()
   name?: string;
 
   @Field(() => String, { nullable: true })
   email?: string;
 
-  @Field(() => String, { nullable: true })
+  @OptionalStringField()
   image?: string;
 
   @Field(() => Boolean, { nullable: true })
@@ -58,24 +64,22 @@ export class GitHubUserResponse extends SignInEmailUserResponse {
 
 @ObjectType()
 export class SignUpEmailUser {
-  @Field(() => String, { nullable: true })
+  // @Field({ nullable: true })
+  @OptionalStringField({ description: 'Token' })
   token?: string;
-  @Field(() => SignUpEmailResponse)
-  user: SignUpEmailResponse;
+
+  @Field(() => UserModel, { nullable: true })
+  user?: UserModel;
 }
 
 @ObjectType()
 export class SignInEmailUser {
-  @Field(() => String)
-  token: string;
+  // @Field(() => SignInEmailUserResponse)
 
-  @Field(() => String)
-  redirect: string;
+  @OptionalStringField({ description: 'Token' })
+  token?: string;
 
-  @Field(() => String)
-  url: string;
-
-  @Field(() => SignInEmailUserResponse)
+  @OptionalObjectField(() => SignInEmailUserResponse, { nullable: true })
   user: SignInEmailUserResponse;
 }
 

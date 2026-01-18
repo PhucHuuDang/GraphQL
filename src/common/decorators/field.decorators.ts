@@ -7,6 +7,7 @@ import {
   IsArray,
   IsBoolean,
   IsDate,
+  IsEmail,
   IsEnum,
   IsInt,
   IsNotEmpty,
@@ -31,6 +32,42 @@ type CustomFieldOptions = FieldOptions & {
   max?: number;
   validationOptions?: ValidationOptions;
 };
+
+/**
+ * Email field decorator
+ * Combines Field (required), IsEmail, and IsNotEmpty
+ * @example @EmailField()
+ */
+export function EmailField(options: CustomFieldOptions = {}) {
+  const decorators: PropertyDecorator[] = [
+    Field(() => String, {
+      nullable: false,
+      ...options,
+    }),
+    IsEmail({}, options.validationOptions),
+    IsNotEmpty(options.validationOptions),
+  ];
+
+  return applyDecorators(...decorators);
+}
+
+/**
+ * Optional email field decorator
+ * Combines Field (nullable), IsEmail, and IsOptional
+ * @example @OptionalEmailField()
+ */
+export function OptionalEmailField(options: CustomFieldOptions = {}) {
+  const decorators: PropertyDecorator[] = [
+    Field(() => String, {
+      nullable: true,
+      ...options,
+    }),
+    IsEmail({}, options.validationOptions),
+    IsOptional(),
+  ];
+
+  return applyDecorators(...decorators);
+}
 
 export function NumberField(options: CustomFieldOptions = {}) {
   const decorators: PropertyDecorator[] = [

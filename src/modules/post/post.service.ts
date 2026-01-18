@@ -133,7 +133,7 @@ export class PostsService extends BaseRepository<Post, Prisma.PostDelegate> {
           select: {
             id: true,
             name: true,
-            avatarUrl: true,
+            image: true,
           },
         },
       },
@@ -195,14 +195,7 @@ export class PostsService extends BaseRepository<Post, Prisma.PostDelegate> {
 
     return await this.create(postData, {
       include: {
-        author: {
-          select: {
-            id: true,
-            name: true,
-            email: true,
-            avatarUrl: true,
-          },
-        },
+        author: true,
         category: true,
       },
     });
@@ -285,7 +278,7 @@ export class PostsService extends BaseRepository<Post, Prisma.PostDelegate> {
             id: true,
             name: true,
             email: true,
-            avatarUrl: true,
+            image: true,
           },
         },
         category: true,
@@ -387,7 +380,7 @@ export class PostsService extends BaseRepository<Post, Prisma.PostDelegate> {
             id: true,
             name: true,
             email: true,
-            avatarUrl: true,
+            image: true,
           },
         },
         category: true,

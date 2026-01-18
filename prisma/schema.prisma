@@ -17,24 +17,24 @@ model User {
   name      String?
   email     String?   @unique
   password  String?
-  
+
   // Profile information
   designation String?
   bio         String?
-  avatarUrl   String?
+  image       String?
   socialLinks Json?
-  
+
   // Authentication & Authorization
   role        UserRole  @default(USER)
   emailVerified Boolean @default(false)
-  
+
   // Account status
   isActive    Boolean   @default(true)
   isVerified  Boolean   @default(false)
   isDeleted   Boolean   @default(false)
   isSuspended Boolean   @default(false)
   isBlocked   Boolean   @default(false)
-  
+
   // Relations
   posts       Post[]
   comments    Comment[]
@@ -42,7 +42,7 @@ model User {
   sessions    Session[]
   accounts    Account[]
   moderationActions ModerationAction[]
-  
+
   createdAt DateTime  @default(now())
   updatedAt DateTime? @updatedAt
 
@@ -78,28 +78,28 @@ model Post {
   // Author
   authorId    String
   author      User      @relation(fields: [authorId], references: [id], onDelete: Cascade)
-  
+
   // Category
   categoryId  String?
   category    Category? @relation(fields: [categoryId], references: [id], onDelete: SetNull)
-  
+
   // Moderation Status
   status      PostStatus @default(PENDING)
-  
+
   // Engagement metrics
   views       Int     @default(0)
-  
+
   // Flags
   isPublished Boolean @default(false)
   isPriority  Boolean @default(false)
   isPinned    Boolean @default(false)
   isDeleted   Boolean @default(false)
-  
+
   // Relations
   comments    Comment[]
   votes       Vote[]
   moderationActions ModerationAction[]
-  
+
   // Timestamps
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
@@ -114,30 +114,30 @@ model Post {
 }
 
 enum PostStatus {
-  DRAFT          
-  PENDING        
-  APPROVED        
-  REJECTED       
-  PUBLISHED      
-  UNPUBLISHED     
+  DRAFT
+  PENDING
+  APPROVED
+  REJECTED
+  PUBLISHED
+  UNPUBLISHED
 }
 
 model ModerationAction {
   id          String   @id @default(cuid())
   postId      String
   post        Post     @relation(fields: [postId], references: [id], onDelete: Cascade)
-  
+
   moderatorId String
   moderator   User     @relation(fields: [moderatorId], references: [id], onDelete: Cascade)
-  
+
   action      ModerationActionType
   oldStatus   PostStatus?
   newStatus   PostStatus
-  
+
   // Feedback from admin
   feedback    String?   // Reason for rejection or suggestion for improvement
   isPrivate   Boolean   @default(true) // Feedback only author can see
-  
+
   createdAt   DateTime @default(now())
 
   @@map("moderation_actions")
@@ -157,22 +157,22 @@ enum ModerationActionType {
 model Comment {
   id        String      @id @default(cuid())
   content   String
-  
+
   userId    String
   user      User        @relation(fields: [userId], references: [id], onDelete: Cascade)
-  
+
   postId    String?
   post      Post?       @relation(fields: [postId], references: [id], onDelete: Cascade)
-  
+
   // Comment threading (reply to another comment)
   parentId  String?
   parent    Comment?    @relation("CommentReplies", fields: [parentId], references: [id], onDelete: Cascade)
   replies   Comment[]   @relation("CommentReplies")
-  
+
   // Moderation
   isDeleted Boolean     @default(false)
   isEdited  Boolean     @default(false)
-  
+
   createdAt DateTime    @default(now())
   updatedAt DateTime    @updatedAt
 
@@ -185,15 +185,15 @@ model Comment {
 // Model mới: Voting system rõ ràng
 model Vote {
   id        String    @id @default(cuid())
-  
+
   userId    String
   user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
-  
+
   postId    String
   post      Post      @relation(fields: [postId], references: [id], onDelete: Cascade)
-  
+
   value     VoteType  // UPVOTE or DOWNVOTE
-  
+
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
 

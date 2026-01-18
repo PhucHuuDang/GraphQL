@@ -21,8 +21,6 @@ import { PrismaModule } from './prisma/prisma.module';
 
 @Module({
   imports: [
-    AuthModule,
-
     GraphQLModule.forRoot<ApolloDriverConfig>({
       driver: ApolloDriver,
       autoSchemaFile: join(process.cwd(), 'src/schema.gql'),
@@ -45,6 +43,8 @@ import { PrismaModule } from './prisma/prisma.module';
     }),
 
     UserModule,
+    AuthModule,
+
     PostModule,
     PrismaModule,
     // ⚠️ AuthModule MUST come before any custom controllers that might interfere

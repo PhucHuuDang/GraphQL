@@ -2,65 +2,100 @@ import { ArgsType, Field, InputType } from '@nestjs/graphql';
 
 import { IsBoolean, IsEmail, IsNotEmpty, IsOptional, IsString } from 'class-validator';
 
+import {
+  OptionalBooleanField,
+  OptionalEmailField,
+  OptionalStringField,
+  StringField,
+} from '../../../common/decorators/field.decorators';
+
 @InputType()
 export class SignUpInput {
-  @Field(() => String)
-  @IsEmail()
-  @IsNotEmpty()
-  email: string;
-
-  @Field(() => String)
-  @IsNotEmpty()
-  @IsString()
-  password: string;
-
-  @Field(() => String)
-  @IsNotEmpty()
-  @IsString()
+  @StringField({
+    description: 'Name',
+    nullable: false,
+    validationOptions: {
+      message: 'Name is required',
+    },
+  })
   name: string;
 
-  @Field(() => String, { nullable: true })
-  @IsString()
-  @IsOptional()
-  avatarUrl?: string;
+  @StringField({
+    description: 'Email',
+    nullable: false,
+    validationOptions: {
+      message: 'Email is required and must be a valid email address',
+    },
+  })
+  email: string;
 
-  @Field(() => Boolean, { nullable: true })
-  @IsBoolean()
-  @IsOptional()
+  @StringField({
+    description: 'Password',
+    nullable: false,
+    validationOptions: {
+      message: 'Password is required',
+    },
+  })
+  password: string;
+
+  @OptionalBooleanField({
+    description: 'Remember me',
+    nullable: true,
+    defaultValue: false,
+  })
   rememberMe?: boolean;
 }
 
 @InputType()
 export class SignInInput {
-  @Field(() => String)
+  @StringField({
+    description: 'Email',
+    nullable: false,
+    validationOptions: {
+      message: 'Email is required and must be a valid email address',
+    },
+  })
   email: string;
 
-  @Field(() => String)
+  @StringField({
+    minLength: 8,
+    maxLength: 20,
+    validationOptions: {
+      message: 'Password must be between 8-20 characters',
+    },
+    description: 'Password',
+    nullable: false,
+  })
   password: string;
 
-  @Field(() => Boolean, { nullable: true })
+  @OptionalBooleanField({
+    description: 'Remember me',
+    nullable: true,
+    defaultValue: false,
+  })
   rememberMe?: boolean;
-
-  @Field(() => String, { nullable: true })
-  callbackURL?: string;
 }
 
 @ArgsType()
 export class UpdateProfileArgs {
-  @Field({ nullable: true })
-  @IsEmail()
-  @IsOptional()
+  @OptionalEmailField({
+    description: 'Email can be optional when updating profile',
+  })
   email?: string;
 
-  @Field({ nullable: true })
-  @IsString()
-  @IsOptional()
+  @OptionalStringField({
+    description: 'Name',
+    nullable: true,
+    defaultValue: null,
+  })
   name?: string;
 
-  @Field({ nullable: true })
-  @IsString()
-  @IsOptional()
-  avatarUrl?: string;
+  @OptionalStringField({
+    description: 'Image',
+    nullable: true,
+    defaultValue: null,
+  })
+  image?: string;
 
   @Field({ nullable: true })
   @IsString()
