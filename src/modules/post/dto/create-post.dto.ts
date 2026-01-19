@@ -6,8 +6,10 @@ import { IsNotEmpty } from 'class-validator';
 
 import {
   BooleanField,
+  OptionalBooleanField,
   OptionalStringArrayField,
   OptionalStringField,
+  StringArrayField,
   StringField,
 } from '../../../common/decorators/field.decorators';
 
@@ -40,15 +42,20 @@ export class CreatePostInput {
   @OptionalStringField({ description: 'Main image URL' })
   mainImage?: string;
 
-  @OptionalStringArrayField({ description: 'Post tags', defaultValue: [] })
+  @StringArrayField({ description: 'Post tags', defaultValue: [] })
   tags: string[];
 
-  @OptionalStringField({ description: 'Category ID' })
-  categoryId?: string;
+  // Relation
 
-  @BooleanField({
+  // @StringField({ description: 'Author ID who create the post' })
+  // authorId: string;
+
+  @StringField({ description: 'Category ID' })
+  categoryId: string;
+
+  @OptionalBooleanField({
     description: 'Whether to publish immediately or save as draft',
     defaultValue: false,
   })
-  isPublished: boolean;
+  isPublished?: boolean;
 }

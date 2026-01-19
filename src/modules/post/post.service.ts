@@ -1,5 +1,4 @@
 import {
-  BadRequestException,
   ForbiddenException,
   Inject,
   Injectable,
@@ -10,7 +9,8 @@ import {
 import { Redis } from '@upstash/redis';
 
 import { Post, PostStatus, Prisma } from '../../../generated/prisma';
-import { BaseRepository, PaginationParams, PaginationResult } from '../../common/base.repository';
+import { BaseRepository, PaginationParams } from '../../common/base.repository';
+import { ResponseHelper } from '../../common/helpers/response.helper';
 import { GraphQLContext } from '../../interface/graphql.context';
 import { UPSTASH_REDIS } from '../../lib/key';
 import { PrismaService } from '../../prisma/prisma.service';
@@ -64,16 +64,34 @@ export class PostsService extends BaseRepository<Post, Prisma.PostDelegate> {
     return ['ADMIN', 'MODERATOR'].includes(userRole);
   }
 
-  async findBySlug(slug: string): Promise<Post | null> {
-    return await this.findUnique(
-      { slug },
-      {
-        include: {
-          author: true,
-          category: true,
+  async findBySlug(slug: string) {
+    try {
+      const post = await this.findUnique(
+        { slug },
+        {
+          include: {
+            author: true,
+            category: true,
+          },
         },
-      },
-    );
+      );
+
+      if (!post) {
+        return ResponseHelper.notFound('Post');
+      }
+
+      if (post.isDeleted) {
+        return ResponseHelper.error('Post has been deleted', 'NOT_FOUND');
+      }
+
+      return ResponseHelper.success(post, 'Post retrieved successfully');
+    } catch (error: any) {
+      this.logger.error(`Failed to find post by slug: ${slug}`, error?.stack);
+      return ResponseHelper.error(
+        error?.message || 'Failed to retrieve post',
+        error?.code || 'INTERNAL_ERROR',
+      );
+    }
   }
 
   async findBySlugOrFail(slug: string) {
@@ -116,299 +134,427 @@ export class PostsService extends BaseRepository<Post, Prisma.PostDelegate> {
   }
 
   async findPriorityPosts(limit: number = 10) {
-    return this.findAll({
-      where: {
-        isPublished: true,
-        isDeleted: false,
-        isPriority: true,
-      },
+    try {
+      const posts = await this.findAll({
+        where: {
+          isPublished: true,
+          isDeleted: false,
+          isPriority: true,
+        },
 
-      orderBy: {
-        createdAt: 'desc',
-      },
+        orderBy: {
+          createdAt: 'desc',
+        },
 
-      take: limit,
-      include: {
-        author: {
-          select: {
-            id: true,
-            name: true,
-            image: true,
+        take: limit,
+        include: {
+          author: {
+            select: {
+              id: true,
+              name: true,
+              image: true,
+            },
           },
         },
-      },
-    });
+      });
+
+      return ResponseHelper.successArray(posts, 'Priority posts retrieved successfully');
+    } catch (error: any) {
+      this.logger.error('Failed to find priority posts', error?.stack);
+      return ResponseHelper.error(
+        error?.message || 'Failed to retrieve priority posts',
+        error?.code || 'INTERNAL_ERROR',
+      );
+    }
   }
 
   /**
    * Create a new post
    */
-  async createPost(input: CreatePostInput, context: GraphQLContext): Promise<Post> {
-    const user = this.getAuthenticatedUser(context);
+  async createPost(input: CreatePostInput, context: GraphQLContext) {
+    try {
+      const user = this.getAuthenticatedUser(context);
 
-    // Generate slug from title
-    const slug = generateSlug(input.title);
+      // Generate slug from title
+      const slug = generateSlug(input.title);
 
-    // Check if slug already exists
-    const existingPost = await this.findUnique({ slug });
-    if (existingPost) {
-      throw new BadRequestException('A post with this title already exists');
-    }
-
-    // Determine post status based on publication and user role
-    let status: PostStatus = PostStatus.DRAFT;
-
-    if (input.isPublished) {
-      // If user wants to publish, check permissions
-      if (this.canPublishPost(user.role)) {
-        status = PostStatus.PUBLISHED;
-      } else {
-        // Regular users must submit for review
-        status = PostStatus.PENDING;
+      // Check if slug already exists
+      const existingPost = await this.findUnique({ slug });
+      if (existingPost) {
+        return ResponseHelper.error(
+          'A post with this title already exists',
+          'DUPLICATE_ENTRY',
+          'title',
+        );
       }
-    }
 
-    const postData: Prisma.PostCreateInput = {
-      title: input.title,
-      slug,
-      description: input.description,
-      content: input.content,
-      mainImage: input.mainImage,
-      tags: input.tags || [],
-      isPublished: input.isPublished,
-      status,
-      author: {
-        connect: { id: user.id },
-      },
-      ...(input.categoryId && {
-        category: {
-          connect: { id: input.categoryId },
+      // Determine post status based on publication and user role
+      let status: PostStatus = PostStatus.DRAFT;
+
+      if (input.isPublished) {
+        // If user wants to publish, check permissions
+        if (this.canPublishPost(user.role)) {
+          status = PostStatus.PUBLISHED;
+        } else {
+          // Regular users must submit for review
+          status = PostStatus.PENDING;
+        }
+      }
+
+      const postData: Prisma.PostCreateInput = {
+        title: input.title,
+        slug,
+        description: input.description,
+        content: input.content,
+        mainImage: input.mainImage,
+        tags: input.tags || [],
+        isPublished: input.isPublished,
+        status,
+        author: {
+          connect: { id: user.id },
         },
-      }),
-      ...(status === PostStatus.PUBLISHED && {
-        publishedAt: new Date(),
-      }),
-      ...(status === PostStatus.PENDING && {
-        submittedForReviewAt: new Date(),
-      }),
-    };
+        ...(input.categoryId && {
+          category: {
+            connect: { id: input.categoryId },
+          },
+        }),
+        ...(status === PostStatus.PUBLISHED && {
+          publishedAt: new Date(),
+        }),
+        ...(status === PostStatus.PENDING && {
+          submittedForReviewAt: new Date(),
+        }),
+      };
 
-    return await this.create(postData, {
-      include: {
+      const post = await this.create(postData, {
         author: true,
         category: true,
-      },
-    });
+      });
+
+      return ResponseHelper.success(post, 'Post created successfully');
+    } catch (error: any) {
+      this.logger.error('Failed to create post', error?.stack);
+
+      if (error instanceof UnauthorizedException) {
+        return ResponseHelper.unauthorized(error.message);
+      }
+
+      if (error?.code === 'P2002') {
+        return ResponseHelper.error('A post with this title already exists', 'DUPLICATE_ENTRY');
+      }
+
+      return ResponseHelper.error(
+        error?.message || 'Failed to create post',
+        error?.code || 'INTERNAL_ERROR',
+      );
+    }
   }
 
   /**
    * Update a post
    */
-  async updatePost(id: string, input: UpdatePostInput, context: GraphQLContext): Promise<Post> {
-    const user = this.getAuthenticatedUser(context);
+  async updatePost(id: string, input: UpdatePostInput, context: GraphQLContext) {
+    try {
+      const user = this.getAuthenticatedUser(context);
 
-    // Verify ownership
-    const post = await this.verifyPostOwnership(id, user.id);
+      // Verify ownership
+      const post = await this.verifyPostOwnership(id, user.id);
 
-    // Generate new slug if title is being updated
-    const slug = input.slug || (input.title ? generateSlug(input.title) : undefined);
+      // Generate new slug if title is being updated
+      const slug = input.slug || (input.title ? generateSlug(input.title) : undefined);
 
-    // Check slug uniqueness if it's being changed
-    if (slug && slug !== post.slug) {
-      const existingPost = await this.findUnique({ slug });
-      if (existingPost && existingPost.id !== id) {
-        throw new BadRequestException('A post with this title already exists');
+      // Check slug uniqueness if it's being changed
+      if (slug && slug !== post.slug) {
+        const existingPost = await this.findUnique({ slug });
+        if (existingPost && existingPost.id !== id) {
+          return ResponseHelper.error(
+            'A post with this title already exists',
+            'DUPLICATE_ENTRY',
+            'title',
+          );
+        }
       }
-    }
 
-    // Handle status changes
-    let statusUpdate: Partial<Prisma.PostUpdateInput> = {};
+      // Handle status changes
+      let statusUpdate: Partial<Prisma.PostUpdateInput> = {};
 
-    if (input.isPublished !== undefined) {
-      if (input.isPublished && !post.isPublished) {
-        // Publishing a post
-        if (this.canPublishPost(user.role)) {
+      if (input.isPublished !== undefined) {
+        if (input.isPublished && !post.isPublished) {
+          // Publishing a post
+          if (this.canPublishPost(user.role)) {
+            statusUpdate = {
+              status: PostStatus.PUBLISHED,
+              isPublished: true,
+              publishedAt: new Date(),
+            };
+          } else {
+            // Submit for review
+            statusUpdate = {
+              status: PostStatus.PENDING,
+              isPublished: false,
+              submittedForReviewAt: new Date(),
+            };
+          }
+        } else if (!input.isPublished && post.isPublished) {
+          // Unpublishing a post
           statusUpdate = {
-            status: PostStatus.PUBLISHED,
-            isPublished: true,
-            publishedAt: new Date(),
-          };
-        } else {
-          // Submit for review
-          statusUpdate = {
-            status: PostStatus.PENDING,
+            status: PostStatus.UNPUBLISHED,
             isPublished: false,
-            submittedForReviewAt: new Date(),
           };
         }
-      } else if (!input.isPublished && post.isPublished) {
-        // Unpublishing a post
-        statusUpdate = {
-          status: PostStatus.UNPUBLISHED,
-          isPublished: false,
-        };
       }
-    }
 
-    const updateData: Prisma.PostUpdateInput = {
-      ...(input.title && { title: input.title }),
-      ...(slug && { slug }),
-      ...(input.description !== undefined && {
-        description: input.description,
-      }),
-      ...(input.content && { content: input.content }),
-      ...(input.mainImage !== undefined && { mainImage: input.mainImage }),
-      ...(input.tags && { tags: input.tags }),
-      ...(input.categoryId && {
-        category: {
-          connect: { id: input.categoryId },
-        },
-      }),
-      ...(input.isPriority !== undefined && { isPriority: input.isPriority }),
-      ...(input.isPinned !== undefined && { isPinned: input.isPinned }),
-      ...statusUpdate,
-      updatedAt: new Date(),
-    };
-
-    return await this.update(id, {
-      data: updateData,
-      include: {
-        author: {
-          select: {
-            id: true,
-            name: true,
-            email: true,
-            image: true,
+      const updateData: Prisma.PostUpdateInput = {
+        ...(input.title && { title: input.title }),
+        ...(slug && { slug }),
+        ...(input.description !== undefined && {
+          description: input.description,
+        }),
+        ...(input.content && { content: input.content }),
+        ...(input.mainImage !== undefined && { mainImage: input.mainImage }),
+        ...(input.tags && { tags: input.tags }),
+        ...(input.categoryId && {
+          category: {
+            connect: { id: input.categoryId },
           },
+        }),
+        ...(input.isPriority !== undefined && { isPriority: input.isPriority }),
+        ...(input.isPinned !== undefined && { isPinned: input.isPinned }),
+        ...statusUpdate,
+        updatedAt: new Date(),
+      };
+
+      const updatedPost = await this.update(id, {
+        data: updateData,
+        include: {
+          author: {
+            select: {
+              id: true,
+              name: true,
+              email: true,
+              image: true,
+            },
+          },
+          category: true,
         },
-        category: true,
-      },
-    });
+      });
+
+      return ResponseHelper.success(updatedPost, 'Post updated successfully');
+    } catch (error: any) {
+      this.logger.error(`Failed to update post ${id}`, error?.stack);
+
+      if (error instanceof UnauthorizedException) {
+        return ResponseHelper.unauthorized(error.message);
+      }
+
+      if (error instanceof ForbiddenException) {
+        return ResponseHelper.forbidden(error.message);
+      }
+
+      if (error instanceof NotFoundException) {
+        return ResponseHelper.notFound('Post');
+      }
+
+      if (error?.code === 'P2002') {
+        return ResponseHelper.error('A post with this title already exists', 'DUPLICATE_ENTRY');
+      }
+
+      return ResponseHelper.error(
+        error?.message || 'Failed to update post',
+        error?.code || 'INTERNAL_ERROR',
+      );
+    }
   }
 
   async incrementViews(id: string, identifier: string) {
-    const cacheKey = `blog:${id}:view:${identifier}`;
-    const hasViewed = await this.upstashRedis.get(cacheKey);
+    try {
+      const cacheKey = `blog:${id}:view:${identifier}`;
+      const hasViewed = await this.upstashRedis.get(cacheKey);
 
-    if (hasViewed) {
-      return await this.findById(id);
+      let post;
+
+      if (hasViewed) {
+        post = await this.findById(id);
+      } else {
+        await this.upstashRedis.set(cacheKey, identifier, { ex: 3600 });
+        // Use built-in increment method
+        post = await this.increment(id, 'views', 1);
+      }
+
+      if (!post) {
+        return ResponseHelper.notFound('Post');
+      }
+
+      return ResponseHelper.success(post, 'View count updated successfully');
+    } catch (error: any) {
+      this.logger.error(`Failed to increment views for post ${id}`, error?.stack);
+      return ResponseHelper.error(
+        error?.message || 'Failed to update view count',
+        error?.code || 'INTERNAL_ERROR',
+      );
     }
-
-    await this.upstashRedis.set(cacheKey, identifier, { ex: 3600 });
-
-    // Use built-in increment method
-    return await this.increment(id, 'views', 1);
   }
 
   /**
    * Delete a post (soft delete)
    */
-  async deletePost(id: string, context: GraphQLContext): Promise<Post> {
-    const user = this.getAuthenticatedUser(context);
+  async deletePost(id: string, context: GraphQLContext) {
+    try {
+      const user = this.getAuthenticatedUser(context);
 
-    // Verify ownership
-    await this.verifyPostOwnership(id, user.id);
+      // Verify ownership
+      await this.verifyPostOwnership(id, user.id);
 
-    // Use built-in soft delete
-    return await this.softDelete(id);
+      // Use built-in soft delete
+      const deletedPost = await this.softDelete(id);
+
+      return ResponseHelper.success(deletedPost, 'Post deleted successfully');
+    } catch (error: any) {
+      this.logger.error(`Failed to delete post ${id}`, error?.stack);
+
+      if (error instanceof UnauthorizedException) {
+        return ResponseHelper.unauthorized(error.message);
+      }
+
+      if (error instanceof ForbiddenException) {
+        return ResponseHelper.forbidden(error.message);
+      }
+
+      if (error instanceof NotFoundException) {
+        return ResponseHelper.notFound('Post');
+      }
+
+      return ResponseHelper.error(
+        error?.message || 'Failed to delete post',
+        error?.code || 'INTERNAL_ERROR',
+      );
+    }
   }
 
   /**
    * Get my posts (posts created by the current user)
    */
-  async getMyPosts(
-    filters: PostFiltersInput,
-    context: GraphQLContext,
-  ): Promise<PaginationResult<Post>> {
-    const user = this.getAuthenticatedUser(context);
+  async getMyPosts(filters: PostFiltersInput, context: GraphQLContext) {
+    try {
+      const user = this.getAuthenticatedUser(context);
 
-    return await this.findPostsWithFilters({
-      ...filters,
-      authorId: user.id,
-    });
+      return await this.findPostsWithFilters({
+        ...filters,
+        authorId: user.id,
+      });
+    } catch (error: any) {
+      this.logger.error('Failed to get user posts', error?.stack);
+
+      if (error instanceof UnauthorizedException) {
+        return ResponseHelper.unauthorized(error.message);
+      }
+
+      return ResponseHelper.error(
+        error?.message || 'Failed to retrieve your posts',
+        error?.code || 'INTERNAL_ERROR',
+      );
+    }
   }
 
   /**
    * Find posts with advanced filters
    */
-  async findPostsWithFilters(filters: PostFiltersInput): Promise<PaginationResult<Post>> {
-    const {
-      page = 1,
-      limit = 10,
-      search,
-      categoryId,
-      authorId,
-      tags,
-      status,
-      isPublished,
-      isPriority,
-      sortBy = 'createdAt',
-      sortOrder = 'desc',
-    } = filters;
+  async findPostsWithFilters(filters: PostFiltersInput) {
+    try {
+      const {
+        page = 1,
+        limit = 10,
+        search,
+        categoryId,
+        authorId,
+        tags,
+        status,
+        isPublished,
+        isPriority,
+        sortBy = 'createdAt',
+        sortOrder = 'desc',
+      } = filters;
 
-    const where: Prisma.PostWhereInput = {
-      isDeleted: false,
-      ...(search && {
-        OR: [
-          { title: { contains: search, mode: 'insensitive' } },
-          { description: { contains: search, mode: 'insensitive' } },
-        ],
-      }),
-      ...(categoryId && { categoryId }),
-      ...(authorId && { authorId }),
-      ...(tags &&
-        tags.length > 0 && {
-          tags: {
-            hasSome: tags,
-          },
+      const where: Prisma.PostWhereInput = {
+        isDeleted: false,
+        ...(search && {
+          OR: [
+            { title: { contains: search, mode: 'insensitive' } },
+            { description: { contains: search, mode: 'insensitive' } },
+          ],
         }),
-      ...(status && { status }),
-      ...(isPublished !== undefined && { isPublished }),
-      ...(isPriority !== undefined && { isPriority }),
-    };
+        ...(categoryId && { categoryId }),
+        ...(authorId && { authorId }),
+        ...(tags &&
+          tags.length > 0 && {
+            tags: {
+              hasSome: tags,
+            },
+          }),
+        ...(status && { status }),
+        ...(isPublished !== undefined && { isPublished }),
+        ...(isPriority !== undefined && { isPriority }),
+      };
 
-    return await this.findManyPaginated({
-      where,
-      page,
-      limit,
-      orderBy: {
-        [sortBy]: sortOrder,
-      },
-      include: {
-        author: {
-          select: {
-            id: true,
-            name: true,
-            email: true,
-            image: true,
+      const result = await this.findManyPaginated({
+        where,
+        page,
+        limit,
+        orderBy: {
+          [sortBy]: sortOrder,
+        },
+        include: {
+          author: {
+            select: {
+              id: true,
+              name: true,
+              email: true,
+              image: true,
+            },
+          },
+          category: true,
+          _count: {
+            select: {
+              comments: true,
+              votes: true,
+            },
           },
         },
-        category: true,
-        _count: {
-          select: {
-            comments: true,
-            votes: true,
-          },
-        },
-      },
-    });
+      });
+
+      return ResponseHelper.successPaginated(result, 'Posts retrieved successfully');
+    } catch (error: any) {
+      this.logger.error('Failed to find posts with filters', error?.stack);
+      return ResponseHelper.error(
+        error?.message || 'Failed to retrieve posts',
+        error?.code || 'INTERNAL_ERROR',
+      );
+    }
   }
 
   /**
    * Get post by ID with full details
    */
-  async getPostById(id: string): Promise<Post> {
-    const post = await this.findById(id);
+  async getPostById(id: string) {
+    try {
+      const post = await this.findById(id);
 
-    if (!post) {
-      throw new NotFoundException('Post not found');
+      if (!post) {
+        return ResponseHelper.notFound('Post');
+      }
+
+      if (post.isDeleted) {
+        return ResponseHelper.error('Post has been deleted', 'NOT_FOUND');
+      }
+
+      return ResponseHelper.success(post, 'Post retrieved successfully');
+    } catch (error: any) {
+      this.logger.error(`Failed to get post by ID: ${id}`, error?.stack);
+      return ResponseHelper.error(
+        error?.message || 'Failed to retrieve post',
+        error?.code || 'INTERNAL_ERROR',
+      );
     }
-
-    if (post.isDeleted) {
-      throw new NotFoundException('Post has been deleted');
-    }
-
-    return post;
   }
 
   /**

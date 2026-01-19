@@ -7,7 +7,7 @@ export class ResponseHelper {
   /**
    * Create a success response for a single item
    */
-  static success<T>(data: T, message?: string) {
+  static success<T extends object>(data: T, message?: string) {
     return {
       success: true,
       data,

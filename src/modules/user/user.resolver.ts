@@ -1,6 +1,7 @@
-import { Args, Context, Mutation, Query, Resolver } from '@nestjs/graphql';
+import { Args, Context, Mutation, ObjectType, Query, Resolver } from '@nestjs/graphql';
 
 import { RawResponse, SingleItem } from '../../common/decorators/response.decorators';
+import { SingleResponse } from '../../common/types/response.types';
 import { AccountModel } from '../../models/account.model';
 import { UserModel } from '../../models/user.model';
 
@@ -17,6 +18,9 @@ import {
 import { UserService } from './user.service';
 
 import type { GraphQLContext } from '../../interface/graphql.context';
+
+@ObjectType()
+export class SessionSingleResponse extends SingleResponse(GetSessionResponse) {}
 
 @Resolver(() => UserModel)
 export class UserResolver {
@@ -105,12 +109,13 @@ export class UserResolver {
     return response;
   }
 
-  @Query(() => GetSessionResponse)
+  @SingleItem('Session retrieved successfully')
+  @Query(() => SessionSingleResponse)
   async getSession(@Context() ctx: GraphQLContext) {
     // console.log(ctx.req);
     const response = await this.userService.getSession(ctx);
 
-    console.log({ response });
+    // console.log({ response });
     return response;
   }
 }

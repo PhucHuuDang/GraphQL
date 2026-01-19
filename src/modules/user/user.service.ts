@@ -4,6 +4,7 @@ import { APIError, type User as UserType } from 'better-auth';
 
 import { Prisma, User } from '../../../generated/prisma';
 import { BaseRepository } from '../../common/base.repository';
+import { ResponseHelper } from '../../common/helpers/response.helper';
 import { GraphQLContext } from '../../interface/graphql.context';
 import { auth } from '../../lib/auth';
 import { fromNodeHeaders } from '../../lib/transform-node-headers';
@@ -228,12 +229,12 @@ export class UserService extends BaseRepository<User, Prisma.UserDelegate> {
   }
 
   async getSession({ req }: GraphQLContext) {
-    console.log(
-      fromNodeHeaders(req.headers)
-        .get('cookie')
-        ?.split(';')
-        .find((item) => item.includes('devs.session_token')),
-    );
+    // console.log(
+    //   fromNodeHeaders(req.headers)
+    //     .get('cookie')
+    //     ?.split(';')
+    //     .find((item) => item.includes('devs.session_token')),
+    // );
 
     const headers = fromNodeHeaders(req.headers);
 
@@ -249,16 +250,16 @@ export class UserService extends BaseRepository<User, Prisma.UserDelegate> {
       token,
     });
 
-    if (!session) return null;
+    if (!session) return ResponseHelper.notFound('Session');
 
     const user = await this.findById(session?.userId);
 
-    if (!user) return null;
+    if (!user) return ResponseHelper.notFound('User');
 
-    return {
+    return ResponseHelper.success({
       session,
       user,
-    };
+    });
   }
 
   async getProfile({ req }: GraphQLContext): Promise<GetProfileResponse | null> {

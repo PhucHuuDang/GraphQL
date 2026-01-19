@@ -1,6 +1,7 @@
 import { ConsoleLogger, ValidationPipe } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
 
+import { GraphQLExceptionFilter } from './common/filters/graphql-exception.filter';
 import { PrismaExceptionFilter } from './common/filters/prisma-exception.filter';
 import { ResponseTransformInterceptor } from './common/interceptors/response-transform.interceptor';
 import { AppModule } from './app.module';
@@ -16,8 +17,8 @@ async function bootstrap() {
     }),
   });
 
-  // Global exception filters
-  app.useGlobalFilters(new PrismaExceptionFilter());
+  // Global exception filters (order matters: most specific first)
+  app.useGlobalFilters(new GraphQLExceptionFilter(), new PrismaExceptionFilter());
 
   // Global interceptors (auto-transform responses)
   app.useGlobalInterceptors(new ResponseTransformInterceptor());
@@ -41,6 +42,7 @@ async function bootstrap() {
   const port = process.env.PORT || 3001;
 
   await app.listen(port);
+
   console.log(`🚀 GraphQL server ready at http://localhost:${port}/graphql`);
 }
 

@@ -2,6 +2,11 @@ import { Field, InputType, Int, ObjectType } from '@nestjs/graphql';
 
 import GraphQLJSON from 'graphql-type-json';
 
+import {
+  ObjectField,
+  OptionalObjectField,
+  StringField,
+} from '../../common/decorators/field.decorators';
 import { BaseModel } from '../../models/base.model';
 import { UserModel } from '../../models/user.model';
 import { CategoryModel } from '../category/category.model';
@@ -44,14 +49,24 @@ export class PostModel extends BaseModel {
   @Field({ defaultValue: false })
   isDeleted: boolean;
 
-  @Field(() => String)
+  // @Field(() => String, { nullable: true })
+
+  @StringField({
+    description: 'Category ID of the post',
+  })
+  categoryId: string;
+
+  // @Field(() => UserModel)
+
+  @StringField({
+    description: 'Category ID of the post',
+  })
   authorId: string;
 
-  @Field(() => String, { nullable: true })
-  categoryId?: string;
-
-  @Field(() => UserModel)
-  user: UserModel;
+  @ObjectField(() => UserModel, {
+    description: 'Author of the post',
+  })
+  author: UserModel;
 
   @Field(() => CategoryModel, { nullable: true })
   category?: CategoryModel;

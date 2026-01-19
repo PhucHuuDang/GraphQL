@@ -117,7 +117,7 @@ export default tseslint.config(
       // ============================================
       // GENERAL CODE QUALITY
       // ============================================
-      'no-console': ['warn', { allow: ['warn', 'error'] }],
+      'no-console': ['warn', { allow: ['warn', 'error', 'log'] }],
       'no-debugger': 'warn',
       'no-alert': 'warn',
       'no-duplicate-imports': 'error',
@@ -137,4 +137,5 @@ export default tseslint.config(
       ],
     },
   },
+
 );

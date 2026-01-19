@@ -72,7 +72,7 @@ input CreateCategoryDto {
 
 input CreatePostInput {
   """Category ID"""
-  categoryId: String
+  categoryId: String!
 
   """Post content in JSON format"""
   content: JSON!
@@ -81,13 +81,13 @@ input CreatePostInput {
   description: String
 
   """Whether to publish immediately or save as draft"""
-  isPublished: Boolean! = false
+  isPublished: Boolean = false
 
   """Main image URL"""
   mainImage: String
 
   """Post tags"""
-  tags: [String!] = []
+  tags: [String!]! = []
 
   """Post title"""
   title: String!
@@ -253,9 +253,15 @@ input PostFiltersInput {
 }
 
 type PostModel {
+  """Author of the post"""
+  author: UserModel!
+
+  """Category ID of the post"""
   authorId: String!
   category: CategoryModel
-  categoryId: String
+
+  """Category ID of the post"""
+  categoryId: String!
   content: JSON!
   createdAt: DateTime!
   description: String
@@ -269,7 +275,6 @@ type PostModel {
   tags: [String!]!
   title: String!
   updatedAt: DateTime!
-  user: UserModel!
   views: Int!
   votes: Int!
 }
@@ -316,7 +321,7 @@ type Query {
   categories: CategoriesResponse!
   getAccounts: [AccountModel!]!
   getProfile: GetProfileResponse!
-  getSession: GetSessionResponse!
+  getSession: SessionSingleResponse!
 
   """Get current user's posts"""
   myPosts(filters: PostFiltersInput!): PaginatedPostsResponse!
@@ -345,6 +350,13 @@ type SessionModel {
   user: UserModel!
   userAgent: String!
   userId: String!
+}
+
+type SessionSingleResponse {
+  """Response data"""
+  data: GetSessionResponse
+  message: String
+  success: Boolean!
 }
 
 type SignInEmailUser {

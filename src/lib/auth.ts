@@ -107,12 +107,29 @@ function createAuthConfig(config: AuthConfig = {}): BetterAuthOptions {
     },
 
     // Advanced cookie configuration
+    // advanced: {
+    //   cookies: {
+    //     state: {
+    //       attributes: {
+    //         sameSite: 'lax',
+    //         secure: isProduction,
+    //       },
+    //     },
+    //   },
+    // },
+
     advanced: {
       cookies: {
+        session: {
+          attributes: {
+            sameSite: 'none',
+            secure: isProduction || true,
+          },
+        },
         state: {
           attributes: {
-            sameSite: 'lax',
-            secure: isProduction,
+            sameSite: 'none',
+            secure: isProduction || true,
           },
         },
       },

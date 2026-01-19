@@ -1,6 +1,7 @@
 import { Global, Logger, Module } from '@nestjs/common';
 
 import { AUTH_INSTANCE_KEY } from '../../constants/auth.constants';
+import { SessionService } from '../session/session.service';
 
 import { BetterAuthService } from './better-auth.service';
 
@@ -35,7 +36,8 @@ import type { Auth } from 'better-auth';
       },
     },
     BetterAuthService,
+    SessionService,
   ],
-  exports: [AUTH_INSTANCE_KEY, BetterAuthService],
+  exports: [AUTH_INSTANCE_KEY, BetterAuthService, SessionService],
 })
 export class AuthModule {}
