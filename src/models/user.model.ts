@@ -4,15 +4,13 @@ import { EnumField } from '../common/decorators/field.decorators';
 import { UserRole } from '../common/registers/register-all-enums.example';
 
 import { AccountModel } from './account.model';
+import { BaseModel } from './base.model';
 import { Comment } from './comment.model';
 import { LikeModel } from './like.model';
 import { SessionModel } from './session.model';
 
 @ObjectType()
-export class UserModel {
-  @Field(() => String)
-  id: string;
-
+export class UserModel extends BaseModel {
   @Field((type) => String, { nullable: true })
   name?: string;
 
@@ -33,12 +31,6 @@ export class UserModel {
 
   @Field(() => [LikeModel], { defaultValue: [] })
   likes: LikeModel[];
-
-  @Field(() => Date)
-  createdAt: Date;
-
-  @Field(() => Date, { nullable: true })
-  updatedAt?: Date;
 
   @Field(() => Boolean, { defaultValue: false })
   emailVerified: boolean;

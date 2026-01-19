@@ -2,14 +2,12 @@ import { Field, InputType, Int, ObjectType } from '@nestjs/graphql';
 
 import GraphQLJSON from 'graphql-type-json';
 
-import { CategoryModel } from '../../models/category.model';
+import { BaseModel } from '../../models/base.model';
 import { UserModel } from '../../models/user.model';
+import { CategoryModel } from '../category/category.model';
 
 @ObjectType()
-export class PostModel {
-  @Field(() => String)
-  id: string;
-
+export class PostModel extends BaseModel {
   @Field()
   title: string;
 
@@ -27,12 +25,6 @@ export class PostModel {
 
   @Field(() => Int)
   votes: number;
-
-  @Field()
-  createdAt: Date;
-
-  @Field()
-  updatedAt: Date;
 
   @Field(() => [String])
   tags: string[];

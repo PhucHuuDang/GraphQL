@@ -1,12 +1,10 @@
 import { Field, ObjectType } from '@nestjs/graphql';
 
+import { BaseModel } from './base.model';
 import { UserModel } from './user.model';
 
 @ObjectType()
-export class AccountModel {
-  @Field(() => String)
-  id: string;
-
+export class AccountModel extends BaseModel {
   @Field(() => String)
   accountId: string;
 
@@ -39,10 +37,4 @@ export class AccountModel {
 
   @Field(() => String, { nullable: true })
   password?: string;
-
-  @Field(() => Date)
-  createdAt: Date;
-
-  @Field(() => Date)
-  updatedAt: Date;
 }

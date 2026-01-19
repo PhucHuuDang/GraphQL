@@ -68,19 +68,21 @@ export class SignUpEmailUser {
   @OptionalStringField({ description: 'Token' })
   token?: string;
 
-  @Field(() => UserModel, { nullable: true })
+  // @Field(() => UserModel, { nullable: true })
+  @OptionalObjectField(() => UserModel, { nullable: true, description: 'Return user model' })
   user?: UserModel;
 }
 
 @ObjectType()
 export class SignInEmailUser {
   // @Field(() => SignInEmailUserResponse)
-
   @OptionalStringField({ description: 'Token' })
   token?: string;
-
-  @OptionalObjectField(() => SignInEmailUserResponse, { nullable: true })
-  user: SignInEmailUserResponse;
+  @OptionalObjectField(() => SignInEmailUserResponse, {
+    nullable: true,
+    description: 'Return sign in user response',
+  })
+  user?: SignInEmailUserResponse;
 }
 
 @ObjectType()

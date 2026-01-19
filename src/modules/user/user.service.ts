@@ -73,7 +73,7 @@ export class UserService extends BaseRepository<User, Prisma.UserDelegate> {
         headers: fromNodeHeaders(req.headers),
       });
 
-      console.log('BetterAuth signUpEmail response:', JSON.stringify(response, null, 2));
+      // console.log('BetterAuth signUpEmail response:', JSON.stringify(response, null, 2));
 
       // If user was created successfully, fetch the complete user data from database
       if (response?.user?.id) {
@@ -94,7 +94,7 @@ export class UserService extends BaseRepository<User, Prisma.UserDelegate> {
         }
       }
 
-      console.log('response', response);
+      // console.log('response', response);
 
       return response;
     } catch (error) {

@@ -14,6 +14,7 @@ import { CacheModule } from './cache/cache.module';
 import { CallbackModule } from './callback/callback.module';
 import { upstashRedis } from './lib/upstash-client';
 import { AuthModule } from './modules/auth/auth.module';
+import { CategoryModule } from './modules/category/category.module';
 import { PostModule } from './modules/post/post.module';
 import { SessionModule } from './modules/session/session.module';
 import { UserModule } from './modules/user/user.module';
@@ -41,12 +42,14 @@ import { PrismaModule } from './prisma/prisma.module';
       envFilePath: ['.env.local', '.env'],
       skipProcessEnv: true,
     }),
+    PrismaModule,
 
     UserModule,
     AuthModule,
+    CategoryModule,
 
     PostModule,
-    PrismaModule,
+
     // ⚠️ AuthModule MUST come before any custom controllers that might interfere
     CacheModule,
 

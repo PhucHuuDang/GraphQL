@@ -19,12 +19,39 @@ type AccountModel {
   userId: String!
 }
 
+type CategoriesResponse {
+  """Total count"""
+  count: Int!
+
+  """Array of items"""
+  data: [CategoryModel!]!
+  message: String
+  success: Boolean!
+}
+
 type CategoryModel {
   createdAt: DateTime!
+
+  """Description of the category"""
+  description: String!
   id: String!
+
+  """Name of the category"""
   name: String!
-  posts: [PostModel!]
+
+  """Posts in this category"""
+  posts: [PostModel!]!
+
+  """Slug of the category"""
+  slug: String!
   updatedAt: DateTime!
+}
+
+type CategoryResponse {
+  """Response data"""
+  data: CategoryModel
+  message: String
+  success: Boolean!
 }
 
 type Comment {
@@ -33,6 +60,14 @@ type Comment {
   id: Int!
   post: PostModel
   user: UserModel!
+}
+
+input CreateCategoryDto {
+  """Description of the category"""
+  description: String!
+
+  """Name of the category"""
+  name: String!
 }
 
 input CreatePostInput {
@@ -88,7 +123,7 @@ type GitHubUserResponse {
   name: String
   redirect: String!
   token: String!
-  updatedAt: DateTime
+  updatedAt: DateTime!
   url: String!
   user: UserModel
 }
@@ -108,8 +143,14 @@ type LikeModel {
 }
 
 type Mutation {
+  """Create a new category"""
+  createCategory(input: CreateCategoryDto!): CategoryResponse!
+
   """Create a new post (requires authentication)"""
   createPost(input: CreatePostInput!): PostResponse!
+
+  """Delete a category"""
+  deleteCategory(id: String!): CategoryResponse!
 
   """Delete a post (requires ownership)"""
   deletePost(id: String!): DeletePostResponse!
@@ -122,6 +163,9 @@ type Mutation {
 
   """Sign up email user"""
   signUpEmail(signUpInput: SignUpInput!): SignUpEmailUser!
+
+  """Update a category"""
+  updateCategory(id: String!, input: UpdateCategoryDto!): CategoryResponse!
 
   """Update a post (requires ownership)"""
   updatePost(id: String!, input: UpdatePostInput!): PostResponse!
@@ -269,6 +313,7 @@ type PostsArrayResponse {
 }
 
 type Query {
+  categories: CategoriesResponse!
   getAccounts: [AccountModel!]!
   getProfile: GetProfileResponse!
   getSession: GetSessionResponse!
@@ -305,6 +350,8 @@ type SessionModel {
 type SignInEmailUser {
   """Token"""
   token: String
+
+  """Return sign in user response"""
   user: SignInEmailUserResponse
 }
 
@@ -314,7 +361,7 @@ type SignInEmailUserResponse {
   id: String!
   image: String
   name: String
-  updatedAt: DateTime
+  updatedAt: DateTime!
 }
 
 input SignInInput {
@@ -335,6 +382,8 @@ type SignOutResponse {
 type SignUpEmailUser {
   """Token"""
   token: String
+
+  """Return user model"""
   user: UserModel
 }
 
@@ -350,6 +399,14 @@ input SignUpInput {
 
   """Remember me"""
   rememberMe: Boolean = false
+}
+
+input UpdateCategoryDto {
+  """Description of the category"""
+  description: String
+
+  """Name of the category"""
+  name: String
 }
 
 input UpdatePostInput {
@@ -377,5 +434,5 @@ type UserModel {
   likes: [LikeModel!]!
   name: String
   sessions: [SessionModel!]!
-  updatedAt: DateTime
+  updatedAt: DateTime!
 }
