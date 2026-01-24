@@ -2,7 +2,7 @@ import bcrypt from 'bcrypt';
 import { betterAuth, type BetterAuthOptions, BetterAuthPlugin } from 'better-auth';
 import { prismaAdapter } from 'better-auth/adapters/prisma';
 
-import { prismaForAuth } from './prisma';
+import { getPrismaForAuth } from './prisma';
 
 /**
  * Plugin to skip OAuth state mismatch errors
@@ -61,7 +61,7 @@ function createAuthConfig(config: AuthConfig = {}): BetterAuthOptions {
   const isProduction = nodeEnv === 'production';
 
   return {
-    database: prismaAdapter(prismaForAuth, {
+    database: prismaAdapter(getPrismaForAuth(), {
       provider: 'postgresql',
       debugLogs: !isProduction,
     }),
@@ -144,8 +144,14 @@ function createAuthConfig(config: AuthConfig = {}): BetterAuthOptions {
 /**
  * Better Auth instance
  * This is initialized once and reused across the application
+ *
+ * Note: In test mode, this is set to null to prevent database connections.
+ * The AuthModule will provide a mock instance instead.
  */
-export const auth = betterAuth(createAuthConfig());
+export const auth =
+  process.env.NODE_ENV === 'test'
+    ? (null as never) // null in test mode - AuthModule provides mock
+    : betterAuth(createAuthConfig());
 
 /**
  * Export configuration creator for testing purposes

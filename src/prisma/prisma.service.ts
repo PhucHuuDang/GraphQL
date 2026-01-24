@@ -4,6 +4,8 @@ import { PrismaClient } from '../../generated/prisma';
 
 @Injectable()
 export class PrismaService extends PrismaClient implements OnModuleInit, OnModuleDestroy {
+  private isConnected = false;
+
   constructor() {
     super({
       datasourceUrl: process.env.DATABASE_URL,
@@ -11,10 +13,20 @@ export class PrismaService extends PrismaClient implements OnModuleInit, OnModul
   }
 
   async onModuleInit() {
-    await this.$connect();
+    // Skip connection in test environment when using shared instance
+    if (process.env.NODE_ENV === 'test' && process.env.SKIP_PRISMA_CONNECT === 'true') {
+      return;
+    }
+    if (!this.isConnected) {
+      await this.$connect();
+      this.isConnected = true;
+    }
   }
 
   async onModuleDestroy() {
-    await this.$disconnect();
+    if (this.isConnected) {
+      await this.$disconnect();
+      this.isConnected = false;
+    }
   }
 }

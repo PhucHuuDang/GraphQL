@@ -1,15 +1,43 @@
+/**
+ * E2E Test Setup
+ * Production-grade test infrastructure for NestJS + GraphQL + Prisma
+ */
+import { join } from 'path';
+
 import { INestApplication, ValidationPipe } from '@nestjs/common';
 
+import { ApolloDriver, ApolloDriverConfig } from '@nestjs/apollo';
+import { ConfigModule } from '@nestjs/config';
+import { GraphQLModule } from '@nestjs/graphql';
 import { Test, TestingModule } from '@nestjs/testing';
+
+import GraphQLJSON from 'graphql-type-json';
 
 import request from 'supertest';
 
+import { CacheModule } from '../src/cache/cache.module';
 import { GraphQLExceptionFilter } from '../src/common/filters/graphql-exception.filter';
 import { PrismaExceptionFilter } from '../src/common/filters/prisma-exception.filter';
 import { ResponseTransformInterceptor } from '../src/common/interceptors/response-transform.interceptor';
+import { AUTH_INSTANCE_KEY } from '../src/constants/auth.constants';
+import { UPSTASH_REDIS } from '../src/lib/key';
+import { AuthGuard } from '../src/modules/auth/auth.guard';
+import { BetterAuthService } from '../src/modules/auth/better-auth.service';
+import { CategoryModule } from '../src/modules/category/category.module';
+import { PostModule } from '../src/modules/post/post.module';
+import { SessionModule } from '../src/modules/session/session.module';
+import { UserModule } from '../src/modules/user/user.module';
+import { PrismaModule } from '../src/prisma/prisma.module';
 import { PrismaService } from '../src/prisma/prisma.service';
 
-// GraphQL test client
+// Set environment variables BEFORE NestJS initialization
+process.env.NODE_ENV = 'test';
+process.env.SKIP_PRISMA_CONNECT = 'true';
+
+// ============================================================================
+// GraphQL Test Client
+// ============================================================================
+
 export class GraphQLTestClient {
   constructor(private app: INestApplication) {}
 
@@ -37,33 +65,33 @@ export class GraphQLTestClient {
   }
 }
 
-// ⭐ Tạo một shared PrismaService instance cho toàn bộ test suite
-let sharedPrismaInstance: PrismaService | null = null;
+// ============================================================================
+// Shared Prisma Instance (Singleton)
+// ============================================================================
 
-function getSharedPrismaInstance(): PrismaService {
+let sharedPrismaInstance: PrismaService | null = null;
+let isConnected = false;
+
+async function getSharedPrismaInstance(): Promise<PrismaService> {
   if (!sharedPrismaInstance) {
     sharedPrismaInstance = new PrismaService();
   }
+
+  if (!isConnected) {
+    await sharedPrismaInstance.$connect();
+    isConnected = true;
+    console.log('✅ Shared Prisma instance connected');
+  }
+
   return sharedPrismaInstance;
 }
 
-// Test database helpers
+// ============================================================================
+// Test Database Helper
+// ============================================================================
+
 export class TestDatabase {
-  private prisma: PrismaService;
-
-  constructor() {
-    // ⭐ Sử dụng shared instance
-    this.prisma = getSharedPrismaInstance();
-  }
-
-  async connect(): Promise<void> {
-    try {
-      await this.prisma.$connect();
-    } catch (error) {
-      // Ignore if already connected
-      console.log('Prisma already connected or connection error:', error);
-    }
-  }
+  constructor(private prisma: PrismaService) {}
 
   async cleanDatabase(): Promise<void> {
     try {
@@ -85,7 +113,7 @@ export class TestDatabase {
 
   async disconnect(): Promise<void> {
     // Don't disconnect shared instance in individual tests
-    // It will be disconnected after all tests complete
+    // It will be disconnected in global teardown
   }
 
   getPrisma(): PrismaService {
@@ -93,13 +121,12 @@ export class TestDatabase {
   }
 }
 
-// Test data factory
-export class TestDataFactory {
-  private prisma: PrismaService;
+// ============================================================================
+// Test Data Factory
+// ============================================================================
 
-  constructor(prisma: PrismaService) {
-    this.prisma = prisma;
-  }
+export class TestDataFactory {
+  constructor(private prisma: PrismaService) {}
 
   async createUser(data?: {
     name?: string;
@@ -168,76 +195,159 @@ export class TestDataFactory {
   }
 }
 
-// Test app factory
+// ============================================================================
+// Mock Providers
+// ============================================================================
+
+/**
+ * Mock Upstash Redis for testing
+ * This prevents actual Redis connections during tests
+ */
+function createMockRedis() {
+  const store = new Map<string, string>();
+
+  return {
+    get: async (key: string) => store.get(key) ?? null,
+    set: async (key: string, value: string) => {
+      store.set(key, value);
+      return 'OK';
+    },
+    del: async (key: string) => {
+      store.delete(key);
+      return 1;
+    },
+    expire: async () => 1,
+    incr: async (key: string) => {
+      const val = parseInt(store.get(key) || '0', 10) + 1;
+      store.set(key, val.toString());
+      return val;
+    },
+    keys: async () => Array.from(store.keys()),
+    flushall: async () => {
+      store.clear();
+      return 'OK';
+    },
+  };
+}
+
+/**
+ * Mock Better Auth for testing
+ * This prevents the Better Auth prismaAdapter from creating database connections
+ */
+function createMockBetterAuth() {
+  return {
+    api: {
+      signUpEmail: () => Promise.resolve({ user: null, session: null }),
+      signInEmail: () => Promise.resolve({ user: null, session: null }),
+      signOut: () => Promise.resolve({ success: true }),
+      getSession: () => Promise.resolve(null),
+    },
+    options: {
+      appName: 'Test App',
+    },
+  };
+}
+
+/**
+ * Mock BetterAuthService for testing
+ */
+function createMockBetterAuthService() {
+  const mockAuth = createMockBetterAuth();
+  return {
+    api: mockAuth.api,
+    instance: mockAuth,
+    auth: mockAuth,
+    verifySession: () => Promise.resolve(null),
+    signOut: () => Promise.resolve({ success: true }),
+  };
+}
+
+// ============================================================================
+// Test App Factory
+// ============================================================================
+
 export async function createTestApp(): Promise<{
   app: INestApplication;
   testClient: GraphQLTestClient;
   testDb: TestDatabase;
   dataFactory: TestDataFactory;
 }> {
-  const testDb = new TestDatabase();
-  await testDb.connect();
+  console.log('\n📦 Creating test app...');
 
-  const prismaInstance = getSharedPrismaInstance();
+  // Step 1: Get shared Prisma instance
+  console.log('  Step 1: Getting Prisma instance...');
+  const prismaInstance = await getSharedPrismaInstance();
+  console.log('  Step 1: ✅ Done');
 
-  console.log('=== DEBUG INFO ===');
-  console.log('PrismaInstance has user?', 'user' in prismaInstance);
-  console.log('PrismaInstance type:', prismaInstance.constructor.name);
-  console.log('PrismaInstance user type:', typeof prismaInstance.user);
+  // Step 2: Import AppModule (AuthModule will use mock auth in test mode)
+  console.log('  Step 2: Importing AppModule...');
+  const { AppModule } = await import('../src/app.module');
+  console.log('  Step 2: ✅ Done');
 
-  try {
-    // ⭐ Import AppModule dynamically để đảm bảo không có circular dependency
-    const { AppModule } = await import('../src/app.module');
+  // Step 3: Create testing module with overrides
+  console.log('  Step 3: Creating test module...');
 
-    const moduleFixture: TestingModule = await Test.createTestingModule({
-      imports: [AppModule],
-    })
-      .overrideProvider(PrismaService)
-      .useValue(prismaInstance)
-      .compile();
+  const moduleFixture: TestingModule = await Test.createTestingModule({
+    imports: [AppModule],
+  })
+    // Override PrismaService with shared instance
+    .overrideProvider(PrismaService)
+    .useValue(prismaInstance)
+    // Mock Upstash Redis to prevent external connections
+    .overrideProvider(UPSTASH_REDIS)
+    .useValue(createMockRedis())
+    .compile();
+  console.log('  Step 3: ✅ Done');
 
-    // Debug: Check injected prisma
-    const injectedPrisma = moduleFixture.get<PrismaService>(PrismaService);
-    console.log('Injected PrismaService has user?', 'user' in injectedPrisma);
-    console.log('Injected type:', injectedPrisma.constructor.name);
-    console.log('Are they same instance?', injectedPrisma === prismaInstance);
+  // Step 4: Create NestJS application
+  console.log('  Step 4: Creating NestJS app...');
+  const app = moduleFixture.createNestApplication();
+  console.log('  Step 4: ✅ Done');
 
-    const app = moduleFixture.createNestApplication();
+  // Step 5: Apply global configuration (same as main.ts)
+  console.log('  Step 5: Applying global configuration...');
+  app.useGlobalFilters(new GraphQLExceptionFilter(), new PrismaExceptionFilter());
+  app.useGlobalInterceptors(new ResponseTransformInterceptor());
+  app.useGlobalPipes(
+    new ValidationPipe({
+      transform: true,
+      whitelist: true,
+    }),
+  );
+  app.enableCors({
+    origin: true,
+    credentials: true,
+  });
+  console.log('  Step 5: ✅ Done');
 
-    // Apply same global configuration as main.ts
-    app.useGlobalFilters(new GraphQLExceptionFilter(), new PrismaExceptionFilter());
-    app.useGlobalInterceptors(new ResponseTransformInterceptor());
-    app.useGlobalPipes(
-      new ValidationPipe({
-        transform: true,
-        whitelist: true,
-      }),
-    );
+  // Step 6: Initialize the app with timeout protection
+  console.log('  Step 6: Initializing app...');
+  await Promise.race([
+    app.init(),
+    new Promise((_, reject) =>
+      setTimeout(() => reject(new Error('App init timeout after 30s')), 30000),
+    ),
+  ]);
+  console.log('  Step 6: ✅ Done');
 
-    app.enableCors({
-      origin: true,
-      credentials: true,
-    });
+  console.log('✅ Test app created successfully\n');
 
-    await app.init();
+  const testDb = new TestDatabase(prismaInstance);
+  const testClient = new GraphQLTestClient(app);
+  const dataFactory = new TestDataFactory(prismaInstance);
 
-    const testClient = new GraphQLTestClient(app);
-    const dataFactory = new TestDataFactory(prismaInstance);
-
-    return {
-      app,
-      testClient,
-      testDb,
-      dataFactory,
-    };
-  } catch (error) {
-    console.error('Error creating test app:', error);
-    await testDb.disconnect();
-    throw error;
-  }
+  return {
+    app,
+    testClient,
+    testDb,
+    dataFactory,
+  };
 }
 
-// Cleanup helper with null safety
+// ============================================================================
+// Cleanup Helper
+// ============================================================================
+
 export async function cleanupTestApp(
   app: INestApplication | undefined,
   testDb: TestDatabase | undefined,
@@ -251,10 +361,15 @@ export async function cleanupTestApp(
   }
 }
 
-// ⭐ Call this after all tests are done
+// ============================================================================
+// Global Prisma Disconnect (for global teardown)
+// ============================================================================
+
 export async function disconnectSharedPrisma(): Promise<void> {
-  if (sharedPrismaInstance) {
+  if (sharedPrismaInstance && isConnected) {
     await sharedPrismaInstance.$disconnect();
     sharedPrismaInstance = null;
+    isConnected = false;
+    console.log('✅ Shared Prisma instance disconnected');
   }
 }
