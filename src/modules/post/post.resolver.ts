@@ -90,6 +90,7 @@ export class PostResolver {
     description: 'Get only published posts',
   })
   async getPublishedPosts(@Args('filters') filters: PostFiltersInput) {
+    console.log({ filters });
     return await this.postsService.findPostsWithFilters({
       ...filters,
       isPublished: true,

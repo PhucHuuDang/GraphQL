@@ -49,8 +49,6 @@ export class PostModel extends BaseModel {
   @Field({ defaultValue: false })
   isDeleted: boolean;
 
-  // @Field(() => String, { nullable: true })
-
   @StringField({
     description: 'Category ID of the post',
   })

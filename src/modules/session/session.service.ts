@@ -8,6 +8,6 @@ import { PrismaService } from '../../prisma/prisma.service';
 @Injectable()
 export class SessionService extends BaseRepository<SessionModel, Prisma.SessionDelegate> {
   constructor(prisma: PrismaService) {
-    super(prisma.session, 'SessionService');
+    super(prisma, 'session', 'SessionService');
   }
 }

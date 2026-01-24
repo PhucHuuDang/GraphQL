@@ -1,6 +1,6 @@
 import { Field, InputType, Int, ObjectType, PickType } from '@nestjs/graphql';
 
-import { EnumField } from '../common/decorators/field.decorators';
+import { EnumField, OptionalStringField } from '../common/decorators/field.decorators';
 import { UserRole } from '../common/registers/register-all-enums.example';
 
 import { AccountModel } from './account.model';
@@ -14,10 +14,13 @@ export class UserModel extends BaseModel {
   @Field((type) => String, { nullable: true })
   name?: string;
 
-  @Field({ nullable: true })
+  // @Field(() => String, { nullable: true })
+
+  @OptionalStringField()
   email?: string;
 
-  @Field({ nullable: true })
+  // @Field(() => String, { nullable: true })
+  @OptionalStringField()
   image?: string;
 
   @Field(() => String, { nullable: true })

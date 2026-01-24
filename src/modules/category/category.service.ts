@@ -11,7 +11,7 @@ import { CreateCategoryDto, UpdateCategoryDto } from './dto/category.dto';
 @Injectable()
 export class CategoryService extends BaseRepository<Category, Prisma.CategoryDelegate> {
   constructor(prisma: PrismaService) {
-    super(prisma.category, 'CategoryService');
+    super(prisma, 'category', 'CategoryService');
   }
 
   async findCategories() {

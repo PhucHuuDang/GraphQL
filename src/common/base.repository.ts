@@ -48,11 +48,44 @@ export interface BulkOperationResult {
 export abstract class BaseRepository<T, ModelDelegate extends { [key: string]: any }> {
   protected readonly logger: Logger;
 
+  // constructor(
+  //   protected readonly model: any,
+  //   loggerContext?: string,
+  // ) {
+  //   this.logger = new Logger(loggerContext || this.constructor.name);
+  // }
+
+  // constructor(
+  //   protected readonly model: any,
+  //   loggerContext?: string,
+  // ) {
+  //   // check if model is undefined
+  //   if (!model) {
+  //     throw new Error(
+  //       `Model delegate is undefined in ${loggerContext || this.constructor.name}. ` +
+  //         `Make sure PrismaService is properly initialized with all model delegates.`,
+  //     );
+  //   }
+
+  //   this.logger = new Logger(loggerContext || this.constructor.name);
+  // }
+
   constructor(
-    protected readonly model: any,
+    protected readonly prisma: PrismaService,
+    protected readonly modelName: keyof PrismaService,
     loggerContext?: string,
   ) {
     this.logger = new Logger(loggerContext || this.constructor.name);
+  }
+
+  protected get model(): any {
+    const model = this.prisma[this.modelName];
+    if (!model) {
+      throw new Error(
+        `Prisma model "${String(this.modelName)}" not found in ${this.constructor.name}`,
+      );
+    }
+    return model;
   }
 
   /**
@@ -80,9 +113,9 @@ export abstract class BaseRepository<T, ModelDelegate extends { [key: string]: a
   /**
    * Get Prisma client instance
    */
-  protected get prisma(): PrismaService {
-    return this.model._client as PrismaService;
-  }
+  // protected get prisma(): PrismaService {
+  //   return this.model._client as PrismaService;
+  // }
 
   // ==================== READ OPERATIONS ====================
 

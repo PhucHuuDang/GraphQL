@@ -26,7 +26,7 @@ export class PostsService extends BaseRepository<Post, Prisma.PostDelegate> {
     prisma: PrismaService,
     @Inject(UPSTASH_REDIS) private readonly upstashRedis: Redis,
   ) {
-    super(prisma.post, 'PostsService');
+    super(prisma, 'post', 'PostsService');
   }
 
   /**

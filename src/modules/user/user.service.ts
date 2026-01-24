@@ -6,7 +6,6 @@ import { Prisma, User } from '../../../generated/prisma';
 import { BaseRepository } from '../../common/base.repository';
 import { ResponseHelper } from '../../common/helpers/response.helper';
 import { GraphQLContext } from '../../interface/graphql.context';
-import { auth } from '../../lib/auth';
 import { fromNodeHeaders } from '../../lib/transform-node-headers';
 import { UserModel } from '../../models/user.model';
 import { BetterAuthService } from '../../modules/auth/better-auth.service';
@@ -39,7 +38,7 @@ export class UserService extends BaseRepository<User, Prisma.UserDelegate> {
     private readonly authService: BetterAuthService,
     private readonly sessionService: SessionService,
   ) {
-    super(prisma.user, 'UserService');
+    super(prisma, 'user', 'UserService');
   }
 
   async getAccounts({ req }: GraphQLContext) {

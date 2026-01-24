@@ -39,8 +39,7 @@ import { PrismaModule } from './prisma/prisma.module';
 
     ConfigModule.forRoot({
       isGlobal: true,
-      envFilePath: ['.env.local', '.env'],
-      skipProcessEnv: true,
+      envFilePath: ['.env.test', '.env.local', '.env'],
     }),
     PrismaModule,
 
