@@ -261,15 +261,15 @@ export class UserService extends BaseRepository<User, Prisma.UserDelegate> {
     });
   }
 
-  async getProfile({ req }: GraphQLContext): Promise<GetProfileResponse | null> {
+  async getProfile({ req }: GraphQLContext) {
     const response = await this.authService.api.accountInfo({
       headers: fromNodeHeaders(req.headers),
     });
 
-    if (!response) return null;
+    if (!response) return ResponseHelper.notFound('User');
     console.log({ response });
 
-    return {
+    return ResponseHelper.success({
       user: {
         id: response.user.id.toString(),
         name: response.user.name,
@@ -278,7 +278,7 @@ export class UserService extends BaseRepository<User, Prisma.UserDelegate> {
         emailVerified: response.user.emailVerified,
       },
       data: response.data,
-    };
+    });
   }
   async isExists(email: string, id: number) {}
 }

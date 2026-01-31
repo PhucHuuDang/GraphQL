@@ -1,0 +1,165 @@
+# Deploy to Production
+# Triggers on push to main or manual trigger
+
+name: Deploy Production
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+    inputs:
+      skip_backup:
+        description: 'Skip database backup'
+        required: false
+        default: 'false'
+        type: boolean
+
+concurrency:
+  group: production-deploy
+  cancel-in-progress: false
+
+env:
+  RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
+
+jobs:
+  # ==========================================
+  # Run CI Checks First
+  # ==========================================
+  ci:
+    name: CI Checks
+    uses: ./.github/workflows/ci.yml
+
+  # ==========================================
+  # Database Backup (Optional)
+  # ==========================================
+  backup:
+    name: Database Backup
+    runs-on: ubuntu-latest
+    needs: ci
+    if: ${{ github.event.inputs.skip_backup != 'true' }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Create database backup
+        run: |
+          echo "Creating database backup..."
+          # Use pg_dump or Neon's backup API
+          # pg_dump ${{ secrets.PRODUCTION_DATABASE_URL }} > backup-$(date +%Y%m%d-%H%M%S).sql
+          echo "Backup completed (placeholder - configure Neon backup)"
+
+  # ==========================================
+  # Deploy to Production
+  # ==========================================
+  deploy:
+    name: Deploy to Production
+    runs-on: ubuntu-latest
+    needs: [ci, backup]
+    if: always() && needs.ci.result == 'success' && (needs.backup.result == 'success' || needs.backup.result == 'skipped')
+    environment:
+      name: production
+      url: ${{ steps.deploy.outputs.url }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: '10'
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'pnpm'
+
+      - name: Install Railway CLI
+        run: npm install -g @railway/cli
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Generate Prisma Client
+        run: pnpm prisma generate
+
+      - name: Run Prisma migrations on production
+        run: pnpm prisma migrate deploy
+        env:
+          DATABASE_URL: ${{ secrets.PRODUCTION_DATABASE_URL }}
+
+      - name: Deploy to Railway Production
+        id: deploy
+        run: |
+          railway link --environment production
+          railway up --detach
+          echo "url=$(railway status --json | jq -r '.deploymentUrl')" >> $GITHUB_OUTPUT
+        env:
+          RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
+
+      - name: Tag release
+        run: |
+          git config user.name github-actions
+          git config user.email github-actions@github.com
+          git tag -a "release-$(date +%Y%m%d-%H%M%S)" -m "Production release"
+          git push origin --tags
+
+  # ==========================================
+  # Smoke Tests
+  # ==========================================
+  smoke-test:
+    name: Smoke Tests
+    runs-on: ubuntu-latest
+    needs: deploy
+    steps:
+      - name: Wait for deployment
+        run: sleep 45
+
+      - name: Health check
+        id: health
+        run: |
+          response=$(curl -s -w "%{http_code}" -o /dev/null --retry 5 --retry-delay 10 \
+            ${{ needs.deploy.outputs.url }}/health)
+          if [ "$response" != "200" ]; then
+            echo "Health check failed with status $response"
+            exit 1
+          fi
+          echo "Health check passed"
+
+      - name: Database connectivity check
+        run: |
+          curl --fail --retry 3 --retry-delay 5 \
+            ${{ needs.deploy.outputs.url }}/health/db
+
+      - name: GraphQL endpoint check
+        run: |
+          curl --fail --retry 3 --retry-delay 5 \
+            -X POST \
+            -H "Content-Type: application/json" \
+            -d '{"query":"{ __typename }"}' \
+            ${{ needs.deploy.outputs.url }}/graphql
+
+  # ==========================================
+  # Rollback on Failure
+  # ==========================================
+  rollback:
+    name: Rollback on Failure
+    runs-on: ubuntu-latest
+    needs: [deploy, smoke-test]
+    if: failure()
+    steps:
+      - name: Install Railway CLI
+        run: npm install -g @railway/cli
+
+      - name: Rollback deployment
+        run: |
+          echo "🚨 Smoke tests failed! Initiating rollback..."
+          railway link --environment production
+          railway rollback
+        env:
+          RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
+
+      - name: Notify failure
+        run: |
+          echo "❌ Production deployment failed and was rolled back"
+          # Add Discord/Slack webhook notification here if needed

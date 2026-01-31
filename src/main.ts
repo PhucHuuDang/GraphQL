@@ -1,6 +1,10 @@
 import { ConsoleLogger, ValidationPipe } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
 
+import { ConfigService } from '@nestjs/config';
+
+import helmet from 'helmet';
+
 import { GraphQLExceptionFilter } from './common/filters/graphql-exception.filter';
 import { PrismaExceptionFilter } from './common/filters/prisma-exception.filter';
 import { ResponseTransformInterceptor } from './common/interceptors/response-transform.interceptor';
@@ -17,6 +21,18 @@ async function bootstrap() {
     }),
   });
 
+  const configService = app.get(ConfigService);
+  const isProduction = configService.get('app.isProduction');
+
+  // Security headers with Helmet.js
+  app.use(
+    helmet({
+      // Disable for GraphQL Playground/GraphiQL in development
+      contentSecurityPolicy: isProduction ? undefined : false,
+      crossOriginEmbedderPolicy: isProduction,
+    }),
+  );
+
   // Global exception filters (order matters: most specific first)
   app.useGlobalFilters(new GraphQLExceptionFilter(), new PrismaExceptionFilter());
 
@@ -28,22 +44,29 @@ async function bootstrap() {
     new ValidationPipe({
       transform: true,
       whitelist: true,
-      // forbidNonWhitelisted: true,
+      forbidNonWhitelisted: true,
     }),
   );
 
+  // CORS configuration with environment-based origins
+  const allowedOrigins = configService.get<string[]>('cors.allowedOrigins') || [
+    'http://localhost:3000',
+  ];
   app.enableCors({
-    origin: true,
+    origin: isProduction ? allowedOrigins : true,
     credentials: true,
+    methods: ['GET', 'POST', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization', 'Cookie'],
   });
 
   await app.init();
 
-  const port = process.env.PORT || 3001;
+  const port = configService.get<number>('app.port') || 3001;
 
   await app.listen(port);
 
   console.log(`🚀 GraphQL server ready at http://localhost:${port}/graphql`);
+  console.log(`💚 Health check available at http://localhost:${port}/health`);
 }
 
 void bootstrap();

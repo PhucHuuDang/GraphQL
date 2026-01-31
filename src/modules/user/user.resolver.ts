@@ -11,6 +11,7 @@ import {
   GetProfileResponse,
   GetSessionResponse,
   GitHubUserResponse,
+  OAuth2UserInfoModel,
   SignInEmailUser,
   SignOutResponse,
   SignUpEmailUser,
@@ -21,6 +22,9 @@ import type { GraphQLContext } from '../../interface/graphql.context';
 
 @ObjectType()
 export class SessionSingleResponse extends SingleResponse(GetSessionResponse) {}
+
+@ObjectType()
+export class SingleProfileResponse extends SingleResponse(OAuth2UserInfoModel) {}
 
 @Resolver(() => UserModel)
 export class UserResolver {
@@ -33,7 +37,7 @@ export class UserResolver {
     return test;
   }
 
-  @Query(() => GetProfileResponse)
+  @Query(() => SingleProfileResponse)
   async getProfile(@Context() context: GraphQLContext) {
     const response = await this.userService.getProfile(context);
     // console.log({ response });

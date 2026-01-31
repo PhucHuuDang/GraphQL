@@ -137,5 +137,16 @@ export default tseslint.config(
       ],
     },
   },
-
+  // ============================================
+  // TEST FILES - RELAXED RULES
+  // ============================================
+  {
+    files: ['test/**/*.{ts,tsx}', '**/*.spec.ts', '**/*.test.ts'],
+    rules: {
+      '@typescript-eslint/no-unused-vars': 'off',
+      '@typescript-eslint/require-await': 'off',
+      '@typescript-eslint/no-unsafe-argument': 'off',
+      'no-empty': 'off',
+    },
+  },
 );

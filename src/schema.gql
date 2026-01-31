@@ -105,11 +105,6 @@ type DeletePostResponse {
   success: Boolean!
 }
 
-type GetProfileResponse {
-  data: JSON
-  user: OAuth2UserInfoModel!
-}
-
 type GetSessionResponse {
   session: SessionModel!
   user: UserModel!
@@ -184,11 +179,13 @@ type Mutation {
 }
 
 type OAuth2UserInfoModel {
+  createdAt: DateTime!
   email: String
   emailVerified: Boolean
   id: String!
   image: String
   name: String!
+  updatedAt: DateTime!
 }
 
 type PaginatedPostsResponse {
@@ -320,7 +317,7 @@ type PostsArrayResponse {
 type Query {
   categories: CategoriesResponse!
   getAccounts: [AccountModel!]!
-  getProfile: GetProfileResponse!
+  getProfile: SingleProfileResponse!
   getSession: SessionSingleResponse!
 
   """Get current user's posts"""
@@ -411,6 +408,13 @@ input SignUpInput {
 
   """Remember me"""
   rememberMe: Boolean = false
+}
+
+type SingleProfileResponse {
+  """Response data"""
+  data: OAuth2UserInfoModel
+  message: String
+  success: Boolean!
 }
 
 input UpdateCategoryDto {
