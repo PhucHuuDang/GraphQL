@@ -6,8 +6,8 @@ FROM node:22-alpine AS builder
 WORKDIR /app
 
 # Install pnpm
-# RUN npm install -g pnpm
-RUN corepack enable
+RUN npm install -g pnpm
+# RUN corepack enable
 
 # Copy package files first for better layer caching
 COPY package.json pnpm-lock.yaml ./
