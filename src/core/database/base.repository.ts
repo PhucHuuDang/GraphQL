@@ -1,15 +1,15 @@
 import { BadRequestException, ConflictException, Logger, NotFoundException } from '@nestjs/common';
 
-import { Prisma } from '../../generated/prisma';
-import { PrismaService } from '../prisma/prisma.service';
-
+import { Prisma } from '../../../generated/prisma';
 import {
   ValidateArray,
   ValidateData,
   ValidateId,
   ValidatePagination,
   ValidateWhere,
-} from './decorators/repository.decorators';
+} from '../../common/decorators/repository.decorators';
+
+import { PrismaService } from './prisma.service';
 
 export interface PaginationResult<T> {
   data: T[];
@@ -47,28 +47,6 @@ export interface BulkOperationResult {
 
 export abstract class BaseRepository<T, ModelDelegate extends { [key: string]: any }> {
   protected readonly logger: Logger;
-
-  // constructor(
-  //   protected readonly model: any,
-  //   loggerContext?: string,
-  // ) {
-  //   this.logger = new Logger(loggerContext || this.constructor.name);
-  // }
-
-  // constructor(
-  //   protected readonly model: any,
-  //   loggerContext?: string,
-  // ) {
-  //   // check if model is undefined
-  //   if (!model) {
-  //     throw new Error(
-  //       `Model delegate is undefined in ${loggerContext || this.constructor.name}. ` +
-  //         `Make sure PrismaService is properly initialized with all model delegates.`,
-  //     );
-  //   }
-
-  //   this.logger = new Logger(loggerContext || this.constructor.name);
-  // }
 
   constructor(
     protected readonly prisma: PrismaService,
@@ -109,13 +87,6 @@ export abstract class BaseRepository<T, ModelDelegate extends { [key: string]: a
   protected calculateSkip(page: number, limit: number): number {
     return (page - 1) * limit;
   }
-
-  /**
-   * Get Prisma client instance
-   */
-  // protected get prisma(): PrismaService {
-  //   return this.model._client as PrismaService;
-  // }
 
   // ==================== READ OPERATIONS ====================
 

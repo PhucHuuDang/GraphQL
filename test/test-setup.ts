@@ -15,20 +15,20 @@ import GraphQLJSON from 'graphql-type-json';
 
 import request from 'supertest';
 
-import { CacheModule } from '../src/cache/cache.module';
 import { GraphQLExceptionFilter } from '../src/common/filters/graphql-exception.filter';
 import { PrismaExceptionFilter } from '../src/common/filters/prisma-exception.filter';
+import { AuthGuard } from '../src/common/guards/auth.guard';
 import { ResponseTransformInterceptor } from '../src/common/interceptors/response-transform.interceptor';
-import { AUTH_INSTANCE_KEY } from '../src/constants/auth.constants';
-import { UPSTASH_REDIS } from '../src/lib/key';
-import { AuthGuard } from '../src/modules/auth/auth.guard';
+import { CacheModule } from '../src/core/cache/cache.module';
+import { AUTH_INSTANCE_KEY } from '../src/core/constants/auth.constants';
+import { UPSTASH_REDIS } from '../src/core/constants/injection-tokens';
+import { PrismaModule } from '../src/core/database/prisma.module';
+import { PrismaService } from '../src/core/database/prisma.service';
 import { BetterAuthService } from '../src/modules/auth/better-auth.service';
 import { CategoryModule } from '../src/modules/category/category.module';
 import { PostModule } from '../src/modules/post/post.module';
 import { SessionModule } from '../src/modules/session/session.module';
 import { UserModule } from '../src/modules/user/user.module';
-import { PrismaModule } from '../src/prisma/prisma.module';
-import { PrismaService } from '../src/prisma/prisma.service';
 
 // Set environment variables BEFORE NestJS initialization
 process.env.NODE_ENV = 'test';

@@ -1,6 +1,6 @@
 import { Global, Logger, Module } from '@nestjs/common';
 
-import { AUTH_INSTANCE_KEY } from '../../constants/auth.constants';
+import { AUTH_INSTANCE_KEY } from '../../core/constants/auth.constants';
 import { SessionService } from '../session/session.service';
 
 import { BetterAuthService } from './better-auth.service';
@@ -55,7 +55,7 @@ function createMockAuth(): Partial<Auth> {
               const logger = new Logger('AuthModule');
               try {
                 logger.log('Initializing Better Auth instance...');
-                const { auth } = await import('../../lib/auth.js');
+                const { auth } = await import('../../core/auth/better-auth.js');
                 logger.log('Better Auth instance initialized successfully');
                 return auth;
               } catch (error) {

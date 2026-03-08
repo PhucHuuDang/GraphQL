@@ -15,16 +15,15 @@ import { GqlExecutionContext } from '@nestjs/graphql';
 import { FastifyRequest } from 'fastify';
 import { Socket } from 'socket.io';
 
+import { fromNodeHeaders } from '../../core/auth/transform-node-headers';
 import {
   AUTH_INSTANCE_KEY,
   IS_OPTIONAL_AUTH,
   IS_PUBLIC_AUTH,
-} from '../../constants/auth.constants';
-import { fromNodeHeaders } from '../../lib/transform-node-headers';
-import { PrismaService } from '../../prisma/prisma.service';
-import { SessionService } from '../session/session.service';
-
-import { BetterAuthService } from './better-auth.service';
+} from '../../core/constants/auth.constants';
+import { PrismaService } from '../../core/database/prisma.service';
+import { BetterAuthService } from '../../modules/auth/better-auth.service';
+import { SessionService } from '../../modules/session/session.service';
 
 import type { Auth } from 'better-auth';
 
@@ -87,7 +86,6 @@ export class AuthGuard implements CanActivate {
     if (contextType === 'graphql') {
       const gqlCtx = GqlExecutionContext.create(context);
       request = gqlCtx.getContext()?.req;
-      console.log({ request });
     } else {
       request = context.switchToHttp().getRequest();
     }
@@ -105,16 +103,8 @@ export class AuthGuard implements CanActivate {
       },
     );
 
-    // const session = await this.auth.api.getSession({
-    //   headers: fromNodeHeaders(request?.headers),
-    // });
-
-    console.log({ session });
-
     request['session'] = session;
     request['user'] = session?.user ?? null; // For Sentry
-
-    console.log(request['session']);
 
     const isAuthOptional = this.reflector.getAllAndOverride<boolean>(IS_OPTIONAL_AUTH, [
       context.getHandler(),

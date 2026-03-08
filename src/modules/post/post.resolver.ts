@@ -8,8 +8,8 @@ import {
   Paginated,
   SingleItem,
 } from '../../common/decorators/response.decorators';
-import { generateSlug } from '../../utils/slug-stringify';
-import { AuthGuard } from '../auth/auth.guard';
+import { AuthGuard } from '../../common/guards/auth.guard';
+import { generateSlug } from '../../common/utils/slug-stringify';
 
 import { CreatePostInput } from './dto/create-post.dto';
 import { PostFiltersInput } from './dto/post-filters.dto';
@@ -20,10 +20,10 @@ import {
   PostsArrayResponse,
 } from './dto/post-response.dto';
 import { UpdatePostInput } from './dto/update-post.dto';
-import { PostModel } from './post.model';
+import { PostModel } from './models/post.model';
 import { PostsService } from './post.service';
 
-import type { GraphQLContext } from '../../interface/graphql.context';
+import type { GraphQLContext } from '../../common/interfaces/graphql-context.interface';
 
 /**
  * GraphQL Resolver for Post operations
@@ -90,7 +90,6 @@ export class PostResolver {
     description: 'Get only published posts',
   })
   async getPublishedPosts(@Args('filters') filters: PostFiltersInput) {
-    console.log({ filters });
     return await this.postsService.findPostsWithFilters({
       ...filters,
       isPublished: true,

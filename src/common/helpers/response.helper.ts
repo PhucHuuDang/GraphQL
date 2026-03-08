@@ -1,4 +1,4 @@
-import { PaginationResult } from '../base.repository';
+import { PaginationResult } from '../../core/database/base.repository';
 
 /**
  * Response helper utilities

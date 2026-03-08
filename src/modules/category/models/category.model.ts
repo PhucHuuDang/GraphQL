@@ -1,12 +1,7 @@
-import { Field, Int, ObjectType } from '@nestjs/graphql';
+import { ObjectType } from '@nestjs/graphql';
 
-import { isNullableType } from 'graphql';
-
-import { IsArray, IsDate, IsOptional, IsString } from 'class-validator';
-
-import { ArrayField, StringField } from '../../common/decorators/field.decorators';
-import { BaseModel } from '../../models/base.model';
-import { PostModel } from '../post/post.model';
+import { StringField } from '../../../common/decorators/field.decorators';
+import { BaseModel } from '../../../common/models/base.model';
 
 @ObjectType()
 export class CategoryModel extends BaseModel {
@@ -35,7 +30,4 @@ export class CategoryModel extends BaseModel {
     validationOptions: { message: 'Description must be between 3-255 characters' },
   })
   description: string;
-
-  @ArrayField(() => PostModel, { nullable: false, description: 'Posts in this category' })
-  posts?: PostModel[];
 }

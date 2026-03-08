@@ -1,12 +1,11 @@
 import { Args, Context, Mutation, ObjectType, Query, Resolver } from '@nestjs/graphql';
 
 import { RawResponse, SingleItem } from '../../common/decorators/response.decorators';
+import { AccountModel } from '../../common/models/account.model';
 import { SingleResponse } from '../../common/types/response.types';
-import { AccountModel } from '../../models/account.model';
-import { UserModel } from '../../models/user.model';
 
 import { SignInInput, SignUpInput, UpdateProfileArgs } from './dto/user.dto';
-// import { User } from 'better-auth';
+import { UserModel } from './models/user.model';
 import {
   GetProfileResponse,
   GetSessionResponse,
@@ -18,7 +17,7 @@ import {
 } from './auth.model';
 import { UserService } from './user.service';
 
-import type { GraphQLContext } from '../../interface/graphql.context';
+import type { GraphQLContext } from '../../common/interfaces/graphql-context.interface';
 
 @ObjectType()
 export class SessionSingleResponse extends SingleResponse(GetSessionResponse) {}
@@ -33,14 +32,12 @@ export class UserResolver {
   @Query(() => [AccountModel])
   async getAccounts(@Context() context: GraphQLContext) {
     const test = await this.userService.getAccounts(context);
-    // console.log({ test });
     return test;
   }
 
   @Query(() => SingleProfileResponse)
   async getProfile(@Context() context: GraphQLContext) {
     const response = await this.userService.getProfile(context);
-    // console.log({ response });
     return response;
   }
 
@@ -51,14 +48,11 @@ export class UserResolver {
   }
 
   @RawResponse()
-  // @SingleItem('Sign up successful')
   @Mutation((type) => SignUpEmailUser, { description: 'Sign up email user' })
   async signUpEmail(
     @Args('signUpInput', { type: () => SignUpInput }) signUpInput: SignUpInput,
     @Context() ctx: GraphQLContext,
   ) {
-    // console.log({ input: signUpInput });
-
     const response = await this.userService.signUpEmail(signUpInput, ctx);
 
     console.log('Sign up email response: ', response);
@@ -116,10 +110,7 @@ export class UserResolver {
   @SingleItem('Session retrieved successfully')
   @Query(() => SessionSingleResponse)
   async getSession(@Context() ctx: GraphQLContext) {
-    // console.log(ctx.req);
     const response = await this.userService.getSession(ctx);
-
-    // console.log({ response });
     return response;
   }
 }

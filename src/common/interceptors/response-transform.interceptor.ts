@@ -5,7 +5,7 @@ import { GqlExecutionContext } from '@nestjs/graphql';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 
-import { PaginationResult } from '../base.repository';
+import { PaginationResult } from '../../core/database/base.repository';
 
 /**
  * Response metadata from decorator

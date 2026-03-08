@@ -4,7 +4,7 @@ import { ArrayItems, SingleItem } from '../../common/decorators/response.decorat
 import { ArrayResponse, SingleResponse } from '../../common/types/response.types';
 
 import { CreateCategoryDto, UpdateCategoryDto } from './dto/category.dto';
-import { CategoryModel } from './category.model';
+import { CategoryModel } from './models/category.model';
 import { CategoryService } from './category.service';
 
 // Create response types for GraphQL

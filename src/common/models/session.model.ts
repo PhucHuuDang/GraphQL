@@ -1,7 +1,8 @@
 import { Field, ObjectType } from '@nestjs/graphql';
 
+import { UserModel } from '../../modules/user/models/user.model';
+
 import { BaseModel } from './base.model';
-import { UserModel } from './user.model';
 
 @ObjectType()
 export class SessionModel extends BaseModel {

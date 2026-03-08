@@ -9,12 +9,12 @@ import {
 import { Redis } from '@upstash/redis';
 
 import { Post, PostStatus, Prisma } from '../../../generated/prisma';
-import { BaseRepository, PaginationParams } from '../../common/base.repository';
 import { ResponseHelper } from '../../common/helpers/response.helper';
-import { GraphQLContext } from '../../interface/graphql.context';
-import { UPSTASH_REDIS } from '../../lib/key';
-import { PrismaService } from '../../prisma/prisma.service';
-import { generateSlug } from '../../utils/slug-stringify';
+import { GraphQLContext } from '../../common/interfaces/graphql-context.interface';
+import { generateSlug } from '../../common/utils/slug-stringify';
+import { UPSTASH_REDIS } from '../../core/constants/injection-tokens';
+import { BaseRepository, PaginationParams } from '../../core/database/base.repository';
+import { PrismaService } from '../../core/database/prisma.service';
 
 import { CreatePostInput } from './dto/create-post.dto';
 import { PostFiltersInput } from './dto/post-filters.dto';
@@ -24,7 +24,7 @@ import { UpdatePostInput } from './dto/update-post.dto';
 export class PostsService extends BaseRepository<Post, Prisma.PostDelegate> {
   constructor(
     prisma: PrismaService,
-    @Inject(UPSTASH_REDIS) private readonly upstashRedis: Redis,
+    @Inject(UPSTASH_REDIS) private readonly upstashRedis: Redis | null,
   ) {
     super(prisma, 'post', 'PostsService');
   }
@@ -368,17 +368,23 @@ export class PostsService extends BaseRepository<Post, Prisma.PostDelegate> {
 
   async incrementViews(id: string, identifier: string) {
     try {
-      const cacheKey = `blog:${id}:view:${identifier}`;
-      const hasViewed = await this.upstashRedis.get(cacheKey);
-
       let post;
 
-      if (hasViewed) {
-        post = await this.findById(id);
-      } else {
-        await this.upstashRedis.set(cacheKey, identifier, { ex: 3600 });
-        // Use built-in increment method
+      // When Redis is unavailable, skip view deduplication and always increment
+      if (!this.upstashRedis) {
+        this.logger.warn('Upstash Redis is not configured. Skipping view deduplication.');
         post = await this.increment(id, 'views', 1);
+      } else {
+        const cacheKey = `blog:${id}:view:${identifier}`;
+        const hasViewed = await this.upstashRedis.get(cacheKey);
+
+        if (hasViewed) {
+          post = await this.findById(id);
+        } else {
+          await this.upstashRedis.set(cacheKey, identifier, { ex: 3600 });
+          // Use built-in increment method
+          post = await this.increment(id, 'views', 1);
+        }
       }
 
       if (!post) {

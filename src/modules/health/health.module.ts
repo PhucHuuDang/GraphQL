@@ -2,7 +2,7 @@ import { Module } from '@nestjs/common';
 
 import { TerminusModule } from '@nestjs/terminus';
 
-import { PrismaModule } from '../../prisma/prisma.module';
+import { PrismaModule } from '../../core';
 
 import { HealthController } from './health.controller';
 

@@ -2,14 +2,10 @@ import { Field, InputType, Int, ObjectType } from '@nestjs/graphql';
 
 import GraphQLJSON from 'graphql-type-json';
 
-import {
-  ObjectField,
-  OptionalObjectField,
-  StringField,
-} from '../../common/decorators/field.decorators';
-import { BaseModel } from '../../models/base.model';
-import { UserModel } from '../../models/user.model';
-import { CategoryModel } from '../category/category.model';
+import { ObjectField, StringField } from '../../../common/decorators/field.decorators';
+import { BaseModel } from '../../../common/models/base.model';
+import { CategoryModel } from '../../category/models/category.model';
+import { UserModel } from '../../user/models/user.model';
 
 @ObjectType()
 export class PostModel extends BaseModel {
@@ -53,8 +49,6 @@ export class PostModel extends BaseModel {
     description: 'Category ID of the post',
   })
   categoryId: string;
-
-  // @Field(() => UserModel)
 
   @StringField({
     description: 'Category ID of the post',

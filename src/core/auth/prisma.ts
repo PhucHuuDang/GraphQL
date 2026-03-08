@@ -1,6 +1,6 @@
 import { withAccelerate } from '@prisma/extension-accelerate';
 
-import { PrismaClient } from '../../generated/prisma';
+import { PrismaClient } from '../../../generated/prisma';
 
 // ✅ Sửa type để accept extended client
 const globalForPrisma = global as unknown as {

@@ -15,7 +15,6 @@ type AccountModel {
   refreshTokenExpiresAt: DateTime
   scope: String
   updatedAt: DateTime!
-  user: UserModel!
   userId: String!
 }
 
@@ -39,9 +38,6 @@ type CategoryModel {
   """Name of the category"""
   name: String!
 
-  """Posts in this category"""
-  posts: [PostModel!]!
-
   """Slug of the category"""
   slug: String!
   updatedAt: DateTime!
@@ -58,8 +54,8 @@ type Comment {
   content: String!
   createdAt: DateTime!
   id: Int!
-  post: PostModel
-  user: UserModel!
+  postId: String
+  userId: String!
 }
 
 input CreateCategoryDto {
@@ -131,9 +127,7 @@ scalar JSON
 type LikeModel {
   createdAt: DateTime!
   id: Int!
-  post: PostModel!
   postId: String!
-  user: UserModel!
   userId: String!
 }
 
@@ -344,7 +338,6 @@ type SessionModel {
   ipAddress: String!
   token: String!
   updatedAt: DateTime!
-  user: UserModel!
   userAgent: String!
   userId: String!
 }

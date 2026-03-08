@@ -7,9 +7,10 @@ import {
   OptionalStringField,
   StringField,
 } from '../../common/decorators/field.decorators';
-import { BaseModel } from '../../models/base.model';
-import { SessionModel } from '../../models/session.model';
-import { UserModel } from '../../models/user.model';
+import { BaseModel } from '../../common/models/base.model';
+import { SessionModel } from '../../common/models/session.model';
+
+import { UserModel } from './models/user.model';
 
 @ObjectType()
 export class OAuth2UserInfoModel extends BaseModel {

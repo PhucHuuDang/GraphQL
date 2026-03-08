@@ -1,33 +1,25 @@
-import { Field, InputType, Int, ObjectType, PickType } from '@nestjs/graphql';
+import { Field, ObjectType } from '@nestjs/graphql';
 
-import { EnumField, OptionalStringField } from '../common/decorators/field.decorators';
-import { UserRole } from '../common/registers/register-all-enums.example';
-
-import { AccountModel } from './account.model';
-import { BaseModel } from './base.model';
-import { Comment } from './comment.model';
-import { LikeModel } from './like.model';
-import { SessionModel } from './session.model';
+import { OptionalStringField } from '../../../common/decorators/field.decorators';
+import { AccountModel } from '../../../common/models/account.model';
+import { BaseModel } from '../../../common/models/base.model';
+import { Comment } from '../../../common/models/comment.model';
+import { LikeModel } from '../../../common/models/like.model';
+import { SessionModel } from '../../../common/models/session.model';
 
 @ObjectType()
 export class UserModel extends BaseModel {
   @Field((type) => String, { nullable: true })
   name?: string;
 
-  // @Field(() => String, { nullable: true })
-
   @OptionalStringField()
   email?: string;
 
-  // @Field(() => String, { nullable: true })
   @OptionalStringField()
   image?: string;
 
   @Field(() => String, { nullable: true })
   designation?: string;
-
-  // @EnumField(() => UserRole, { nullable: true })
-  // role?: UserRole;
 
   @Field(() => [Comment], { defaultValue: [] })
   comments: Comment[];

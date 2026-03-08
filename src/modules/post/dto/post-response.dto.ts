@@ -6,7 +6,7 @@ import {
   PaginatedResponse,
   SingleResponse,
 } from '../../../common/types/response.types';
-import { PostModel } from '../post.model';
+import { PostModel } from '../models/post.model';
 
 /**
  * Paginated posts response

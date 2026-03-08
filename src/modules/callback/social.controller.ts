@@ -1,8 +1,7 @@
 import { Controller, Get, Req, Res } from '@nestjs/common';
 
-// import { fromNodeHeaders } from 'better-auth/node';
-import { fromNodeHeaders } from '../lib/transform-node-headers';
-import { BetterAuthService } from '../modules/auth/better-auth.service';
+import { fromNodeHeaders } from '../../core/auth/transform-node-headers';
+import { BetterAuthService } from '../auth/better-auth.service';
 
 @Controller('social')
 export class SocialController {
@@ -17,10 +16,6 @@ export class SocialController {
       },
       headers: fromNodeHeaders(req.headers as any),
     });
-
-    // console.log({ data });
-
-    // console.log('headers: ', fromNodeHeaders(req.headers as any));
 
     return res.redirect(data.url);
   }

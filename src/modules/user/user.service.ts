@@ -3,16 +3,16 @@ import { BadRequestException, Injectable, UnauthorizedException } from '@nestjs/
 import { APIError, type User as UserType } from 'better-auth';
 
 import { Prisma, User } from '../../../generated/prisma';
-import { BaseRepository } from '../../common/base.repository';
 import { ResponseHelper } from '../../common/helpers/response.helper';
-import { GraphQLContext } from '../../interface/graphql.context';
-import { fromNodeHeaders } from '../../lib/transform-node-headers';
-import { UserModel } from '../../models/user.model';
-import { BetterAuthService } from '../../modules/auth/better-auth.service';
-import { SessionService } from '../../modules/session/session.service';
-import { PrismaService } from '../../prisma/prisma.service';
+import { GraphQLContext } from '../../common/interfaces/graphql-context.interface';
+import { fromNodeHeaders } from '../../core/auth/transform-node-headers';
+import { BaseRepository } from '../../core/database/base.repository';
+import { PrismaService } from '../../core/database/prisma.service';
+import { BetterAuthService } from '../auth/better-auth.service';
+import { SessionService } from '../session/session.service';
 
 import { SignInInput, SignUpInput, UpdateProfileArgs } from './dto/user.dto';
+import { UserModel } from './models/user.model';
 import { GetProfileResponse, GetSessionResponse } from './auth.model';
 
 @Injectable()
@@ -73,8 +73,6 @@ export class UserService extends BaseRepository<User, Prisma.UserDelegate> {
         headers: fromNodeHeaders(req.headers),
       });
 
-      // console.log('BetterAuth signUpEmail response:', JSON.stringify(response, null, 2));
-
       // If user was created successfully, fetch the complete user data from database
       if (response?.user?.id) {
         const fullUser = await this.findById(response.user.id);
@@ -93,8 +91,6 @@ export class UserService extends BaseRepository<User, Prisma.UserDelegate> {
           };
         }
       }
-
-      // console.log('response', response);
 
       return response;
     } catch (error) {
@@ -118,8 +114,6 @@ export class UserService extends BaseRepository<User, Prisma.UserDelegate> {
         headers: fromNodeHeaders(req.headers),
       });
 
-      console.log({ response });
-
       return response;
     } catch (error) {
       if (error instanceof APIError) {
@@ -133,8 +127,6 @@ export class UserService extends BaseRepository<User, Prisma.UserDelegate> {
   }
 
   async signOut({ req }: GraphQLContext) {
-    console.log(req.headers);
-
     const headers = fromNodeHeaders(req.headers);
     try {
       return await this.authService.api.signOut({
@@ -151,7 +143,6 @@ export class UserService extends BaseRepository<User, Prisma.UserDelegate> {
             token,
           },
         });
-        console.log({ test });
 
         return { success: true };
       }
@@ -175,24 +166,6 @@ export class UserService extends BaseRepository<User, Prisma.UserDelegate> {
     return response;
   }
 
-  // async changePassword(
-  //   changePasswordInput: ChangePasswordInput,
-  //   { req }: GraphQLContext,
-  // ) {
-  //   const { currentPassword, newPassword } = changePasswordInput;
-
-  //   const response = await this.authService.api.changePassword({
-  //     body: {
-  //       currentPassword,
-  //       newPassword,
-  //       revokeOtherSessions: true,
-  //     },
-
-  //     headers: fromNodeHeaders(req.headers),
-  //   });
-  //   return response;
-  // }
-
   async gitHub({ req }: GraphQLContext) {
     try {
       const data = await this.authService.api.signInSocial({
@@ -204,9 +177,6 @@ export class UserService extends BaseRepository<User, Prisma.UserDelegate> {
         headers: fromNodeHeaders(req.headers),
       });
 
-      console.log('GitHub sign-in initiation response:', data);
-
-      // The response should contain a redirect URL to GitHub OAuth
       if (!data.url) {
         throw new Error('No redirect URL received from Better Auth');
       }
@@ -222,19 +192,12 @@ export class UserService extends BaseRepository<User, Prisma.UserDelegate> {
     return await this.authService.api.callbackOAuth({
       method: 'GET',
       headers: fromNodeHeaders(req.headers),
-      params: { id: 'github' }, // <-- đây thay thế cho provider
+      params: { id: 'github' },
       request: req as any,
     });
   }
 
   async getSession({ req }: GraphQLContext) {
-    // console.log(
-    //   fromNodeHeaders(req.headers)
-    //     .get('cookie')
-    //     ?.split(';')
-    //     .find((item) => item.includes('devs.session_token')),
-    // );
-
     const headers = fromNodeHeaders(req.headers);
 
     const apiSession = (await this.authService.api.getSession({
@@ -267,7 +230,6 @@ export class UserService extends BaseRepository<User, Prisma.UserDelegate> {
     });
 
     if (!response) return ResponseHelper.notFound('User');
-    console.log({ response });
 
     return ResponseHelper.success({
       user: {
