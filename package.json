@@ -19,7 +19,7 @@
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
     "test:e2e": "dotenv -e .env.test -- vitest run",
     "test:e2e:watch": "dotenv -e .env.test -- vitest",
-    "prepare": "husky",
+    "prepare": "if [ -d .git ]; then husky; fi",
     "postinstall": "prisma generate",
     "lint:fix": "eslint \"{src,apps,libs,test}/**/*.ts\" --fix",
     "format:check": "prettier --check \"src/**/*.ts\" \"test/**/*.ts\"",
