@@ -66,7 +66,10 @@ export class PrismaExceptionFilter implements ExceptionFilter {
     const ctx = host.switchToHttp();
     const response = ctx.getResponse<Response>();
 
-    response.status(errorMapping.status).json({
+    // Cast response to any temporarily to satisfy both Fastify and Express typings
+    const res = response as any;
+
+    res.status(errorMapping.status).json({
       statusCode: errorMapping.status,
       message: errorMapping.message,
       error: errorMapping.code || 'DATABASE_ERROR',

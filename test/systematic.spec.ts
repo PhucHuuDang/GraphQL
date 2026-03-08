@@ -20,7 +20,7 @@ describe('Systematic PostsService Investigation', () => {
 
   it('should compile PrismaService mock', async () => {
     console.log('Testing PrismaService mock...');
-    const { PrismaService } = await import('../src/prisma/prisma.service');
+    const { PrismaService } = await import('../src/core/database/prisma.service');
 
     const start = Date.now();
     module = await Test.createTestingModule({
@@ -42,7 +42,7 @@ describe('Systematic PostsService Investigation', () => {
 
   it('should compile simple injectable with Redis', async () => {
     console.log('Testing simple injectable with Redis...');
-    const { UPSTASH_REDIS } = await import('../src/lib/key');
+    const { UPSTASH_REDIS } = await import('../src/core/constants/injection-tokens');
 
     // Define a simple test class that uses Redis
     @Injectable()
@@ -67,13 +67,13 @@ describe('Systematic PostsService Investigation', () => {
 
   it('should compile simple class extending BaseRepository', async () => {
     console.log('Testing class extending BaseRepository...');
-    const { BaseRepository } = await import('../src/common/base.repository');
-    const { PrismaService } = await import('../src/prisma/prisma.service');
+    const { BaseRepository } = await import('../src/core/database/base.repository');
+    const { PrismaService } = await import('../src/core/database/prisma.service');
 
     // Simple class extending BaseRepository without any Redis
     @Injectable()
     class SimpleRepo extends BaseRepository<any, any> {
-      constructor(prisma: PrismaService) {
+      constructor(prisma: any) {
         super(prisma, 'post', 'SimpleRepo');
       }
     }
@@ -102,8 +102,8 @@ describe('Systematic PostsService Investigation', () => {
   it('should compile PostsService directly', async () => {
     console.log('Testing PostsService directly...');
     const { PostsService } = await import('../src/modules/post/post.service');
-    const { PrismaService } = await import('../src/prisma/prisma.service');
-    const { UPSTASH_REDIS } = await import('../src/lib/key');
+    const { PrismaService } = await import('../src/core/database/prisma.service');
+    const { UPSTASH_REDIS } = await import('../src/core/constants/injection-tokens');
 
     const mockPrisma = {
       $connect: async () => {},

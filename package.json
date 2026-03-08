@@ -1,10 +1,11 @@
 {
   "name": "graphql",
   "version": "0.0.1",
-  "description": "",
   "author": "",
   "private": true,
   "license": "UNLICENSED",
+  "description": "Nestjs with graphql by @PhucHuuDang",
+  "packageManager": "pnpm@10.14.0",
   "scripts": {
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
     "start": "nest start",

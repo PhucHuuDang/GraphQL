@@ -11,9 +11,8 @@ import { afterEach, describe, expect, it } from 'vitest';
 
 import { Post, Prisma } from '../generated/prisma';
 // Import BaseRepository
-import { BaseRepository } from '../src/common/base.repository';
-import { UPSTASH_REDIS } from '../src/lib/key';
-import { PrismaService } from '../src/prisma/prisma.service';
+// Import BaseRepository
+import { BaseRepository, PrismaService, UPSTASH_REDIS } from '../src/core';
 
 // **REMOVED**: import { PostFiltersInput } from '../src/modules/post/dto/post-filters.dto';
 

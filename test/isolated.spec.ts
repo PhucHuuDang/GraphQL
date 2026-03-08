@@ -51,11 +51,11 @@ describe('Completely Isolated Test', () => {
 
   it('should compile after importing PrismaService', async () => {
     console.log('Testing after PrismaService import...');
-    const { PrismaService } = await import('../src/prisma/prisma.service');
+    const { PrismaService } = await import('../src/core/database/prisma.service');
 
     @Injectable()
     class ServiceWithPrisma {
-      constructor(private readonly prisma: PrismaService) {}
+      constructor(private readonly prisma: any) {}
     }
 
     const start = Date.now();
@@ -75,10 +75,10 @@ describe('Completely Isolated Test', () => {
 
   it('should compile after importing generated Prisma types', async () => {
     console.log('Testing after generated Prisma types import...');
-    const { Post, Prisma } = await import('../generated/prisma');
+    const generatedPrisma = await import('../generated/prisma');
 
     console.log('Generated types imported successfully');
-    console.log('Post type exists:', typeof Post);
+    console.log('Prisma exists:', !!generatedPrisma.Prisma);
 
     const start = Date.now();
     module = await Test.createTestingModule({
@@ -96,7 +96,7 @@ describe('Completely Isolated Test', () => {
 
   it('should compile after importing BaseRepository', async () => {
     console.log('Testing after BaseRepository import...');
-    const { BaseRepository } = await import('../src/common/base.repository');
+    const { BaseRepository } = await import('../src/core/database/base.repository');
 
     console.log('BaseRepository imported successfully');
 

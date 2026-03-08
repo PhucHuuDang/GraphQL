@@ -5,13 +5,11 @@ import { Test, TestingModule } from '@nestjs/testing';
 
 import { afterEach, describe, expect, it } from 'vitest';
 
-import { AUTH_INSTANCE_KEY } from '../src/constants/auth.constants';
-import { UPSTASH_REDIS } from '../src/lib/key';
-import { AuthGuard } from '../src/modules/auth/auth.guard';
+import { AuthGuard } from '../src/common/guards/auth.guard';
 // Import PostModule components directly
+import { AUTH_INSTANCE_KEY, PrismaService, UPSTASH_REDIS } from '../src/core';
 import { PostResolver } from '../src/modules/post/post.resolver';
 import { PostsService } from '../src/modules/post/post.service';
-import { PrismaService } from '../src/prisma/prisma.service';
 
 // Create a mock Redis client
 function createMockRedis() {

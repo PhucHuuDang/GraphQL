@@ -3,7 +3,7 @@
  * This file runs ONCE after ALL test files complete
  */
 import { PrismaClient } from '../generated/prisma';
-import { disconnectPrismaForAuth } from '../src/lib/prisma';
+import { disconnectPrismaForAuth } from '../src/core/auth/prisma';
 
 export default async function globalTeardown() {
   console.log('\n🧹 Global test teardown starting...');

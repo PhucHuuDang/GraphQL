@@ -36,7 +36,7 @@ async function testModules() {
   // Test 2: PrismaModule
   console.log('\n=== Test 2: PrismaModule ===');
   try {
-    const { PrismaModule } = await import('../src/prisma/prisma.module');
+    const { PrismaModule } = await import('../src/core/database/prisma.module');
     const start2 = Date.now();
     const mod2 = await Test.createTestingModule({
       imports: [ConfigModule.forRoot({ isGlobal: true }), PrismaModule],
@@ -50,7 +50,7 @@ async function testModules() {
   // Test 3: CacheModule
   console.log('\n=== Test 3: CacheModule ===');
   try {
-    const { CacheModule } = await import('../src/cache/cache.module');
+    const { CacheModule } = await import('../src/core/cache/cache.module');
     const start3 = Date.now();
     const mod3 = await Test.createTestingModule({
       imports: [ConfigModule.forRoot({ isGlobal: true }), CacheModule],
@@ -65,7 +65,7 @@ async function testModules() {
   console.log('\n=== Test 4: AuthModule ===');
   try {
     const { AuthModule } = await import('../src/modules/auth/auth.module');
-    const { PrismaModule } = await import('../src/prisma/prisma.module');
+    const { PrismaModule } = await import('../src/core/database/prisma.module');
     const start4 = Date.now();
     const mod4 = await Test.createTestingModule({
       imports: [ConfigModule.forRoot({ isGlobal: true }), PrismaModule, AuthModule],
@@ -81,9 +81,9 @@ async function testModules() {
   try {
     const { UserResolver } = await import('../src/modules/user/user.resolver');
     const { UserService } = await import('../src/modules/user/user.service');
-    const { PrismaModule } = await import('../src/prisma/prisma.module');
+    const { PrismaModule } = await import('../src/core/database/prisma.module');
     const { AuthModule } = await import('../src/modules/auth/auth.module');
-    const { CacheModule } = await import('../src/cache/cache.module');
+    const { CacheModule } = await import('../src/core/cache/cache.module');
 
     const start5 = Date.now();
     const mod5 = await Test.createTestingModule({

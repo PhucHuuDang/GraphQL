@@ -16,13 +16,13 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { PostStatus } from '../generated/prisma';
+import { PrismaService } from '../src/core/database/prisma.service';
 import { PostsService } from '../src/modules/post/post.service';
-import { PrismaService } from '../src/prisma/prisma.service';
 
 import { createPrismaMock, MockPrismaService } from './__mocks__/prisma.mock';
 import { createRedisMock, MockRedis } from './__mocks__/redis.mock';
 
-import type { GraphQLContext } from '../src/interface/graphql.context';
+import type { GraphQLContext } from '../src/common/interfaces/graphql-context.interface';
 
 describe('PostsService (Unit)', () => {
   let service: PostsService;
@@ -62,11 +62,14 @@ describe('PostsService (Unit)', () => {
     it('throws UnauthorizedException when session is missing', async () => {
       const ctx = mockContext(); // No user
 
-      const result = await service.createPost({ title: 'Test', content: {} as any }, ctx);
+      const result = await service.createPost(
+        { title: 'Test', content: {} as any, tags: [], categoryId: 'test-cat' },
+        ctx,
+      );
 
       // Service returns ResponseHelper.unauthorized() for missing session
       expect(result.success).toBe(false);
-      expect(result.code).toBe('UNAUTHORIZED');
+      expect((result as any).code).toBe('UNAUTHORIZED');
     });
 
     it('throws UnauthorizedException when session.user is null', async () => {
@@ -75,10 +78,13 @@ describe('PostsService (Unit)', () => {
         res: {},
       } as unknown as GraphQLContext;
 
-      const result = await service.createPost({ title: 'Test', content: {} as any }, ctx);
+      const result = await service.createPost(
+        { title: 'Test', content: {} as any, tags: [], categoryId: 'test-cat' },
+        ctx,
+      );
 
       expect(result.success).toBe(false);
-      expect(result.code).toBe('UNAUTHORIZED');
+      expect((result as any).code).toBe('UNAUTHORIZED');
     });
 
     it('allows authenticated user to proceed', async () => {
@@ -96,12 +102,12 @@ describe('PostsService (Unit)', () => {
       });
 
       const result = await service.createPost(
-        { title: 'Test', content: {} as any, isPublished: false },
+        { title: 'Test', content: {} as any, tags: [], categoryId: 'test-cat', isPublished: false },
         ctx,
       );
 
       expect(result.success).toBe(true);
-      expect(result.data.authorId).toBe('user-1');
+      expect((result as any).data.authorId).toBe('user-1');
     });
   });
 
@@ -115,7 +121,7 @@ describe('PostsService (Unit)', () => {
       const result = await service.deletePost('missing-id', ctx);
 
       expect(result.success).toBe(false);
-      expect(result.code).toBe('NOT_FOUND');
+      expect((result as any).code).toBe('NOT_FOUND');
     });
 
     it('returns FORBIDDEN when user is not the author', async () => {
@@ -128,7 +134,7 @@ describe('PostsService (Unit)', () => {
       const result = await service.deletePost('post-1', ctx);
 
       expect(result.success).toBe(false);
-      expect(result.code).toBe('FORBIDDEN');
+      expect((result as any).code).toBe('FORBIDDEN');
     });
 
     it('allows owner to modify their post', async () => {
@@ -167,13 +173,19 @@ describe('PostsService (Unit)', () => {
         }));
 
         const result = await service.createPost(
-          { title: 'Admin Post', content: {} as any, isPublished: true },
+          {
+            title: 'Admin Post',
+            content: {} as any,
+            tags: [],
+            categoryId: 'test-cat',
+            isPublished: true,
+          },
           ctx,
         );
 
         expect(result.success).toBe(true);
-        expect(result.data.status).toBe(PostStatus.PUBLISHED);
-        expect(result.data.publishedAt).toBeDefined();
+        expect((result as any).data.status).toBe(PostStatus.PUBLISHED);
+        expect((result as any).data.publishedAt).toBeDefined();
       });
     });
 
@@ -188,11 +200,17 @@ describe('PostsService (Unit)', () => {
         }));
 
         const result = await service.createPost(
-          { title: 'Mod Post', content: {} as any, isPublished: true },
+          {
+            title: 'Mod Post',
+            content: {} as any,
+            tags: [],
+            categoryId: 'test-cat',
+            isPublished: true,
+          },
           ctx,
         );
 
-        expect(result.data.status).toBe(PostStatus.PUBLISHED);
+        expect((result as any).data.status).toBe(PostStatus.PUBLISHED);
       });
     });
 
@@ -208,12 +226,18 @@ describe('PostsService (Unit)', () => {
         }));
 
         const result = await service.createPost(
-          { title: 'User Post', content: {} as any, isPublished: true },
+          {
+            title: 'User Post',
+            content: {} as any,
+            tags: [],
+            categoryId: 'test-cat',
+            isPublished: true,
+          },
           ctx,
         );
 
-        expect(result.data.status).toBe(PostStatus.PENDING);
-        expect(result.data.submittedForReviewAt).toBeDefined();
+        expect((result as any).data.status).toBe(PostStatus.PENDING);
+        expect((result as any).data.submittedForReviewAt).toBeDefined();
       });
 
       it('creates DRAFT when isPublished is false', async () => {
@@ -226,11 +250,17 @@ describe('PostsService (Unit)', () => {
         }));
 
         const result = await service.createPost(
-          { title: 'Draft Post', content: {} as any, isPublished: false },
+          {
+            title: 'Draft Post',
+            content: {} as any,
+            tags: [],
+            categoryId: 'test-cat',
+            isPublished: false,
+          },
           ctx,
         );
 
-        expect(result.data.status).toBe(PostStatus.DRAFT);
+        expect((result as any).data.status).toBe(PostStatus.DRAFT);
       });
     });
   });
@@ -256,7 +286,7 @@ describe('PostsService (Unit)', () => {
 
       const result = await service.updatePost('post-1', { isPublished: true }, ctx);
 
-      expect(result.data.status).toBe(PostStatus.PENDING);
+      expect((result as any).data.status).toBe(PostStatus.PENDING);
     });
 
     it('DRAFT → PUBLISHED when ADMIN publishes', async () => {
@@ -277,8 +307,8 @@ describe('PostsService (Unit)', () => {
 
       const result = await service.updatePost('post-1', { isPublished: true }, ctx);
 
-      expect(result.data.status).toBe(PostStatus.PUBLISHED);
-      expect(result.data.publishedAt).toBeDefined();
+      expect((result as any).data.status).toBe(PostStatus.PUBLISHED);
+      expect((result as any).data.publishedAt).toBeDefined();
     });
 
     it('PUBLISHED → UNPUBLISHED when user unpublishes', async () => {
@@ -298,8 +328,8 @@ describe('PostsService (Unit)', () => {
 
       const result = await service.updatePost('post-1', { isPublished: false }, ctx);
 
-      expect(result.data.status).toBe(PostStatus.UNPUBLISHED);
-      expect(result.data.isPublished).toBe(false);
+      expect((result as any).data.status).toBe(PostStatus.UNPUBLISHED);
+      expect((result as any).data.isPublished).toBe(false);
     });
   });
 
@@ -313,11 +343,14 @@ describe('PostsService (Unit)', () => {
         slug: 'test-post',
       });
 
-      const result = await service.createPost({ title: 'Test Post', content: {} as any }, ctx);
+      const result = await service.createPost(
+        { title: 'Test Post', content: {} as any, tags: [], categoryId: 'test-cat' },
+        ctx,
+      );
 
       expect(result.success).toBe(false);
-      expect(result.code).toBe('DUPLICATE_ENTRY');
-      expect(result.field).toBe('title');
+      expect((result as any).code).toBe('DUPLICATE_ENTRY');
+      expect((result as any).field).toBe('title');
     });
 
     it('allows unique slug on create', async () => {
@@ -328,7 +361,10 @@ describe('PostsService (Unit)', () => {
         slug: 'unique-slug',
       });
 
-      const result = await service.createPost({ title: 'Unique Slug', content: {} as any }, ctx);
+      const result = await service.createPost(
+        { title: 'Unique Slug', content: {} as any, tags: [], categoryId: 'test-cat' },
+        ctx,
+      );
 
       expect(result.success).toBe(true);
     });
@@ -353,7 +389,7 @@ describe('PostsService (Unit)', () => {
       const result = await service.updatePost('post-1', { title: 'New Title' }, ctx);
 
       expect(result.success).toBe(false);
-      expect(result.code).toBe('DUPLICATE_ENTRY');
+      expect((result as any).code).toBe('DUPLICATE_ENTRY');
     });
 
     it('allows same slug if title unchanged', async () => {
@@ -397,7 +433,7 @@ describe('PostsService (Unit)', () => {
       });
       expect(prismaMock.post.update).toHaveBeenCalled();
       expect(result.success).toBe(true);
-      expect(result.data.views).toBe(1);
+      expect((result as any).data.views).toBe(1);
     });
 
     it('does NOT increment on duplicate visit (cached)', async () => {
@@ -410,7 +446,7 @@ describe('PostsService (Unit)', () => {
       const result = await service.incrementViews('post-1', 'ip:127.0.0.1');
 
       expect(prismaMock.post.update).not.toHaveBeenCalled();
-      expect(result.data.views).toBe(5);
+      expect((result as any).data.views).toBe(5);
     });
 
     it('returns NOT_FOUND for missing post', async () => {
@@ -420,7 +456,7 @@ describe('PostsService (Unit)', () => {
       const result = await service.incrementViews('missing', 'ip:127.0.0.1');
 
       expect(result.success).toBe(false);
-      expect(result.code).toBe('NOT_FOUND');
+      expect((result as any).code).toBe('NOT_FOUND');
     });
   });
 
@@ -444,8 +480,8 @@ describe('PostsService (Unit)', () => {
       const result = await service.deletePost('post-1', ctx);
 
       expect(result.success).toBe(true);
-      expect(result.data.isDeleted).toBe(true);
-      expect(result.data.deletedAt).toBeDefined();
+      expect((result as any).data.isDeleted).toBe(true);
+      expect((result as any).data.deletedAt).toBeDefined();
     });
   });
 
@@ -462,7 +498,7 @@ describe('PostsService (Unit)', () => {
       const result = await service.getPostById('post-1');
 
       expect(result.success).toBe(true);
-      expect(result.data.id).toBe('post-1');
+      expect((result as any).data.id).toBe('post-1');
     });
 
     it('returns NOT_FOUND for missing post', async () => {
@@ -471,7 +507,7 @@ describe('PostsService (Unit)', () => {
       const result = await service.getPostById('missing');
 
       expect(result.success).toBe(false);
-      expect(result.code).toBe('NOT_FOUND');
+      expect((result as any).code).toBe('NOT_FOUND');
     });
 
     it('returns NOT_FOUND for deleted post', async () => {
@@ -483,7 +519,7 @@ describe('PostsService (Unit)', () => {
       const result = await service.getPostById('post-1');
 
       expect(result.success).toBe(false);
-      expect(result.code).toBe('NOT_FOUND');
+      expect((result as any).code).toBe('NOT_FOUND');
     });
   });
 
@@ -500,7 +536,7 @@ describe('PostsService (Unit)', () => {
       const result = await service.findBySlug('test-post');
 
       expect(result.success).toBe(true);
-      expect(result.data.slug).toBe('test-post');
+      expect((result as any).data.slug).toBe('test-post');
     });
 
     it('returns NOT_FOUND for missing slug', async () => {
@@ -509,7 +545,7 @@ describe('PostsService (Unit)', () => {
       const result = await service.findBySlug('non-existent');
 
       expect(result.success).toBe(false);
-      expect(result.code).toBe('NOT_FOUND');
+      expect((result as any).code).toBe('NOT_FOUND');
     });
 
     it('returns error for deleted post', async () => {
@@ -534,7 +570,7 @@ describe('PostsService (Unit)', () => {
       const result = await service.getMyPosts({}, ctx);
 
       expect(result.success).toBe(false);
-      expect(result.code).toBe('UNAUTHORIZED');
+      expect((result as any).code).toBe('UNAUTHORIZED');
     });
 
     it('scopes to current user', async () => {

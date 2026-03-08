@@ -65,5 +65,5 @@ HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
 ENV NODE_ENV=production
 ENV PORT=3001
 
-# Start command
-CMD ["node", "dist/main.js"]
+# Start command ensuring prisma migrations run before the app
+CMD ["sh", "-c", "npx prisma migrate deploy && node dist/main.js"]

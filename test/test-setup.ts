@@ -46,7 +46,10 @@ export class GraphQLTestClient {
     variables?: Record<string, unknown>,
     authToken?: string,
   ): Promise<request.Response> {
-    const req = request(this.app.getHttpServer()).post('/graphql').send({ query, variables });
+    const req = (request(this.app.getHttpServer()).post('/graphql') as any).send({
+      query,
+      variables,
+    });
 
     if (authToken) {
       req.set('Authorization', `Bearer ${authToken}`);

@@ -28,8 +28,8 @@ describe('PostsService Investigation', () => {
     console.log('Step 2: Importing dependencies...');
     const start = Date.now();
     const { PostsService } = await import('../src/modules/post/post.service');
-    const { PrismaService } = await import('../src/prisma/prisma.service');
-    const { UPSTASH_REDIS } = await import('../src/lib/key');
+    const { PrismaService } = await import('../src/core/database/prisma.service');
+    const { UPSTASH_REDIS } = await import('../src/core/constants/injection-tokens');
     console.log(`✅ All dependencies imported in ${Date.now() - start}ms`);
     expect(PostsService).toBeDefined();
     expect(PrismaService).toBeDefined();
@@ -39,8 +39,8 @@ describe('PostsService Investigation', () => {
   it('Step 3: Create TestingModule WITHOUT compile', async () => {
     console.log('Step 3: Creating TestingModule without compile...');
     const { PostsService } = await import('../src/modules/post/post.service');
-    const { PrismaService } = await import('../src/prisma/prisma.service');
-    const { UPSTASH_REDIS } = await import('../src/lib/key');
+    const { PrismaService } = await import('../src/core/database/prisma.service');
+    const { UPSTASH_REDIS } = await import('../src/core/constants/injection-tokens');
 
     const start = Date.now();
     const builder = Test.createTestingModule({
@@ -66,8 +66,8 @@ describe('PostsService Investigation', () => {
   it('Step 4: Compile the TestingModule', async () => {
     console.log('Step 4: Compiling TestingModule...');
     const { PostsService } = await import('../src/modules/post/post.service');
-    const { PrismaService } = await import('../src/prisma/prisma.service');
-    const { UPSTASH_REDIS } = await import('../src/lib/key');
+    const { PrismaService } = await import('../src/core/database/prisma.service');
+    const { UPSTASH_REDIS } = await import('../src/core/constants/injection-tokens');
 
     const builder = Test.createTestingModule({
       providers: [

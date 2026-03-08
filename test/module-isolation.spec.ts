@@ -10,7 +10,7 @@ import GraphQLJSON from 'graphql-type-json';
 
 import { afterEach, describe, expect, it } from 'vitest';
 
-import { UPSTASH_REDIS } from '../src/lib/key';
+import { UPSTASH_REDIS } from '../src/core/constants/injection-tokens';
 
 // Create a mock Redis client
 function createMockRedis() {
@@ -41,9 +41,9 @@ describe('PostModule Isolation Debug', () => {
   it('should compile PostModule with correct dependencies and Redis mock', async () => {
     console.log('Testing PostModule with correct deps and Redis mock...');
     const { PostModule } = await import('../src/modules/post/post.module');
-    const { PrismaModule } = await import('../src/prisma/prisma.module');
+    const { PrismaModule } = await import('../src/core/database/prisma.module');
     const { SessionModule } = await import('../src/modules/session/session.module');
-    const { CacheModule } = await import('../src/cache/cache.module');
+    const { CacheModule } = await import('../src/core/cache/cache.module');
     const { AuthModule } = await import('../src/modules/auth/auth.module');
 
     const start = Date.now();
@@ -67,9 +67,9 @@ describe('PostModule Isolation Debug', () => {
   it('should compile GraphQL + PostModule with Redis mock', async () => {
     console.log('Testing GraphQL + PostModule with Redis mock...');
     const { PostModule } = await import('../src/modules/post/post.module');
-    const { PrismaModule } = await import('../src/prisma/prisma.module');
+    const { PrismaModule } = await import('../src/core/database/prisma.module');
     const { SessionModule } = await import('../src/modules/session/session.module');
-    const { CacheModule } = await import('../src/cache/cache.module');
+    const { CacheModule } = await import('../src/core/cache/cache.module');
     const { AuthModule } = await import('../src/modules/auth/auth.module');
 
     const start = Date.now();
