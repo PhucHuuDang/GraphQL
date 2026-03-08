@@ -63,10 +63,10 @@ async function bootstrap() {
 
   const port = configService.get<number>('app.port') || 3001;
 
-  await app.listen(Number(port));
+  await app.listen(Number(port), '0.0.0.0');
 
-  console.log(`🚀 GraphQL server ready at http://localhost:${port}/graphql`);
-  console.log(`💚 Health check available at http://localhost:${port}/health`);
+  console.log(`🚀 GraphQL server ready at http://0.0.0.0:${port}/graphql`);
+  console.log(`💚 Health check available at http://0.0.0.0:${port}/health`);
 }
 
 void bootstrap();
