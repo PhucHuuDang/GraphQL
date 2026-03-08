@@ -6,7 +6,8 @@ FROM node:22-alpine AS builder
 WORKDIR /app
 
 # Install pnpm
-RUN npm install -g pnpm
+# RUN npm install -g pnpm
+RUN corepack enable
 
 # Copy package files first for better layer caching
 COPY package.json pnpm-lock.yaml ./
@@ -24,7 +25,8 @@ COPY . .
 RUN pnpm run prisma:generate && pnpm run build
 
 # Prune dev dependencies for smaller production image
-RUN pnpm prune --prod
+# RUN pnpm prune --prod
+RUN pnpm prune --prod --ignore-scripts
 
 # ==================================
 # Production Stage
@@ -32,6 +34,8 @@ RUN pnpm prune --prod
 FROM node:22-alpine AS production
 
 WORKDIR /app
+
+ENV HUSKY=0
 
 # Add non-root user for security
 RUN addgroup -g 1001 -S nodejs && \
