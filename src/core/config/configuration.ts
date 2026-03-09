@@ -65,7 +65,12 @@ export default () => {
     cors: {
       allowedOrigins: (process.env.CORS_ORIGINS || 'http://localhost:3000')
         .split(',')
-        .map((origin) => origin.trim()),
+        .map((origin) =>
+          origin
+            .trim()
+            .replace(/^['"]|['"]$/g, '')
+            .replace(/\/$/, ''),
+        ),
     } as CorsConfig,
 
     throttler: {

@@ -59,7 +59,16 @@ async function bootstrap() {
   const configOrigins = configService.get<string[]>('cors.allowedOrigins') || [];
   const allowedOrigins = [...new Set([...configOrigins, 'http://localhost:3000'])];
   app.enableCors({
-    origin: isProduction ? allowedOrigins : true,
+    origin: (requestOrigin: string, callback: (err: Error | null, allow?: boolean) => void) => {
+      if (!isProduction) {
+        return callback(null, true); // Allow all in development
+      }
+      if (!requestOrigin || allowedOrigins.includes(requestOrigin)) {
+        return callback(null, true);
+      }
+      console.warn(`[CORS block] Origin missing from Railway variable: ${requestOrigin}`);
+      return callback(null, false);
+    },
     credentials: true,
     // methods: ['GET', 'POST', 'OPTIONS'],
     methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
