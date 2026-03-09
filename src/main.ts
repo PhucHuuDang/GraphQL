@@ -25,11 +25,18 @@ async function bootstrap() {
   const isProduction = configService.get('app.isProduction');
 
   // Security headers with Helmet.js
+  // app.use(
+  //   helmet({
+  //     // Disable for GraphQL Playground/GraphiQL in development
+  //     contentSecurityPolicy: isProduction ? undefined : false,
+  //     crossOriginEmbedderPolicy: isProduction,
+  //   }),
+  // );
   app.use(
     helmet({
-      // Disable for GraphQL Playground/GraphiQL in development
-      contentSecurityPolicy: isProduction ? undefined : false,
-      crossOriginEmbedderPolicy: isProduction,
+      contentSecurityPolicy: false,
+      crossOriginEmbedderPolicy: false,
+      crossOriginResourcePolicy: false,
     }),
   );
 
@@ -56,8 +63,10 @@ async function bootstrap() {
   app.enableCors({
     origin: isProduction ? allowedOrigins : true,
     credentials: true,
-    methods: ['GET', 'POST', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Authorization', 'Cookie'],
+    // methods: ['GET', 'POST', 'OPTIONS'],
+    methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+    // allowedHeaders: ['Content-Type', 'Authorization', 'Cookie'],
+    allowedHeaders: '*',
   });
 
   await app.init();
