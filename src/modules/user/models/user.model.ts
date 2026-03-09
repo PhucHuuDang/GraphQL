@@ -9,7 +9,7 @@ import { SessionModel } from '../../../common/models/session.model';
 
 @ObjectType()
 export class UserModel extends BaseModel {
-  @Field((type) => String, { nullable: true })
+  @OptionalStringField()
   name?: string;
 
   @OptionalStringField()
