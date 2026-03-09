@@ -45,7 +45,8 @@ import { UserModule } from './modules/user/user.module';
     // GraphQL with Apollo
     GraphQLModule.forRoot<ApolloDriverConfig>({
       driver: ApolloDriver,
-      autoSchemaFile: join(process.cwd(), 'src/schema.gql'),
+      autoSchemaFile:
+        process.env.NODE_ENV === 'production' ? true : join(process.cwd(), 'src/schema.gql'),
       graphiql: true,
       sortSchema: true,
       playground: true,
