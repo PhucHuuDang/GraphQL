@@ -5,7 +5,7 @@
     "buildCommand": "pnpm install --frozen-lockfile && pnpm prisma generate && pnpm build"
   },
   "deploy": {
-    "startCommand": "timeout 20 npx prisma migrate deploy; node dist/main.js",
+    "startCommand": "pnpm run start:railway",
     "healthcheckPath": "/health",
     "healthcheckTimeout": 120,
     "restartPolicyType": "ON_FAILURE",

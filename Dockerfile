@@ -66,4 +66,4 @@ ENV NODE_ENV=production
 ENV PORT=3001
 
 # Start command ensuring prisma migrations run before the app
-CMD ["sh", "-c", "timeout 20 npx prisma migrate deploy; node dist/main.js"]
+CMD ["npm", "run", "start:railway"]
