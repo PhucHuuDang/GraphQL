@@ -56,10 +56,8 @@ async function bootstrap() {
   );
 
   // CORS configuration with environment-based origins
-  const allowedOrigins = configService.get<string[]>('cors.allowedOrigins') || [
-    'http://localhost:3000',
-    'https://storydevs.vercel.app',
-  ];
+  const configOrigins = configService.get<string[]>('cors.allowedOrigins') || [];
+  const allowedOrigins = [...new Set([...configOrigins, 'http://localhost:3000'])];
   app.enableCors({
     origin: isProduction ? allowedOrigins : true,
     credentials: true,
