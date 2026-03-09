@@ -59,11 +59,11 @@ EXPOSE 3001
 
 # Health check
 HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
-  CMD wget --no-verbose --tries=1 --spider http://localhost:3001/health || exit 1
+  CMD wget --no-verbose --tries=1 --spider http://localhost:${PORT:-3001}/health || exit 1
 
 # Environment variables (can be overridden at runtime)
 ENV NODE_ENV=production
 ENV PORT=3001
 
 # Start command ensuring prisma migrations run before the app
-CMD ["sh", "-c", "npx prisma migrate deploy && node dist/main.js"]
+CMD ["sh", "-c", "timeout 20 npx prisma migrate deploy; node dist/main.js"]
