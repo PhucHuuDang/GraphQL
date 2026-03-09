@@ -57,11 +57,16 @@ async function bootstrap() {
 
   // CORS configuration with environment-based origins
   const configOrigins = configService.get<string[]>('cors.allowedOrigins') || [];
+
   const allowedOrigins = [...new Set([...configOrigins, 'http://localhost:3000'])];
+  console.log({ allowedOrigins });
   app.enableCors({
-    origin: (requestOrigin: string, callback: (err: Error | null, allow?: boolean) => void) => {
+    origin: (
+      requestOrigin: string | undefined,
+      callback: (err: Error | null, allow?: boolean) => void,
+    ) => {
       if (!isProduction) {
-        return callback(null, true); // Allow all in development
+        return callback(null, true);
       }
       if (!requestOrigin || allowedOrigins.includes(requestOrigin)) {
         return callback(null, true);
@@ -70,17 +75,14 @@ async function bootstrap() {
       return callback(null, false);
     },
     credentials: true,
-    // methods: ['GET', 'POST', 'OPTIONS'],
     methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
-    // allowedHeaders: ['Content-Type', 'Authorization', 'Cookie'],
-    allowedHeaders: '*',
   });
 
   await app.init();
 
   const port = configService.get<number>('app.port') || 3001;
 
-  await app.listen(Number(port), '0.0.0.0');
+  await app.listen(port, '0.0.0.0');
 
   console.log(`🚀 GraphQL server ready at http://0.0.0.0:${port}/graphql`);
   console.log(`💚 Health check available at http://0.0.0.0:${port}/health`);
