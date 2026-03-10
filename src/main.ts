@@ -24,14 +24,6 @@ async function bootstrap() {
   const configService = app.get(ConfigService);
   const isProduction = configService.get('app.isProduction');
 
-  // Security headers with Helmet.js
-  // app.use(
-  //   helmet({
-  //     // Disable for GraphQL Playground/GraphiQL in development
-  //     contentSecurityPolicy: isProduction ? undefined : false,
-  //     crossOriginEmbedderPolicy: isProduction,
-  //   }),
-  // );
   app.use(
     helmet({
       contentSecurityPolicy: false,
