@@ -21,7 +21,7 @@ async function bootstrap() {
     }),
   });
 
-  const configService = app.get(ConfigService);
+  const configService: ConfigService<unknown, boolean> = app.get(ConfigService);
   const isProduction = configService.get('app.isProduction');
 
   app.use(
