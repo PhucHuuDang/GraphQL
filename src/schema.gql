@@ -15,6 +15,7 @@ type AccountModel {
   refreshTokenExpiresAt: DateTime
   scope: String
   updatedAt: DateTime!
+  user: UserModel!
   userId: String!
 }
 

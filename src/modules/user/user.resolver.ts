@@ -73,12 +73,16 @@ export class UserResolver {
     }
 
     if ('token' in response) {
-      ctx.res.setHeader(
-        'Set-Cookie',
-        `devs.session_token=${response.token}; HttpOnly; Path=/; Max-Age=${
-          signInInput.rememberMe ? 30 * 24 * 3600 : 7 * 24 * 3600
-        }; SameSite=Lax`,
-      );
+      const isProduction = process.env.NODE_ENV === 'production';
+      const cookieOptions = [
+        `devs:session-token=${response.token}`,
+        'HttpOnly',
+        'Path=/',
+        `Max-Age=${signInInput.rememberMe ? 30 * 24 * 3600 : 7 * 24 * 3600}`,
+        isProduction ? 'SameSite=None; Secure' : 'SameSite=Lax',
+      ].join('; ');
+
+      ctx.res.setHeader('Set-Cookie', cookieOptions);
     }
 
     return response;
@@ -89,10 +93,16 @@ export class UserResolver {
     const response = await this.userService.signOut(ctx);
 
     if (response.success) {
-      ctx.res.setHeader(
-        'Set-Cookie',
-        'devs.session_token=; HttpOnly; Path=/; Max-Age=0; SameSite=Lax',
-      );
+      const isProduction = process.env.NODE_ENV === 'production';
+      const cookieOptions = [
+        'devs:session-token=',
+        'HttpOnly',
+        'Path=/',
+        'Max-Age=0',
+        isProduction ? 'SameSite=None; Secure' : 'SameSite=Lax',
+      ].join('; ');
+
+      ctx.res.setHeader('Set-Cookie', cookieOptions);
     }
 
     return response;

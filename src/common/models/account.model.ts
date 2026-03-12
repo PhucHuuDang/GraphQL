@@ -1,5 +1,7 @@
 import { Field, ObjectType } from '@nestjs/graphql';
 
+import { UserModel } from '../../modules/user/models/user.model';
+
 import { BaseModel } from './base.model';
 
 @ObjectType()
@@ -12,6 +14,9 @@ export class AccountModel extends BaseModel {
 
   @Field(() => String)
   userId: string;
+
+  @Field(() => UserModel)
+  user: UserModel;
 
   @Field(() => String, { nullable: true })
   accessToken?: string;

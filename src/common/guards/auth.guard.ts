@@ -46,7 +46,7 @@ export class AuthGuard implements CanActivate {
       cookie
         .split(';')
         .map((c) => c.trim())
-        .find((c) => c.startsWith('devs.session_token='))
+        .find((c) => c.startsWith('devs:session-token='))
         ?.split('=')[1] ?? null
     );
   }

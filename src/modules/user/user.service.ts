@@ -1,5 +1,7 @@
 import { BadRequestException, Injectable, UnauthorizedException } from '@nestjs/common';
 
+import { ConfigService } from '@nestjs/config';
+
 import { APIError, type User as UserType } from 'better-auth';
 
 import { Prisma, User } from '../../../generated/prisma';
@@ -17,9 +19,7 @@ import { GetProfileResponse, GetSessionResponse } from './auth.model';
 
 @Injectable()
 export class UserService extends BaseRepository<User, Prisma.UserDelegate> {
-  // ⚠️ This is where the USER is redirected AFTER authentication completes
-  // NOT the OAuth callback URL (Better Auth handles that automatically)
-  private readonly callbackURL: string = 'http://localhost:3000/blogs';
+  private readonly callbackURL: string;
 
   private getSessionToken(headers: Headers): string | null {
     const cookie = headers.get('cookie');
@@ -29,7 +29,7 @@ export class UserService extends BaseRepository<User, Prisma.UserDelegate> {
       cookie
         .split(';')
         .map((c) => c.trim())
-        .find((c) => c.startsWith('devs.session_token='))
+        .find((c) => c.startsWith('devs:session-token='))
         ?.split('=')[1] ?? null
     );
   }
@@ -37,8 +37,11 @@ export class UserService extends BaseRepository<User, Prisma.UserDelegate> {
     prisma: PrismaService,
     private readonly authService: BetterAuthService,
     private readonly sessionService: SessionService,
+    private readonly configService: ConfigService,
   ) {
     super(prisma, 'user', 'UserService');
+    this.callbackURL =
+      this.configService.get<string>('auth.callbackUrl') || 'http://localhost:3000/blogs';
   }
 
   async getAccounts({ req }: GraphQLContext) {
