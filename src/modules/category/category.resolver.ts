@@ -1,6 +1,9 @@
+import { UseGuards } from '@nestjs/common';
+
 import { Args, Mutation, ObjectType, Query, Resolver } from '@nestjs/graphql';
 
 import { ArrayItems, SingleItem } from '../../common/decorators/response.decorators';
+import { AuthGuard } from '../../common/guards/auth.guard';
 import { ArrayResponse, SingleResponse } from '../../common/types/response.types';
 
 import { CreateCategoryDto, UpdateCategoryDto } from './dto/category.dto';
@@ -25,19 +28,24 @@ export class CategoryResolver {
   }
 
   @SingleItem('Category created successfully')
-  @Mutation(() => CategoryResponse, { description: 'Create a new category' })
+  @UseGuards(AuthGuard)
+  @Mutation(() => CategoryResponse, {
+    description: 'Create a new category (requires authentication)',
+  })
   async createCategory(@Args('input') input: CreateCategoryDto) {
     return await this.categoryService.createCategory(input);
   }
 
   @SingleItem('Category updated successfully')
-  @Mutation(() => CategoryResponse, { description: 'Update a category' })
+  @UseGuards(AuthGuard)
+  @Mutation(() => CategoryResponse, { description: 'Update a category (requires authentication)' })
   async updateCategory(@Args('id') id: string, @Args('input') input: UpdateCategoryDto) {
     return await this.categoryService.updateCategory(id, input);
   }
 
   @SingleItem('Category deleted successfully')
-  @Mutation(() => CategoryResponse, { description: 'Delete a category' })
+  @UseGuards(AuthGuard)
+  @Mutation(() => CategoryResponse, { description: 'Delete a category (requires authentication)' })
   async deleteCategory(@Args('id') id: string) {
     return await this.categoryService.deleteCategory(id);
   }

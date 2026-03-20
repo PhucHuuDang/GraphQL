@@ -119,6 +119,14 @@ export class AuthGuard implements CanActivate {
       });
     }
 
+    // Validate session has not expired
+    if (session.expiresAt && new Date(session.expiresAt) < new Date()) {
+      throw new UnauthorizedException({
+        code: 'SESSION_EXPIRED',
+        message: 'Your session has expired. Please log in again.',
+      });
+    }
+
     return true;
   }
 }

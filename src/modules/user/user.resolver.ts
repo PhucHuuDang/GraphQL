@@ -7,7 +7,6 @@ import { SingleResponse } from '../../common/types/response.types';
 import { SignInInput, SignUpInput, UpdateProfileArgs } from './dto/user.dto';
 import { UserModel } from './models/user.model';
 import {
-  GetProfileResponse,
   GetSessionResponse,
   GitHubUserResponse,
   OAuth2UserInfoModel,
@@ -48,14 +47,12 @@ export class UserResolver {
   }
 
   @RawResponse()
-  @Mutation((type) => SignUpEmailUser, { description: 'Sign up email user' })
+  @Mutation(() => SignUpEmailUser, { description: 'Sign up email user' })
   async signUpEmail(
     @Args('signUpInput', { type: () => SignUpInput }) signUpInput: SignUpInput,
     @Context() ctx: GraphQLContext,
   ) {
     const response = await this.userService.signUpEmail(signUpInput, ctx);
-
-    console.log('Sign up email response: ', response);
     return response;
   }
 
@@ -111,8 +108,6 @@ export class UserResolver {
   @Mutation(() => GitHubUserResponse)
   async gitHub(@Context() ctx: GraphQLContext) {
     const response = await this.userService.gitHub(ctx);
-
-    console.log('cookies before redirect:', ctx.req.headers.cookie);
 
     return response;
   }

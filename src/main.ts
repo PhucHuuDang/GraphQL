@@ -1,4 +1,4 @@
-import { ConsoleLogger, ValidationPipe } from '@nestjs/common';
+import { ConsoleLogger, Logger, ValidationPipe } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
 
 import { ConfigService } from '@nestjs/config';
@@ -11,6 +11,8 @@ import { ResponseTransformInterceptor } from './common/interceptors/response-tra
 import { AppModule } from './app.module';
 
 async function bootstrap() {
+  const logger = new Logger('Bootstrap');
+
   const app = await NestFactory.create(AppModule, {
     logger: new ConsoleLogger({
       prefix: 'GraphQL',
@@ -47,11 +49,20 @@ async function bootstrap() {
     }),
   );
 
+  // Validate required environment variables at startup
+  const requiredEnvVars = ['DATABASE_URL', 'BETTER_AUTH_SECRET', 'BETTER_AUTH_URL'];
+  for (const envVar of requiredEnvVars) {
+    if (!process.env[envVar]) {
+      logger.warn(`Missing required environment variable: ${envVar}`);
+    }
+  }
+
+  // Enable graceful shutdown hooks (important for containers / Railway)
+  app.enableShutdownHooks();
+
   // CORS configuration with environment-based origins
   const configOrigins = configService.get<string[]>('cors.allowedOrigins') || [];
-
   const allowedOrigins = [...new Set([...configOrigins, 'http://localhost:3000'])];
-  console.log({ allowedOrigins });
   app.enableCors({
     origin: (
       requestOrigin: string | undefined,
@@ -76,8 +87,8 @@ async function bootstrap() {
 
   await app.listen(port, '0.0.0.0');
 
-  console.log(`🚀 GraphQL server ready at http://0.0.0.0:${port}/graphql`);
-  console.log(`💚 Health check available at http://0.0.0.0:${port}/health`);
+  logger.log(`🚀 GraphQL server ready at http://0.0.0.0:${port}/graphql`);
+  logger.log(`💚 Health check available at http://0.0.0.0:${port}/health`);
 }
 
 void bootstrap();
