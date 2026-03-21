@@ -19,6 +19,14 @@ type AccountModel {
   userId: String!
 }
 
+input CastVoteInput {
+  """Post ID to vote on"""
+  postId: String!
+
+  """Vote type: UPVOTE or DOWNVOTE"""
+  value: String!
+}
+
 type CategoriesResponse {
   """Total count"""
   count: Int!
@@ -59,12 +67,54 @@ type Comment {
   userId: String!
 }
 
+type CommentModel {
+  content: String!
+  createdAt: DateTime!
+  id: String!
+  isDeleted: Boolean!
+  isEdited: Boolean!
+  parentId: String
+  postId: String
+  replies: [CommentModel!]!
+  updatedAt: DateTime!
+  user: UserModel
+  userId: String!
+}
+
+type CommentResponse {
+  """Response data"""
+  data: CommentModel
+  message: String
+  success: Boolean!
+}
+
+type CommentsResponse {
+  """Total count"""
+  count: Int!
+
+  """Array of items"""
+  data: [CommentModel!]!
+  message: String
+  success: Boolean!
+}
+
 input CreateCategoryDto {
   """Description of the category"""
   description: String!
 
   """Name of the category"""
   name: String!
+}
+
+input CreateCommentInput {
+  """Comment content"""
+  content: String!
+
+  """Parent comment ID for replies"""
+  parentId: String
+
+  """Post ID to comment on"""
+  postId: String!
 }
 
 input CreatePostInput {
@@ -94,6 +144,13 @@ input CreatePostInput {
 A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date-time format.
 """
 scalar DateTime
+
+type DeleteCommentResponse {
+  code: String
+  deletedId: String
+  message: String!
+  success: Boolean!
+}
 
 type DeletePostResponse {
   code: String
@@ -133,14 +190,23 @@ type LikeModel {
 }
 
 type Mutation {
-  """Create a new category"""
+  """Cast a vote on a post (toggle behavior)"""
+  castVote(input: CastVoteInput!): VoteResponse!
+
+  """Create a new category (requires authentication)"""
   createCategory(input: CreateCategoryDto!): CategoryResponse!
+
+  """Create a comment on a post (requires authentication)"""
+  createComment(input: CreateCommentInput!): CommentResponse!
 
   """Create a new post (requires authentication)"""
   createPost(input: CreatePostInput!): PostResponse!
 
-  """Delete a category"""
+  """Delete a category (requires authentication)"""
   deleteCategory(id: String!): CategoryResponse!
+
+  """Delete a comment (requires ownership)"""
+  deleteComment(id: String!): DeleteCommentResponse!
 
   """Delete a post (requires ownership)"""
   deletePost(id: String!): DeletePostResponse!
@@ -148,14 +214,20 @@ type Mutation {
 
   """Increment post view count"""
   incrementViews(id: String!, identifier: String): PostResponse!
+
+  """Remove your vote from a post"""
+  removeVote(postId: String!): RemoveVoteResponse!
   signInEmail(signInInput: SignInInput!): SignInEmailUser!
   signOut: SignOutResponse!
 
   """Sign up email user"""
   signUpEmail(signUpInput: SignUpInput!): SignUpEmailUser!
 
-  """Update a category"""
+  """Update a category (requires authentication)"""
   updateCategory(id: String!, input: UpdateCategoryDto!): CategoryResponse!
+
+  """Update a comment (requires ownership)"""
+  updateComment(id: String!, input: UpdateCommentInput!): CommentResponse!
 
   """Update a post (requires ownership)"""
   updatePost(id: String!, input: UpdatePostInput!): PostResponse!
@@ -311,6 +383,9 @@ type PostsArrayResponse {
 
 type Query {
   categories: CategoriesResponse!
+
+  """Get all comments for a post (with nested replies)"""
+  commentsByPost(postId: String!): CommentsResponse!
   getAccounts: [AccountModel!]!
   getProfile: SingleProfileResponse!
   getSession: SessionSingleResponse!
@@ -330,6 +405,16 @@ type Query {
 
   """Get only published posts"""
   publishedPosts(filters: PostFiltersInput!): PaginatedPostsResponse!
+
+  """Get vote counts and current user vote for a post"""
+  voteStatus(postId: String!): VoteStatusResponse!
+}
+
+type RemoveVoteResponse {
+  code: String
+  deletedId: String
+  message: String!
+  success: Boolean!
 }
 
 type SessionModel {
@@ -420,6 +505,11 @@ input UpdateCategoryDto {
   name: String
 }
 
+input UpdateCommentInput {
+  """Updated comment content"""
+  content: String!
+}
+
 input UpdatePostInput {
   categoryId: String
   content: JSON
@@ -446,4 +536,41 @@ type UserModel {
   name: String
   sessions: [SessionModel!]!
   updatedAt: DateTime!
+}
+
+type VoteModel {
+  createdAt: DateTime!
+  id: String!
+  postId: String!
+  updatedAt: DateTime!
+  user: UserModel
+  userId: String!
+  value: VoteType!
+}
+
+type VoteResponse {
+  """Response data"""
+  data: VoteModel
+  message: String
+  success: Boolean!
+}
+
+type VoteStatusModel {
+  downvotes: Float!
+  score: Float!
+  upvotes: Float!
+  userVote: VoteType
+}
+
+type VoteStatusResponse {
+  """Response data"""
+  data: VoteStatusModel
+  message: String
+  success: Boolean!
+}
+
+"""Type of vote (UPVOTE or DOWNVOTE)"""
+enum VoteType {
+  DOWNVOTE
+  UPVOTE
 }

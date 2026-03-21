@@ -127,6 +127,44 @@ export class AuthGuard implements CanActivate {
       });
     }
 
+    // ==========================================
+    // Enforce user account status flags
+    // ==========================================
+    // Session includes full Prisma User model (via `include: { user: true }`)
+    // which has status flags not present on the GraphQL UserModel type
+    const user = (session as any).user as
+      | { isDeleted?: boolean; isBlocked?: boolean; isSuspended?: boolean; isActive?: boolean }
+      | undefined;
+    if (user) {
+      if (user.isDeleted) {
+        throw new UnauthorizedException({
+          code: 'ACCOUNT_DELETED',
+          message: 'This account has been deleted.',
+        });
+      }
+
+      if (user.isBlocked) {
+        throw new UnauthorizedException({
+          code: 'ACCOUNT_BLOCKED',
+          message: 'This account has been blocked. Contact support for assistance.',
+        });
+      }
+
+      if (user.isSuspended) {
+        throw new UnauthorizedException({
+          code: 'ACCOUNT_SUSPENDED',
+          message: 'This account has been suspended. Contact support for assistance.',
+        });
+      }
+
+      if (user.isActive === false) {
+        throw new UnauthorizedException({
+          code: 'ACCOUNT_INACTIVE',
+          message: 'This account is inactive. Please verify your email or contact support.',
+        });
+      }
+    }
+
     return true;
   }
 }

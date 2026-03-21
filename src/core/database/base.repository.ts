@@ -456,16 +456,22 @@ export abstract class BaseRepository<T, ModelDelegate extends { [key: string]: a
   // ==================== RAW QUERY OPERATIONS ====================
 
   /**
-   * Execute raw SQL query
+   * Execute raw SQL query.
+   * @warning SECURITY: This method uses $executeRawUnsafe. Always use parameterized queries
+   * to prevent SQL injection. Never interpolate user input directly into the query string.
+   * @example executeRaw('UPDATE users SET name = $1 WHERE id = $2', ['newName', userId])
    */
-  async executeRaw(query: string, params?: any[]): Promise<any> {
+  protected async executeRaw(query: string, params?: any[]): Promise<any> {
     return await this.prisma.$executeRawUnsafe(query, ...(params || []));
   }
 
   /**
-   * Query raw SQL
+   * Query raw SQL.
+   * @warning SECURITY: This method uses $queryRawUnsafe. Always use parameterized queries
+   * to prevent SQL injection. Never interpolate user input directly into the query string.
+   * @example queryRaw('SELECT * FROM users WHERE id = $1', [userId])
    */
-  async queryRaw<R = any>(query: string, params?: any[]): Promise<R[]> {
+  protected async queryRaw<R = any>(query: string, params?: any[]): Promise<R[]> {
     return await this.prisma.$queryRawUnsafe(query, ...(params || []));
   }
 
